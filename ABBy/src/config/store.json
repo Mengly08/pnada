@@ -1,0 +1,45 @@
+{
+  "storeName": "Abby Store",
+  "storeTagline": "Mobile Legends & Free Fire Top-up Center",
+  "logoUrl": "https://raw.githubusercontent.com/Mengly08/abby-yes/refs/heads/main/photo_2024-12-31_23-57-18.png",
+  "faviconUrl": "https://raw.githubusercontent.com/Cheagjihvg/feliex-assets/refs/heads/main/favicon.ico",
+  "backgroundImageUrl": "https://raw.githubusercontent.com/Mengly08/abby-yes/refs/heads/main/pink.jpg",
+  "banners": {
+    "banner1": "https://raw.githubusercontent.com/Cheagjihvg/xia-asssets/refs/heads/main/Cover__-XiaTopup.jpg"
+  },
+  "popupBanner": {
+    "image": "https://raw.githubusercontent.com/Cheagjihvg/xia-asssets/refs/heads/main/Cover__-XiaTopup.jpg",
+    "enabled": true
+  },
+  "supportUrl": "https://t.me/Mei_lalaa",
+  "channelUrl": "https://t.me/Mei_lalaa",
+  "games": {
+    "mlbb": {
+      "name": "Mobile Legends",
+      "tagline": "Diamonds & Weekly Pass",
+      "logoUrl": "https://raw.githubusercontent.com/Cheagjihvg/feliex-assets/refs/heads/main/IMG_1324.JPG"
+    },
+    "freefire": {
+      "name": "Free Fire",
+      "tagline": "Diamonds & Special Items",
+      "logoUrl": "https://raw.githubusercontent.com/Cheagjihvg/feliex-assets/refs/heads/main/IMG_1225.JPG"
+    }
+  },
+  "payment": {
+    "khqr": {
+      "accountId": "wen_mei@trmc",
+      "accountName": "Abby Store",
+      "accountInformation": "34670417145214",
+      "currency": "USD",
+      "address": "PhnomPenh"
+    }
+  },
+  "colors": {
+    "primary": "yellow",
+    "secondary": "emerald",
+    "accent": "yellow"
+  },
+  "footer": {
+    "copyright": "© 2025 XIA TOPUP. All rights reserved."
+  }
+}
