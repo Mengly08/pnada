@@ -268,9 +268,9 @@ const App = () => {
   if (isAdminRoute) {
     return (
       <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#282828]">
-          <Loader2 className="w-10 h-10 animate-spin text-white" />
-          <span className="ml-2 text-white">Loading admin panel...</span>
+        <div className="min-h-screen flex items-center justify-center bg-[#ffffff]">
+          <Loader2 className="w-10 h-10 animate-spin text-[#ff4d4d]" />
+          <span className="ml-2 text-[#1a1a1a]">Loading admin panel...</span>
         </div>
       }>
         <AdminPage />
@@ -281,9 +281,9 @@ const App = () => {
   if (isResellerRoute) {
     return (
       <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#282828]">
-          <Loader2 className="w-10 h-10 animate-spin text-white" />
-          <span className="ml-2 text-white">Loading reseller panel...</span>
+        <div className="min-h-screen flex items-center justify-center bg-[#ffffff]">
+          <Loader2 className="w-10 h-10 animate-spin text-[#ff4d4d]" />
+          <span className="ml-2 text-[#1a1a1a]">Loading reseller panel...</span>
         </div>
       }>
         <ResellerPage onLogin={() => { setIsResellerLoggedIn(true); window.location.href = '/'; }} />
@@ -292,150 +292,160 @@ const App = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#1a1a1a] to-[#282828] flex flex-col relative text-white">
+    <div className="min-h-screen bg-[#ffffff] flex flex-col relative text-[#1a1a1a]">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Kh+Ang+Chittbous&family=Poppins:wght@400;600&display=swap');
         .khmer-font { font-family: 'Kh Ang Chittbous', sans-serif; }
         .poppins-font { font-family: 'Poppins', sans-serif; }
-        .bg-dark { background-color: #1a1a1a; }
+        .bg-light { background-color: #f9f9f9; }
         .bg-accent { background: linear-gradient(90deg, #ff4d4d, #ff8c00); }
         .price-box {
           background: linear-gradient(135deg, #ffd700, #ffeb3b);
-          padding: 6px 12px;
-          border-radius: 8px;
-          display: inline-block;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          padding: 8px 14px; border-radius: 10px; display: inline-block;
+          box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); font-weight: 600;
         }
-        .logo-container { width: 70px; height: 70px; }
-        .logo-image { width: 100%; height: 100%; object-fit: contain; }
+        .logo-container { width: 80px; height: 80px; }
+        .logo-image { width: 100%; height: 100%; object-fit: contain; transition: transform 0.3s ease; }
         .section-header {
-          display: flex; align-items: center; gap: 16px; margin-bottom: 20px;
-          border-bottom: 1px solid #444; padding-bottom: 10px;
+          display: flex; align-items: center; gap: 18px; margin-bottom: 24px;
+          border-bottom: 2px solid #e0e0e0; padding-bottom: 12px;
         }
         .section-number {
-          width: 40px; height: 40px; background: #ff4d4d; border-radius: 50%;
+          width: 45px; height: 45px; background: #ff4d4d; border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
-          font-size: 1.5rem; font-weight: bold; color: #fff; margin-right: 12px;
+          font-size: 1.6rem; font-weight: 700; color: #fff; margin-right: 14px;
         }
         .inner-content, .inner-content.payment-section {
           background: linear-gradient(135deg, #d70040, #a1002f);
-          padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-          border: 1px solid #ff4d4d;
+          padding: 24px; border-radius: 15px; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+          border: 2px solid #ff4d4d; color: #fff;
         }
         .inner-content.products-section {
           background: transparent; padding: 0; border-radius: 0; box-shadow: none;
         }
         .payment-box {
-          background: #fff; border: 2px solid #ff69b4; border-radius: 10px;
-          padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center;
+          background: #fff; border: 2px solid #ff69b4; border-radius: 12px;
+          padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center;
           justify-content: space-between; position: relative; transition: all 0.3s ease;
-          cursor: pointer;
+          cursor: pointer; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
         .payment-box.selected::after {
-          content: ''; position: absolute; right: 12px; top: 50%;
-          transform: translateY(-50%); width: 14px; height: 14px;
+          content: ''; position: absolute; right: 14px; top: 50%;
+          transform: translateY(-50%); width: 16px; height: 16px;
           background: #ff0000; border-radius: 50%; border: 2px solid #ff69b4;
         }
-        .payment-box:hover { transform: scale(1.03); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
-        .payment-content { display: flex; align-items: center; gap: 12px; flex: 1; }
-        .payment-image { width: 40px; height: 40px; object-fit: contain; border-radius: 6px; }
-        .payment-text p:first-child { font-size: 1.1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
-        .payment-text p:last-child { font-size: 0.9rem; color: #333; opacity: 0.8; }
+        .payment-box:hover {
+          transform: scale(1.04); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        .payment-content { display: flex; align-items: center; gap: 14px; flex: 1; }
+        .payment-image { width: 45px; height: 45px; object-fit: contain; border-radius: 8px; }
+        .payment-text p:first-child { font-size: 1.2rem; font-weight: 600; color: #1a1a1a; }
+        .payment-text p:last-child { font-size: 0.95rem; color: #333; opacity: 0.85; }
         .input-field {
           background: #fff; color: #1a1a1a; border: 2px solid #ffd700;
-          padding: 10px; border-radius: 8px; width: 100%; text-align: center;
-          transition: border-color 0.3s ease; font-family: 'Poppins', sans-serif;
+          padding: 12px; border-radius: 10px; width: 100%; text-align: center;
+          transition: all 0.3s ease; font-family: 'Poppins', sans-serif;
         }
-        .input-field:focus { border-color: #ff4d4d; outline: none; }
+        .input-field:focus { border-color: #ff4d4d; outline: none; box-shadow: 0 0 10px rgba(255, 77, 77, 0.3); }
         .mlbb-form4 {
           display: flex; justify-content: space-between; align-items: center;
           background: linear-gradient(135deg, #d70040, #a1002f);
-          padding: 15px; border-radius: 12px; width: 100%; position: fixed;
-          bottom: 20px; left: 50%; transform: translateX(-50%);
-          max-width: 600px; z-index: 1000; box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+          padding: 18px; border-radius: 15px; width: 90%; position: fixed;
+          bottom: 30px; left: 50%; transform: translateX(-50%);
+          max-width: 650px; z-index: 1000; box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.4);
         }
         .mlbb-container43 { display: flex; flex-direction: column; color: #fff; }
-        .mlbb-text30, .mlbb-text33 { font-size: 16px; margin-bottom: 6px; color: #fff; }
-        .mlbb-text32, .mlbb-text35 { font-weight: 700; margin-left: 8px; color: #ffd700; }
+        .mlbb-text30, .mlbb-text33 { font-size: 18px; margin-bottom: 8px; color: #fff; }
+        .mlbb-text32, .mlbb-text35 { font-weight: 700; margin-left: 10px; color: #ffd700; }
         .mlbb-container44 { display: flex; justify-content: flex-end; }
         .mlbb-button2, .check-id-button {
           display: flex; align-items: center; justify-content: center;
           background: linear-gradient(90deg, #ff4d4d, #ff8c00);
-          color: #fff; padding: 12px 28px; border-radius: 8px; border: none;
-          cursor: pointer; font-size: 16px; font-weight: 600; transition: all 0.3s ease;
-          min-width: 160px; height: 50px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          color: #fff; padding: 14px 32px; border-radius: 10px; border: none;
+          cursor: pointer; font-size: 17px; font-weight: 600; transition: all 0.3s ease;
+          min-width: 170px; height: 55px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
         .mlbb-button2:hover, .check-id-button:hover {
-          transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+          transform: translateY(-3px); box-shadow: 0 7px 18px rgba(0, 0, 0, 0.4);
         }
         .mlbb-button2:disabled, .check-id-button:disabled {
-          opacity: 0.6; cursor: not-allowed; background: #666;
+          opacity: 0.65; cursor: not-allowed; background: #666;
         }
-        .mlbb-icon64 { margin-right: 10px; }
+        .mlbb-icon64 { margin-right: 12px; }
         .mlbb-text36, .check-id-text { text-transform: uppercase; color: #fff; }
         .game-card {
           display: flex; flex-direction: column; align-items: center;
-          cursor: pointer; transition: all 0.3s ease; background: #2a2a2a;
-          border-radius: 12px; padding: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          cursor: pointer; transition: all 0.3s ease; background: #f9f9f9;
+          border-radius: 15px; padding: 12px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+          border: 2px solid #e0e0e0;
         }
-        .game-card:hover { transform: scale(1.08); background: #333; }
-        .game-card.disabled { cursor: not-allowed; opacity: 0.7; }
+        .game-card:hover { transform: scale(1.1); background: #fff; }
+        .game-card.disabled { cursor: not-allowed; opacity: 0.75; }
         .game-card.disabled:hover { transform: none; }
         .game-image {
-          width: 100%; max-width: 220px; min-width: 220px; aspect-ratio: 1 / 1;
-          object-fit: contain; border-radius: 8px; border: 2px solid #ffd700;
+          width: 100%; max-width: 250px; min-width: 250px; aspect-ratio: 1 / 1;
+          object-fit: contain; border-radius: 10px; border: 3px solid #ffd700;
+          transition: transform 0.3s ease;
         }
         .game-container {
-          display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-          gap: 2rem; justify-content: center; width: 100%; max-width: 1200px;
-          padding: 2rem 0;
+          display: grid; grid-template-columns: repeat(2, minmax(250px, 1fr));
+          gap: 2.5rem; justify-content: center; width: 100%; max-width: 1200px;
+          padding: 2.5rem 0;
         }
         .coming-soon {
           position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-          background: rgba(0, 0, 0, 0.8); color: #ffd700; padding: 10px 20px;
-          border-radius: 6px; font-size: 1.1rem; font-weight: 600; text-align: center;
+          background: rgba(0, 0, 0, 0.85); color: #ffd700; padding: 12px 22px;
+          border-radius: 8px; font-size: 1.2rem; font-weight: 600; text-align: center;
+          text-shadow: 1px 1px 3px #000;
         }
-        @media (max-width: 480px) {
-          .game-container { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.5rem; }
-          .game-image { max-width: 160px; min-width: 160px; }
-          .game-card h3 { font-size: 1rem; }
-        }
-        @media (min-width: 481px) and (max-width: 768px) {
-          .game-container { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.75rem; }
-          .game-image { max-width: 180px; min-width: 180px; }
+        @media (max-width: 768px) {
+          .game-container { grid-template-columns: repeat(2, minmax(200px, 1fr)); gap: 2rem; }
+          .game-image { max-width: 200px; min-width: 200px; }
           .game-card h3 { font-size: 1.1rem; }
         }
-        @media (min-width: 769px) {
-          .game-container { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2rem; }
-          .game-image { max-width: 220px; min-width: 220px; }
-          .game-card h3 { font-size: 1.2rem; }
+        @media (max-width: 480px) {
+          .game-container { grid-template-columns: repeat(1, minmax(200px, 1fr)); gap: 1.5rem; }
+          .game-image { max-width: 200px; min-width: 200px; }
+          .game-card h3 { font-size: 1rem; }
+          .mlbb-form4 { width: 95%; bottom: 20px; }
         }
         .social-dropdown { position: relative; }
         .social-menu {
           position: absolute; top: 100%; right: 0; background: #fff;
-          border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-          display: flex; flex-direction: column; padding: 10px; z-index: 1000;
+          border-radius: 10px; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+          display: flex; flex-direction: column; padding: 12px; z-index: 1000;
+          border: 1px solid #e0e0e0;
         }
         .social-menu a {
-          display: flex; align-items: center; gap: 10px; padding: 10px;
-          color: #1a1a1a; text-decoration: none; transition: background 0.3s ease;
-          border-radius: 6px;
+          display: flex; align-items: center; gap: 12px; padding: 12px;
+          color: #1a1a1a; text-decoration: none; transition: all 0.3s ease;
+          border-radius: 8px;
         }
-        .social-menu a:hover { background: #f0f0f0; }
+        .social-menu a:hover { background: #f9f9f9; transform: translateX(5px); }
         .products-section * { background-color: transparent !important; }
         nav {
           background: linear-gradient(90deg, #ff4d4d, #ff8c00);
-          padding: 1rem 2rem; border-bottom: 2px solid #fff;
+          padding: 1.5rem 2.5rem; border-bottom: 3px solid #fff;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         nav a, nav button { transition: all 0.3s ease; }
-        nav a:hover .logo-image, nav button:hover { transform: scale(1.1); }
-        nav input { background: #fff; border-radius: 20px; padding: 8px 12px; }
-        nav input:focus { box-shadow: 0 0 8px #ffd700; }
-        footer { background: #1a1a1a; padding: 2rem 1rem; }
-        footer a svg { transition: transform 0.3s ease; }
-        footer a:hover svg { transform: rotate(20deg) scale(1.2); }
-        .support-button { background: linear-gradient(90deg, #ff4d4d, #ff8c00); }
-        .support-button:hover { background: linear-gradient(90deg, #ff8c00, #ff4d4d); }
+        nav a:hover .logo-image, nav button:hover { transform: scale(1.15); }
+        nav input {
+          background: #fff; border-radius: 25px; padding: 10px 15px;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        nav input:focus { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+        footer { background: #f9f9f9; padding: 2.5rem 1rem; border-top: 2px solid #e0e0e0; }
+        footer a svg { transition: all 0.3s ease; }
+        footer a:hover svg { transform: rotate(20deg) scale(1.3); color: #ff4d4d; }
+        .support-button {
+          background: linear-gradient(90deg, #ff4d4d, #ff8c00);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        .support-button:hover {
+          background: linear-gradient(90deg, #ff8c00, #ff4d4d);
+          box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
       `}</style>
 
       <nav className="bg-accent text-white p-3 shadow-lg sticky top-0 z-50 flex items-center justify-between">
@@ -453,27 +463,27 @@ const App = () => {
             <input
               type="text"
               placeholder="Search..."
-              className="w-full pl-10 pr-4 py-2 rounded-full bg-white text-black focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full pl-12 pr-5 py-3 rounded-full bg-white text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600 w-5 h-5" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-600 w-6 h-6" />
           </div>
         </div>
         <div className="social-dropdown">
           <button
             onClick={() => setShowSocialDropdown(!showSocialDropdown)}
-            className="text-white hover:text-yellow-300 transition-all flex items-center gap-2 bg-[#ff4d4d] px-4 py-2 rounded-full"
+            className="text-white hover:text-yellow-300 transition-all flex items-center gap-3 bg-[#ff4d4d] px-5 py-3 rounded-full shadow-md"
           >
-            <MessageCircle className="w-6 h-6" />
-            <span className="poppins-font font-medium">Contact Us</span>
+            <MessageCircle className="w-7 h-7" />
+            <span className="poppins-font font-semibold">Contact Us</span>
           </button>
           {showSocialDropdown && (
             <div className="social-menu">
               <a href="https://www.facebook.com/share/1CVHbXejqR/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer">
-                <Facebook className="w-5 h-5 text-blue-600" />
+                <Facebook className="w-6 h-6 text-blue-600" />
                 <span className="poppins-font">Facebook</span>
               </a>
               <a href="https://t.me/kakrona_168" target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="w-5 h-5 text-blue-400" />
+                <MessageCircle className="w-6 h-6 text-blue-400" />
                 <span className="poppins-font">Telegram</span>
               </a>
             </div>
@@ -482,30 +492,30 @@ const App = () => {
       </nav>
 
       {isThinking && (
-        <div className="flex items-center justify-center py-3 bg-[#1a1a1a] text-white">
-          <Loader2 className="w-6 h-6 animate-spin text-yellow-400" />
-          <span className="ml-2 text-sm poppins-font">Processing...</span>
+        <div className="flex items-center justify-center py-4 bg-[#f9f9f9] text-[#1a1a1a]">
+          <Loader2 className="w-8 h-8 animate-spin text-[#ff4d4d]" />
+          <span className="ml-3 text-lg poppins-font">Processing...</span>
         </div>
       )}
 
       <div className="flex-grow">
-        <div className="container mx-auto px-4 py-8">
-          <div className="bg-[#2a2a2a] rounded-2xl shadow-xl overflow-hidden">
+        <div className="container mx-auto px-6 py-10">
+          <div className="bg-[#f9f9f9] rounded-2xl shadow-xl overflow-hidden">
             <BannerSlider banners={storeConfig.banners} />
           </div>
         </div>
 
         {showTopUp ? (
-          <main className="container mx-auto px-6 py-10">
-            <div className="header py-4">
+          <main className="container mx-auto px-8 py-12">
+            <div className="header py-5">
               <img
                 src="https://raw.githubusercontent.com/Cheagjihvg/jackstore-asssets/refs/heads/main/Untitled-1%20(1).png"
                 alt="Banner"
-                className="w-full h-auto max-h-60 sm:max-h-80 object-contain rounded-lg"
+                className="w-full h-auto max-h-72 sm:max-h-96 object-contain rounded-xl"
               />
             </div>
-            <div className="max-w-5xl mx-auto space-y-8">
-              <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="max-w-6xl mx-auto space-y-10">
+              <div className="flex flex-wrap items-center justify-between gap-5">
                 <button
                   onClick={() => {
                     setShowTopUp(false);
@@ -513,34 +523,34 @@ const App = () => {
                     setValidationResult(null);
                     setForm(prev => ({ ...prev, nickname: undefined }));
                   }}
-                  className="text-white hover:text-yellow-300 transition-all text-md flex items-center gap-2 bg-[#2a2a2a] px-5 py-3 rounded-lg shadow-md"
+                  className="text-[#1a1a1a] hover:text-yellow-300 transition-all text-lg flex items-center gap-3 bg-[#f9f9f9] px-6 py-4 rounded-xl shadow-md"
                 >
-                  <ArrowLeft className="w-5 h-5" /> <span className="poppins-font">Back to Games</span>
+                  <ArrowLeft className="w-6 h-6" /> <span className="poppins-font">Back to Games</span>
                 </button>
                 {(form.userId || form.serverId) && (
                   <button
                     onClick={clearSavedInfo}
-                    className="text-white hover:text-yellow-300 transition-all text-md flex items-center gap-2 bg-[#2a2a2a] px-5 py-3 rounded-lg shadow-md"
+                    className="text-[#1a1a1a] hover:text-yellow-300 transition-all text-lg flex items-center gap-3 bg-[#f9f9f9] px-6 py-4 rounded-xl shadow-md"
                   >
-                    <XCircle className="w-5 h-5" /> <span className="poppins-font">Clear Saved Info</span>
+                    <XCircle className="w-6 h-6" /> <span className="poppins-font">Clear Saved Info</span>
                   </button>
                 )}
               </div>
             </div>
 
-            <div className="p-6 rounded-lg">
+            <div className="p-8 rounded-xl">
               <div className="inner-content">
                 <div className="section-header">
                   <div className="section-number">01</div>
-                  <h3 className="text-xl font-semibold poppins-font">Enter Your Info</h3>
+                  <h3 className="text-2xl font-semibold poppins-font">Enter Your Info</h3>
                   <img
                     src="https://zttopup.com/_next/image?url=%2Fassets%2Fzttopup%2Fhello-kitty.gif&w=1920&q=75"
                     alt="Hello Kitty"
-                    className="w-12 h-12 ml-auto"
+                    className="w-14 h-14 ml-auto"
                   />
                 </div>
-                <form className="space-y-6">
-                  <div className="flex justify-center gap-6">
+                <form className="space-y-7">
+                  <div className="flex justify-center gap-7">
                     <div>
                       <input
                         type="text"
@@ -555,7 +565,7 @@ const App = () => {
                           setFormErrors(prev => ({ ...prev, userId: undefined }));
                         }}
                       />
-                      {formErrors.userId && <p className="text-red-400 text-sm mt-2">{formErrors.userId}</p>}
+                      {formErrors.userId && <p className="text-red-500 text-md mt-2">{formErrors.userId}</p>}
                     </div>
                     {form.game === 'mlbb' && (
                       <div>
@@ -572,11 +582,11 @@ const App = () => {
                             setFormErrors(prev => ({ ...prev, serverId: undefined }));
                           }}
                         />
-                        {formErrors.serverId && <p className="text-red-400 text-sm mt-2">{formErrors.serverId}</p>}
+                        {formErrors.serverId && <p className="text-red-500 text-md mt-2">{formErrors.serverId}</p>}
                       </div>
                     )}
                   </div>
-                  <div className="flex justify-center items-center gap-4">
+                  <div className="flex justify-center items-center gap-5">
                     <button
                       type="button"
                       onClick={validateAccount}
@@ -585,7 +595,7 @@ const App = () => {
                     >
                       {validating ? (
                         <>
-                          <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                          <Loader2 className="w-6 h-6 animate-spin mr-2" />
                           <span className="check-id-text poppins-font">Checking...</span>
                         </>
                       ) : (
@@ -593,29 +603,29 @@ const App = () => {
                       )}
                     </button>
                     {(validationResult?.success || validationResult?.status) && (
-                      <div className="flex items-center gap-2 text-green-400 text-md poppins-font">
-                        <CheckCircle2 className="w-5 h-5" />
+                      <div className="flex items-center gap-2 text-green-500 text-lg poppins-font">
+                        <CheckCircle2 className="w-6 h-6" />
                         <span>Account found: {form.nickname}</span>
                       </div>
                     )}
                   </div>
-                  <div className="mt-6 text-gray-300 text-md poppins-font">
+                  <div className="mt-7 text-gray-600 text-lg poppins-font">
                     To see your User ID, log into the game, tap your Avatar on the left screen, then select "Check ID". Your User ID will be displayed. Example: User ID: 123456789, Zone ID: 1234.
                   </div>
                 </form>
               </div>
             </div>
 
-            <div className="p-6 rounded-lg">
+            <div className="p-8 rounded-xl">
               <div className="inner-content products-section">
                 <div className="section-header">
                   <div className="section-number">02</div>
-                  <h3 className="text-2xl font-semibold poppins-font">Diamond Products</h3>
+                  <h3 className="text-3xl font-semibold poppins-font">Diamond Products</h3>
                 </div>
                 {loading ? (
-                  <div className="flex justify-center items-center py-10">
-                    <Loader2 className="w-14 h-14 animate-spin text-yellow-400" />
-                    <span className="ml-3 text-lg poppins-font">Loading products...</span>
+                  <div className="flex justify-center items-center py-12">
+                    <Loader2 className="w-16 h-16 animate-spin text-[#ff4d4d]" />
+                    <span className="ml-4 text-xl poppins-font">Loading products...</span>
                   </div>
                 ) : (
                   <ProductList
@@ -628,11 +638,11 @@ const App = () => {
               </div>
             </div>
 
-            <div className="p-6 rounded-lg">
+            <div className="p-8 rounded-xl">
               <div className="inner-content payment-section">
                 <div className="section-header">
                   <div className="section-number">03</div>
-                  <h3 className="text-xl font-semibold poppins-font">Payment Methods</h3>
+                  <h3 className="text-2xl font-semibold poppins-font">Payment Methods</h3>
                 </div>
                 <div
                   className={`payment-box ${selectedPayment === 'khqr' ? 'selected' : ''}`}
@@ -650,17 +660,17 @@ const App = () => {
                     </div>
                   </div>
                 </div>
-                {formErrors.paymentMethod && <p className="text-red-400 text-md mt-2">{formErrors.paymentMethod}</p>}
-                <div className="flex items-center gap-3">
+                {formErrors.paymentMethod && <p className="text-red-500 text-md mt-2">{formErrors.paymentMethod}</p>}
+                <div className="flex items-center gap-4">
                   <input
                     type="checkbox"
                     id="accept"
-                    className="w-6 h-6 text-yellow-400 border-yellow-400 rounded focus:ring-yellow-400"
+                    className="w-6 h-6 text-[#ff4d4d] border-[#ff4d4d] rounded focus:ring-[#ff4d4d]"
                     checked
                     disabled
                   />
-                  <label htmlFor="accept" className="text-gray-300 text-md poppins-font">
-                    I agree to the <a href="/term-and-policy" className="text-yellow-400 hover:underline">Terms</a>
+                  <label htmlFor="accept" className="text-gray-600 text-lg poppins-font">
+                    I agree to the <a href="/term-and-policy" className="text-[#ff4d4d] hover:underline">Terms</a>
                   </label>
                 </div>
                 {form.product && (
@@ -701,13 +711,13 @@ const App = () => {
             </div>
           </main>
         ) : (
-          <main className="container mx-auto px-6 py-10">
+          <main className="container mx-auto px-8 py-12">
             <div className="flex flex-col items-center">
-              <div className="header py-4">
+              <div className="header py-5">
                 <img
                   src="https://raw.githubusercontent.com/Cheagjihvg/jackstore-asssets/refs/heads/main/Untitled-1%20(1).png"
                   alt="Banner"
-                  className="w-full h-auto max-h-60 sm:max-h-80 object-contain rounded-lg"
+                  className="w-full h-auto max-h-72 sm:max-h-96 object-contain rounded-xl"
                 />
               </div>
               <div className="game-container">
@@ -721,9 +731,9 @@ const App = () => {
                   <img
                     src="https://www.daddytopup.com/_next/image?url=https%3A%2F%2Fdaddy-cms.minttopup.xyz%2Fuploads%2FImg_Resizer_20240801_2222_57312_4914487dd4.webp&w=1920&q=75"
                     alt="Mobile Legends"
-                    className="game-image"
+                    className="game-image transition-transform hover:scale-105"
                   />
-                  <h3 className="text-xl font-semibold poppins-font text-center truncate mt-3">Mobile Legends</h3>
+                  <h3 className="text-2xl font-semibold poppins-font text-center truncate mt-4">Mobile Legends</h3>
                 </div>
                 <div
                   className="game-card"
@@ -735,9 +745,9 @@ const App = () => {
                   <img
                     src="https://www.daddytopup.com/_next/image?url=https%3A%2F%2Fdaddy-cms.minttopup.xyz%2Fuploads%2Ffree_fire_logo_7b069d4084.jpg&w=750&q=75"
                     alt="Free Fire"
-                    className="game-image"
+                    className="game-image transition-transform hover:scale-105"
                   />
-                  <h3 className="text-xl font-semibold poppins-font text-center truncate mt-3">Free Fire</h3>
+                  <h3 className="text-2xl font-semibold poppins-font text-center truncate mt-4">Free Fire</h3>
                 </div>
                 <div className="game-card disabled" title="Coming Soon">
                   <div className="relative">
@@ -748,56 +758,56 @@ const App = () => {
                     />
                     <span className="coming-soon">Coming Soon</span>
                   </div>
-                  <h3 className="text-xl font-semibold poppins-font text-center truncate mt-3">Mobile Legends PH</h3>
+                  <h3 className="text-2xl font-semibold poppins-font text-center truncate mt-4">Mobile Legends PH</h3>
                 </div>
               </div>
             </div>
           </main>
         )}
 
-        <div className="fixed bottom-8 right-8 z-50">
+        <div className="fixed bottom-10 right-10 z-50">
           <button
             onClick={() => window.open(storeConfig.supportUrl, '_blank')}
-            className="support-button flex items-center gap-3 bg-red-500 text-white px-5 py-3 rounded-full shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-110"
+            className="support-button flex items-center gap-4 bg-red-500 text-white px-6 py-4 rounded-full shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-110"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" className="text-white">
               <path fill="none" d="M0 0h24v24H0z"/>
               <path fill="currentColor" d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"/>
             </svg>
-            <span className="font-medium poppins-font">Support</span>
+            <span className="font-semibold poppins-font text-lg">Support</span>
           </button>
         </div>
 
-        <footer className="bg-[#1a1a1a] text-white py-6">
-          <div className="container mx-auto px-4 text-center space-y-4">
-            <div className="mb-4">
-              <p className="font-bold text-xl poppins-font">Contact Us:</p>
-              <div className="flex justify-center gap-6">
-                <a href="https://www.facebook.com/share/1CVHbXejqR/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="text-white hover:text-blue-400">
-                  <Facebook className="w-6 h-6" />
+        <footer className="bg-[#f9f9f9] text-[#1a1a1a] py-8">
+          <div className="container mx-auto px-6 text-center space-y-6">
+            <div className="mb-6">
+              <p className="font-bold text-2xl poppins-font">Contact Us:</p>
+              <div className="flex justify-center gap-8">
+                <a href="https://www.facebook.com/share/1CVHbXejqR/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="text-[#1a1a1a] hover:text-blue-500">
+                  <Facebook className="w-8 h-8" />
                 </a>
-                <a href="https://t.me/kakronabns" target="_blank" rel="noopener noreferrer" className="text-white hover:text-blue-400">
-                  <MessageCircle className="w-6 h-6" />
+                <a href="https://t.me/kakronabns" target="_blank" rel="noopener noreferrer" className="text-[#1a1a1a] hover:text-blue-500">
+                  <MessageCircle className="w-8 h-8" />
                 </a>
               </div>
             </div>
-            <div className="mb-4">
-              <p className="font-bold text-xl poppins-font">Accept Payment:</p>
+            <div className="mb-6">
+              <p className="font-bold text-2xl poppins-font">Accept Payment:</p>
               <div className="flex justify-center">
                 <img
                   alt="khqr"
                   src="https://www.daddytopup.com/_next/image?url=%2Fassets%2Fmain%2Fkhqr.webp&w=828&q=75"
-                  className="w-20 h-auto"
+                  className="w-24 h-auto"
                 />
               </div>
             </div>
             <div>
-              <p className="text-md">
-                <a href="/term-and-policy" className="text-yellow-400 hover:underline">
+              <p className="text-xl">
+                <a href="/term-and-policy" className="text-[#ff4d4d] hover:underline">
                   <span className="font-bold">Privacy Policy</span> | <span className="font-bold">Terms & Conditions</span>
                 </a>
               </p>
-              <p className="text-md poppins-font">© 2025 MLBB Store. All Rights Reserved.</p>
+              <p className="text-xl poppins-font">© 2025 MLBB Store. All Rights Reserved.</p>
             </div>
           </div>
         </footer>
