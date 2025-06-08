@@ -268,9 +268,9 @@ const App = () => {
   if (isAdminRoute) {
     return (
       <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#ffffff]">
-          <Loader2 className="w-10 h-10 animate-spin text-[#ff4d4d]" />
-          <span className="ml-2 text-[#1a1a1a]">Loading admin panel...</span>
+        <div className="min-h-screen flex items-center justify-center bg-[#282828]">
+          <Loader2 className="w-10 h-10 animate-spin text-white" />
+          <span className="ml-2 text-white">Loading admin panel...</span>
         </div>
       }>
         <AdminPage />
@@ -281,9 +281,9 @@ const App = () => {
   if (isResellerRoute) {
     return (
       <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#ffffff]">
-          <Loader2 className="w-10 h-10 animate-spin text-[#ff4d4d]" />
-          <span className="ml-2 text-[#1a1a1a]">Loading reseller panel...</span>
+        <div className="min-h-screen flex items-center justify-center bg-[#282828]">
+          <Loader2 className="w-10 h-10 animate-spin text-white" />
+          <span className="ml-2 text-white">Loading reseller panel...</span>
         </div>
       }>
         <ResellerPage onLogin={() => { setIsResellerLoggedIn(true); window.location.href = '/'; }} />
@@ -292,169 +292,326 @@ const App = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#ffffff] flex flex-col relative text-[#1a1a1a]">
+    <div className="min-h-screen bg-dark flex flex-col relative">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Kh+Ang+Chittbous&family=Poppins:wght@400;600&display=swap');
-        .khmer-font { font-family: 'Kh Ang Chittbous', sans-serif; }
-        .poppins-font { font-family: 'Poppins', sans-serif; }
-        .bg-light { background-color: #f9f9f9; }
-        .bg-accent { background: linear-gradient(90deg, #ff4d4d, #ff8c00); }
-        .price-box {
-          background: linear-gradient(135deg, #ffd700, #ffeb3b);
-          padding: 8px 14px; border-radius: 10px; display: inline-block;
-          box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); font-weight: 600;
+        @import url('https://fonts.googleapis.com/css2?family=Kh+Ang+Chittbous&display=swap');
+        .khmer-font {
+          font-family: 'Kh Ang Chittbous', sans-serif;
         }
-        .logo-container { width: 80px; height: 80px; }
-        .logo-image { width: 100%; height: 100%; object-fit: contain; transition: transform 0.3s ease; }
+        .bg-dark {
+          background-color: #282828;
+        }
+        .price-box {
+          background-color: #ffd700;
+          padding: 4px 8px;
+          border-radius: 4px;
+          display: inline-block;
+        }
+        .logo-container {
+          width: 60px;
+          height: 60px;
+        }
+        .logo-image {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
         .section-header {
-          display: flex; align-items: center; gap: 18px; margin-bottom: 24px;
-          border-bottom: 2px solid #e0e0e0; padding-bottom: 12px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 16px;
         }
         .section-number {
-          width: 45px; height: 45px; background: #ff4d4d; border-radius: 50%;
-          display: flex; align-items: center; justify-content: center;
-          font-size: 1.6rem; font-weight: 700; color: #fff; margin-right: 14px;
+          width: 32px;
+          height: 32px;
+          background-color: #ffffff;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.25rem;
+          font-weight: bold;
+          color: #000000;
+          margin-right: 8px;
         }
-        .inner-content, .inner-content.payment-section {
-          background: linear-gradient(135deg, #d70040, #a1002f);
-          padding: 24px; border-radius: 15px; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-          border: 2px solid #ff4d4d; color: #fff;
+        .inner-content,
+        .inner-content.payment-section {
+          background-color: #D70040 !important;
+          padding: 16px;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .inner-content.products-section {
-          background: transparent; padding: 0; border-radius: 0; box-shadow: none;
+          background-color: transparent !important;
+          padding: 0;
+          border-radius: 0;
+          box-shadow: none;
         }
         .payment-box {
-          background: #fff; border: 2px solid #ff69b4; border-radius: 12px;
-          padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center;
-          justify-content: space-between; position: relative; transition: all 0.3s ease;
-          cursor: pointer; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          background-color: #ffffff;
+          border: 2px solid #ff69b4;
+          border-radius: 8px;
+          padding: 8px 12px;
+          margin-bottom: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          position: relative;
+          transition: transform 0.2s ease-in-out;
+          cursor: pointer;
         }
         .payment-box.selected::after {
-          content: ''; position: absolute; right: 14px; top: 50%;
-          transform: translateY(-50%); width: 16px; height: 16px;
-          background: #ff0000; border-radius: 50%; border: 2px solid #ff69b4;
+          content: '';
+          position: absolute;
+          right: 8px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 12px;
+          height: 12px;
+          background-color: #ff0000;
+          border-radius: 50%;
+          border: 2px solid #ff69b4;
         }
         .payment-box:hover {
-          transform: scale(1.04); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          transform: scale(1.02);
         }
-        .payment-content { display: flex; align-items: center; gap: 14px; flex: 1; }
-        .payment-image { width: 45px; height: 45px; object-fit: contain; border-radius: 8px; }
-        .payment-text p:first-child { font-size: 1.2rem; font-weight: 600; color: #1a1a1a; }
-        .payment-text p:last-child { font-size: 0.95rem; color: #333; opacity: 0.85; }
+        .payment-content {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex: 1;
+        }
+        .payment-image {
+          width: 32px;
+          height: 32px;
+          object-fit: contain;
+          border-radius: 4px;
+        }
+        .payment-text {
+          flex: 1;
+        }
+        .payment-text p:first-child {
+          font-size: 1rem;
+          font-weight-semibold;
+          color: #000000;
+          margin-bottom: 2px;
+        }
+        .payment-text p:last-child {
+          font-size: 0.8rem;
+          color: #000000;
+          opacity: 0.7;
+        }
         .input-field {
-          background: #fff; color: #1a1a1a; border: 2px solid #ffd700;
-          padding: 12px; border-radius: 10px; width: 100%; text-align: center;
-          transition: all 0.3s ease; font-family: 'Poppins', sans-serif;
+          background-color: #ffffff;
+          color: #000000;
+          border: 1px solid #ffff00;
+          padding: 8px;
+          border-radius: 4px;
+          width: 100%;
+          text-align: center;
         }
-        .input-field:focus { border-color: #ff4d4d; outline: none; box-shadow: 0 0 10px rgba(255, 77, 77, 0.3); }
         .mlbb-form4 {
-          display: flex; justify-content: space-between; align-items: center;
-          background: linear-gradient(135deg, #d70040, #a1002f);
-          padding: 18px; border-radius: 15px; width: 90%; position: fixed;
-          bottom: 30px; left: 50%; transform: translateX(-50%);
-          max-width: 650px; z-index: 1000; box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.4);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background-color: #D70040;
+          padding: 10px;
+          border-radius: 8px;
+          width: 100%;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          z-index: 1000;
+          box-shadow: 0 -2px 10px rgba(0, 0,0,0.2);
         }
-        .mlbb-container43 { display: flex; flex-direction: column; color: #fff; }
-        .mlbb-text30, .mlbb-text33 { font-size: 18px; margin-bottom: 8px; color: #fff; }
-        .mlbb-text32, .mlbb-text35 { font-weight: 700; margin-left: 10px; color: #ffd700; }
-        .mlbb-container44 { display: flex; justify-content: flex-end; }
+        .mlbb-container43 {
+          display: flex;
+          flex-direction: column;
+          color: #fff;
+        }
+        .mlbb-text30, .mlbb-text33 {
+          font-size: 14px;
+          margin-bottom: 5px;
+          color: #fff;
+        }
+        .mlbb-text32, .mlbb-text35 {
+          font-weight: bold;
+          margin-left: 5px;
+          color: #fff;
+        }
+        .mlbb-container44 {
+          display: flex;
+          justify-content: flex-end;
+        }
         .mlbb-button2, .check-id-button {
-          display: flex; align-items: center; justify-content: center;
-          background: linear-gradient(90deg, #ff4d4d, #ff8c00);
-          color: #fff; padding: 14px 32px; border-radius: 10px; border: none;
-          cursor: pointer; font-size: 17px; font-weight: 600; transition: all 0.3s ease;
-          min-width: 170px; height: 55px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #fff;
+          color: #000000;
+          padding: 10px 24px;
+          border-radius: 5px;
+          border: 2px solid #000000;
+          cursor: pointer;
+          font-size: 16px;
+          font-weight: 700;
+          transition: background-color 0.3s, color 0.3s;
+          min-width: 150px;
+          height: 48px;
         }
         .mlbb-button2:hover, .check-id-button:hover {
-          transform: translateY(-3px); box-shadow: 0 7px 18px rgba(0, 0, 0, 0.4);
+          background-color: #000000;
+          color: #fff;
         }
         .mlbb-button2:disabled, .check-id-button:disabled {
-          opacity: 0.65; cursor: not-allowed; background: #666;
+          opacity: 0.5;
+          cursor: not-allowed;
         }
-        .mlbb-icon64 { margin-right: 12px; }
-        .mlbb-text36, .check-id-text { text-transform: uppercase; color: #fff; }
+        .mlbb-button2:disabled:hover, .check-id-button:disabled:hover {
+          background-color: #fff;
+          color: #000000;
+        }
+        .mlbb-icon64 {
+          margin-right: 8px;
+        }
+        .mlbb-text36, .check-id-text {
+          text-transform: uppercase;
+          color: #000000;
+        }
+        .mlbb-button2:hover .mlbb-text36, .check-id-button:hover .check-id-text {
+          color: #fff;
+        }
         .game-card {
-          display: flex; flex-direction: column; align-items: center;
-          cursor: pointer; transition: all 0.3s ease; background: #f9f9f9;
-          border-radius: 15px; padding: 12px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
-          border: 2px solid #e0e0e0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          cursor: pointer;
+          transition: transform 0.2s;
         }
-        .game-card:hover { transform: scale(1.1); background: #fff; }
-        .game-card.disabled { cursor: not-allowed; opacity: 0.75; }
-        .game-card.disabled:hover { transform: none; }
+        .game-card:hover {
+          transform: scale(1.05);
+        }
+        .game-card.disabled {
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+        .game-card.disabled:hover {
+          transform: none;
+        }
         .game-image {
-          width: 100%; max-width: 250px; min-width: 250px; aspect-ratio: 1 / 1;
-          object-fit: contain; border-radius: 10px; border: 3px solid #ffd700;
-          transition: transform 0.3s ease;
-        }
-        .game-container {
-          display: grid; grid-template-columns: repeat(2, minmax(250px, 1fr));
-          gap: 2.5rem; justify-content: center; width: 100%; max-width: 1200px;
-          padding: 2.5rem 0;
-        }
-        .coming-soon {
-          position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-          background: rgba(0, 0, 0, 0.85); color: #ffd700; padding: 12px 22px;
-          border-radius: 8px; font-size: 1.2rem; font-weight: 600; text-align: center;
-          text-shadow: 1px 1px 3px #000;
-        }
-        @media (max-width: 768px) {
-          .game-container { grid-template-columns: repeat(2, minmax(200px, 1fr)); gap: 2rem; }
-          .game-image { max-width: 200px; min-width: 200px; }
-          .game-card h3 { font-size: 1.1rem; }
-        }
-        @media (max-width: 480px) {
-          .game-container { grid-template-columns: repeat(1, minmax(200px, 1fr)); gap: 1.5rem; }
-          .game-image { max-width: 200px; min-width: 200px; }
-          .game-card h3 { font-size: 1rem; }
-          .mlbb-form4 { width: 95%; bottom: 20px; }
-        }
-        .social-dropdown { position: relative; }
-        .social-menu {
-          position: absolute; top: 100%; right: 0; background: #fff;
-          border-radius: 10px; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-          display: flex; flex-direction: column; padding: 12px; z-index: 1000;
-          border: 1px solid #e0e0e0;
-        }
-        .social-menu a {
-          display: flex; align-items: center; gap: 12px; padding: 12px;
-          color: #1a1a1a; text-decoration: none; transition: all 0.3s ease;
+          width: 100%;
+          max-width: 200px;
+          min-width: 200px;
+          aspect-ratio: 1 / 1;
+          object-fit: contain;
           border-radius: 8px;
         }
-        .social-menu a:hover { background: #f9f9f9; transform: translateX(5px); }
-        .products-section * { background-color: transparent !important; }
-        nav {
-          background: linear-gradient(90deg, #ff4d4d, #ff8c00);
-          padding: 1.5rem 2.5rem; border-bottom: 3px solid #fff;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        .game-container {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(140px, 200px));
+          gap: 1.5rem;
+          justify-content: center;
+          width: 100%;
+          max-width: 1200px;
+          padding-bottom: 1.5rem;
         }
-        nav a, nav button { transition: all 0.3s ease; }
-        nav a:hover .logo-image, nav button:hover { transform: scale(1.15); }
-        nav input {
-          background: #fff; border-radius: 25px; padding: 10px 15px;
-          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        .coming-soon {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background-color: rgba(0, 0, 0, 0.7);
+          color: white;
+          padding: 8px 16px;
+          border-radius: 4px;
+          font-size: 1rem;
+          font-weight: bold;
+          text-align: center;
         }
-        nav input:focus { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-        footer { background: #f9f9f9; padding: 2.5rem 1rem; border-top: 2px solid #e0e0e0; }
-        footer a svg { transition: all 0.3s ease; }
-        footer a:hover svg { transform: rotate(20deg) scale(1.3); color: #ff4d4d; }
-        .support-button {
-          background: linear-gradient(90deg, #ff4d4d, #ff8c00);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        @media (max-width: 480px) {
+          .game-container {
+            grid-template-columns: repeat(2, minmax(140px, 160px));
+            gap: 1rem;
+          }
+          .game-image {
+            max-width: 140px;
+            min-width: 140px;
+          }
+          .game-card h3 {
+            font-size: 0.9rem;
+            color: #ffffff; /* Changed from #000000 to #ffffff */
+          }
         }
-        .support-button:hover {
-          background: linear-gradient(90deg, #ff8c00, #ff4d4d);
-          box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        @media (min-width: 481px) and (max-width: 768px) {
+          .game-container {
+            grid-template-columns: repeat(2, minmax(160px, 180px));
+            gap: 1.25rem;
+          }
+          .game-image {
+            max-width: 160px;
+            min-width: 160px;
+          }
+          .game-card h3 {
+            font-size: 0.95rem;
+            color: #ffffff; /* Changed from #000000 to #ffffff */
+          }
+        }
+        @media (min-width: 769px) {
+          .game-container {
+            grid-template-columns: repeat(2, minmax(180px, 200px));
+            gap: 1.5rem;
+          }
+          .game-image {
+            max-width: 200px;
+            min-width: 200px;
+          }
+          .game-card h3 {
+            font-size: 1rem;
+            color: #ffffff; /* Changed from #000000 to #ffffff */
+          }
+        }
+        .social-dropdown {
+          position: relative;
+        }
+        .social-menu {
+          position: absolute;
+          top: 100%;
+          right: 0;
+          background-color: #ffffff;
+          border-radius: 4px;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          display: flex;
+          flex-direction: column;
+          padding: 8px;
+          z-index: 1000;
+        }
+        .social-menu a {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px;
+          color: #000000;
+          text-decoration: none;
+          transition: background-color 0.2s;
+        }
+        .social-menu a:hover {
+          background-color: #f0f0f0;
+        }
+        /* Additional fix to ensure no white background from ProductList or children */
+        .products-section * {
+          background-color: transparent !important;
         }
       `}</style>
 
-      <nav className="bg-accent text-white p-3 shadow-lg sticky top-0 z-50 flex items-center justify-between">
+      <nav className="bg-red-600 text-white p-3 shadow-lg sticky top-0 z-50 flex items-center justify-between">
         <a href="/" className="flex items-center">
           <div className="logo-container">
             <img
               src="https://raw.githubusercontent.com/Mengly08/picsa/refs/heads/main/profile.png"
               alt="Logo"
-              className="logo-image transition-transform"
+              className="logo-image"
             />
           </div>
         </a>
@@ -463,28 +620,28 @@ const App = () => {
             <input
               type="text"
               placeholder="Search..."
-              className="w-full pl-12 pr-5 py-3 rounded-full bg-white text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full pl-10 pr-4 py-2 rounded-full bg-white text-black focus:outline-none focus:ring-2 focus:ring-white"
             />
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-600 w-6 h-6" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
           </div>
         </div>
         <div className="social-dropdown">
           <button
             onClick={() => setShowSocialDropdown(!showSocialDropdown)}
-            className="text-white hover:text-yellow-300 transition-all flex items-center gap-3 bg-[#ff4d4d] px-5 py-3 rounded-full shadow-md"
+            className="text-white hover:text-gray-300 transition-colors flex items-center gap-2"
           >
-            <MessageCircle className="w-7 h-7" />
-            <span className="poppins-font font-semibold">Contact Us</span>
+            <MessageCircle className="w-6 h-6" />
+            <span>Contact Us</span>
           </button>
           {showSocialDropdown && (
             <div className="social-menu">
               <a href="https://www.facebook.com/share/1CVHbXejqR/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer">
-                <Facebook className="w-6 h-6 text-blue-600" />
-                <span className="poppins-font">Facebook</span>
+                <Facebook className="w-5 h-5" />
+                Facebook
               </a>
               <a href="https://t.me/kakrona_168" target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="w-6 h-6 text-blue-400" />
-                <span className="poppins-font">Telegram</span>
+                <MessageCircle className="w-5 h-5" />
+                Telegram
               </a>
             </div>
           )}
@@ -492,30 +649,30 @@ const App = () => {
       </nav>
 
       {isThinking && (
-        <div className="flex items-center justify-center py-4 bg-[#f9f9f9] text-[#1a1a1a]">
-          <Loader2 className="w-8 h-8 animate-spin text-[#ff4d4d]" />
-          <span className="ml-3 text-lg poppins-font">Processing...</span>
+        <div className="flex items-center justify-center py-2 bg-[#282828] text-white">
+          <Loader2 className="w-6 h-6 animate-spin text-white" />
+          <span className="ml-2 text-sm text-white">Grok is thinking...</span>
         </div>
       )}
 
       <div className="flex-grow">
-        <div className="container mx-auto px-6 py-10">
-          <div className="bg-[#f9f9f9] rounded-2xl shadow-xl overflow-hidden">
+        <div className="container mx-auto px-4 py-6">
+          <div className="bg-[#282828] rounded-2xl shadow-xl overflow-hidden">
             <BannerSlider banners={storeConfig.banners} />
           </div>
         </div>
 
         {showTopUp ? (
-          <main className="container mx-auto px-8 py-12">
-            <div className="header py-5">
+          <main className="container mx-auto px-4 py-8">
+            <div className="header py-2">
               <img
                 src="https://raw.githubusercontent.com/Cheagjihvg/jackstore-asssets/refs/heads/main/Untitled-1%20(1).png"
                 alt="Banner"
-                className="w-full h-auto max-h-72 sm:max-h-96 object-contain rounded-xl"
+                className="w-full h-auto max-h-48 sm:max-h-64 object-contain"
               />
             </div>
-            <div className="max-w-6xl mx-auto space-y-10">
-              <div className="flex flex-wrap items-center justify-between gap-5">
+            <div className="max-w-4xl mx-auto space-y-6">
+              <div className="flex flex-wrap items-center justify-between gap-4">
                 <button
                   onClick={() => {
                     setShowTopUp(false);
@@ -523,34 +680,34 @@ const App = () => {
                     setValidationResult(null);
                     setForm(prev => ({ ...prev, nickname: undefined }));
                   }}
-                  className="text-[#1a1a1a] hover:text-yellow-300 transition-all text-lg flex items-center gap-3 bg-[#f9f9f9] px-6 py-4 rounded-xl shadow-md"
+                  className="text-white hover:text-gray-300 transition-colors text-sm flex items-center gap-2 bg-[#282828] px-4 py-2 rounded-lg"
                 >
-                  <ArrowLeft className="w-6 h-6" /> <span className="poppins-font">Back to Games</span>
+                  <ArrowLeft className="w-5 h-5 text-white" /> Back to Games
                 </button>
                 {(form.userId || form.serverId) && (
                   <button
                     onClick={clearSavedInfo}
-                    className="text-[#1a1a1a] hover:text-yellow-300 transition-all text-lg flex items-center gap-3 bg-[#f9f9f9] px-6 py-4 rounded-xl shadow-md"
+                    className="text-white hover:text-gray-300 transition-colors text-sm flex items-center gap-2 bg-[#282828] px-4 py-2 rounded-lg"
                   >
-                    <XCircle className="w-6 h-6" /> <span className="poppins-font">Clear Saved Info</span>
+                    <XCircle className="w-5 h-5 text-white" /> Clear Saved Info
                   </button>
                 )}
               </div>
             </div>
 
-            <div className="p-8 rounded-xl">
+            <div className="p-6 rounded-lg">
               <div className="inner-content">
                 <div className="section-header">
                   <div className="section-number">01</div>
-                  <h3 className="text-2xl font-semibold poppins-font">Enter Your Info</h3>
+                  <h3 className="text-base font-semibold text-white khmer-font">បញ្ចូលព័ត៌មានរបស់អ្នក</h3>
                   <img
                     src="https://zttopup.com/_next/image?url=%2Fassets%2Fzttopup%2Fhello-kitty.gif&w=1920&q=75"
                     alt="Hello Kitty"
-                    className="w-14 h-14 ml-auto"
+                    className="w-10 h-10 ml-auto"
                   />
                 </div>
-                <form className="space-y-7">
-                  <div className="flex justify-center gap-7">
+                <form className="space-y-4">
+                  <div className="flex justify-center gap-4">
                     <div>
                       <input
                         type="text"
@@ -565,7 +722,7 @@ const App = () => {
                           setFormErrors(prev => ({ ...prev, userId: undefined }));
                         }}
                       />
-                      {formErrors.userId && <p className="text-red-500 text-md mt-2">{formErrors.userId}</p>}
+                      {formErrors.userId && <p className="text-red-400 text-xs mt-1">{formErrors.userId}</p>}
                     </div>
                     {form.game === 'mlbb' && (
                       <div>
@@ -582,11 +739,11 @@ const App = () => {
                             setFormErrors(prev => ({ ...prev, serverId: undefined }));
                           }}
                         />
-                        {formErrors.serverId && <p className="text-red-500 text-md mt-2">{formErrors.serverId}</p>}
+                        {formErrors.serverId && <p className="text-red-400 text-xs mt-1">{formErrors.serverId}</p>}
                       </div>
                     )}
                   </div>
-                  <div className="flex justify-center items-center gap-5">
+                  <div className="flex justify-center items-center gap-2">
                     <button
                       type="button"
                       onClick={validateAccount}
@@ -595,37 +752,37 @@ const App = () => {
                     >
                       {validating ? (
                         <>
-                          <Loader2 className="w-6 h-6 animate-spin mr-2" />
-                          <span className="check-id-text poppins-font">Checking...</span>
+                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                          <span className="check-id-text">Checking...</span>
                         </>
                       ) : (
-                        <span className="check-id-text poppins-font">Check ID</span>
+                        <span className="check-id-text">Check ID</span>
                       )}
                     </button>
                     {(validationResult?.success || validationResult?.status) && (
-                      <div className="flex items-center gap-2 text-green-500 text-lg poppins-font">
-                        <CheckCircle2 className="w-6 h-6" />
+                      <div className="flex items-center gap-2 text-green-400 text-sm">
+                        <CheckCircle2 className="w-4 h-4" />
                         <span>Account found: {form.nickname}</span>
                       </div>
                     )}
                   </div>
-                  <div className="mt-7 text-gray-600 text-lg poppins-font">
-                    To see your User ID, log into the game, tap your Avatar on the left screen, then select "Check ID". Your User ID will be displayed. Example: User ID: 123456789, Zone ID: 1234.
+                  <div className="mt-4 text-white text-xs khmer-font">
+                    ដើម្បីឃើញ UserID សូមចូលទៅក្នុងហ្គេម ហើយចុចរូបភាព Avatar នៅខាងឆ្វេងអេក្រង់កញ្ចក់ ហើយចុចទៅកាន់ "Check ID" ពេលនោះ User ID នឹងបង្ហាញឲ្យឃើញ បន្ទាប់មកសូមយក User ID នោះមកបំពេញ។ ឧទាហរណ៍: User ID: 123456789, Zone ID: 1234។
                   </div>
                 </form>
               </div>
             </div>
 
-            <div className="p-8 rounded-xl">
+            <div className="p-6 rounded-lg">
               <div className="inner-content products-section">
                 <div className="section-header">
                   <div className="section-number">02</div>
-                  <h3 className="text-3xl font-semibold poppins-font">Diamond Products</h3>
+                  <h3 className="text-lg font-semibold text-white khmer-font">ផលិតផល Diamond</h3>
                 </div>
                 {loading ? (
-                  <div className="flex justify-center items-center py-12">
-                    <Loader2 className="w-16 h-16 animate-spin text-[#ff4d4d]" />
-                    <span className="ml-4 text-xl poppins-font">Loading products...</span>
+                  <div className="flex justify-center items-center py-8">
+                    <Loader2 className="w-12 h-12 animate-spin text-white" />
+                    <span className="ml-2 text-white">Loading products...</span>
                   </div>
                 ) : (
                   <ProductList
@@ -638,11 +795,11 @@ const App = () => {
               </div>
             </div>
 
-            <div className="p-8 rounded-xl">
+            <div className="p-6 rounded-lg">
               <div className="inner-content payment-section">
                 <div className="section-header">
                   <div className="section-number">03</div>
-                  <h3 className="text-2xl font-semibold poppins-font">Payment Methods</h3>
+                  <h3 className="text-base font-semibold text-white khmer-font">វិធីបង់ប្រាក់</h3>
                 </div>
                 <div
                   className={`payment-box ${selectedPayment === 'khqr' ? 'selected' : ''}`}
@@ -656,21 +813,21 @@ const App = () => {
                     />
                     <div className="payment-text">
                       <p>ABA KHQR</p>
-                      <p className="khmer-font">Scan to pay with any bank app</p>
+                      <p className="khmer-font">ស្កែនដើម្បីបង់ប្រាក់ជាមួយកម្មវិធីធនាគារណាមួយ</p>
                     </div>
                   </div>
                 </div>
-                {formErrors.paymentMethod && <p className="text-red-500 text-md mt-2">{formErrors.paymentMethod}</p>}
-                <div className="flex items-center gap-4">
+                {formErrors.paymentMethod && <p className="text-red-400 text-xs mt-1">{formErrors.paymentMethod}</p>}
+                <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     id="accept"
-                    className="w-6 h-6 text-[#ff4d4d] border-[#ff4d4d] rounded focus:ring-[#ff4d4d]"
+                    className="w-5 h-5 text-white border-white rounded focus:ring-white"
                     checked
                     disabled
                   />
-                  <label htmlFor="accept" className="text-gray-600 text-lg poppins-font">
-                    I agree to the <a href="/term-and-policy" className="text-[#ff4d4d] hover:underline">Terms</a>
+                  <label htmlFor="accept" className="text-white text-sm khmer-font">
+                    ខ្ញុំយល់ព្រមតាម <a href="/term-and-policy" className="text-white hover:underline">លក្ខខណ្ឌ</a>
                   </label>
                 </div>
                 {form.product && (
@@ -694,15 +851,15 @@ const App = () => {
                           paymentCooldown > 0 ||
                           !selectedPayment
                         }
-                        className="mlbb-button2"
+                        className="mlbb-button2 button"
                       >
                         <svg width="24" height="24" viewBox="0 0 24 24" className="mlbb-icon64">
                           <g fill="none" fillRule="evenodd">
                             <path d="m12.calendar_month 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.10-.01z"></path>
-                            <path d="M5 6.5a.5.5 0 1 1 .5-.5H16a1 1 0 1 0 0-2H5.5A2.5 2.5 0 0 0 3 6.5V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5.5a.5.5 0 0 1-.5-.5M15.5 15a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" fill="#fff"></path>
+                            <path d="M5 6.5a.5.5 0 1 1 .5-.5H16a1 1 0 1 0 0-2H5.5A2.5 2.5 0 0 0 3 6.5V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5.5a.5.5 0 0 1-.5-.5M15.5 15a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" fill="#0a86aa"></path>
                           </g>
                         </svg>
-                        <span className="mlbb-text36 poppins-font">Pay Now</span>
+                        <span className="mlbb-text36">Pay Now</span>
                       </button>
                     </div>
                   </form>
@@ -711,13 +868,13 @@ const App = () => {
             </div>
           </main>
         ) : (
-          <main className="container mx-auto px-8 py-12">
+          <main className="container mx-auto px-4 py-6">
             <div className="flex flex-col items-center">
-              <div className="header py-5">
+              <div className="header py-2">
                 <img
                   src="https://raw.githubusercontent.com/Cheagjihvg/jackstore-asssets/refs/heads/main/Untitled-1%20(1).png"
                   alt="Banner"
-                  className="w-full h-auto max-h-72 sm:max-h-96 object-contain rounded-xl"
+                  className="w-full h-auto max-h-48 sm:max-h-64 object-contain"
                 />
               </div>
               <div className="game-container">
@@ -731,9 +888,9 @@ const App = () => {
                   <img
                     src="https://www.daddytopup.com/_next/image?url=https%3A%2F%2Fdaddy-cms.minttopup.xyz%2Fuploads%2FImg_Resizer_20240801_2222_57312_4914487dd4.webp&w=1920&q=75"
                     alt="Mobile Legends"
-                    className="game-image transition-transform hover:scale-105"
+                    className="game-image"
                   />
-                  <h3 className="text-2xl font-semibold poppins-font text-center truncate mt-4">Mobile Legends</h3>
+                  <h3 className="text-sm font-semibold text-white text-center truncate mt-2">Mobile Legends</h3>
                 </div>
                 <div
                   className="game-card"
@@ -745,9 +902,9 @@ const App = () => {
                   <img
                     src="https://www.daddytopup.com/_next/image?url=https%3A%2F%2Fdaddy-cms.minttopup.xyz%2Fuploads%2Ffree_fire_logo_7b069d4084.jpg&w=750&q=75"
                     alt="Free Fire"
-                    className="game-image transition-transform hover:scale-105"
+                    className="game-image"
                   />
-                  <h3 className="text-2xl font-semibold poppins-font text-center truncate mt-4">Free Fire</h3>
+                  <h3 className="text-sm font-semibold text-white text-center truncate mt-2">Free Fire</h3>
                 </div>
                 <div className="game-card disabled" title="Coming Soon">
                   <div className="relative">
@@ -758,56 +915,69 @@ const App = () => {
                     />
                     <span className="coming-soon">Coming Soon</span>
                   </div>
-                  <h3 className="text-2xl font-semibold poppins-font text-center truncate mt-4">Mobile Legends PH</h3>
+                  <h3 className="text-sm font-semibold text-white text-center truncate mt-2">Mobile Legends PH</h3>
                 </div>
               </div>
             </div>
           </main>
         )}
 
-        <div className="fixed bottom-10 right-10 z-50">
+        <div className="fixed bottom-6 right-6 z-50">
           <button
             onClick={() => window.open(storeConfig.supportUrl, '_blank')}
-            className="support-button flex items-center gap-4 bg-red-500 text-white px-6 py-4 rounded-full shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-110"
+            className="flex items-center gap-2 bg-white text-black px-4 py-3 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" className="text-white">
-              <path fill="none" d="M0 0h24v24H0z"/>
-              <path fill="currentColor" d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"/>
-            </svg>
-            <span className="font-semibold poppins-font text-lg">Support</span>
+            <div className="relative">
+              <div className="absolute inset-0 bg-gray-300/30 rounded-full animate-ping opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="text-black">
+                <path fill="none" d="M0 0h24v24H0z"/>
+                <path fill="currentColor" d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"/>
+              </svg>
+            </div>
+            <span className="font-medium">Support</span>
           </button>
         </div>
 
-        <footer className="bg-[#f9f9f9] text-[#1a1a1a] py-8">
-          <div className="container mx-auto px-6 text-center space-y-6">
-            <div className="mb-6">
-              <p className="font-bold text-2xl poppins-font">Contact Us:</p>
-              <div className="flex justify-center gap-8">
-                <a href="https://www.facebook.com/share/1CVHbXejqR/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="text-[#1a1a1a] hover:text-blue-500">
-                  <Facebook className="w-8 h-8" />
+        <footer className="bg-[#282828] text-white py-4 w-full">
+          <div className="container mx-auto px-4 text-center">
+            <div className="mb-2">
+              <p className="font-bold text-white">Contact Us:</p>
+              <div className="flex justify-center gap-4">
+                <a href="https://www.facebook.com/share/1CVHbXejqR/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="text-white hover:text-gray-300">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2.04c-5.5 0-10 4.49-10 10.02 0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89 1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7a10 10 0 0 0 8.44-9.9c0-5.53-4.5-10.02-10-10.02"/>
+                  </svg>
                 </a>
-                <a href="https://t.me/kakronabns" target="_blank" rel="noopener noreferrer" className="text-[#1a1a1a] hover:text-blue-500">
-                  <MessageCircle className="w-8 h-8" />
+                <a href="https://t.me/kakronabns" target="_blank" rel="noopener noreferrer" className="text-white hover:text-gray-300">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6m4.5 5.4c-.6.1-1.2.3-1.8.5v6.2c0 2.5-2 4.5-4.5 4.5S6 16.6 6 14.1s2-4.5 4.5-4.5c.3 0 .6 0 .9.1v-2.2c-.3 0-.6-.1-.9-.1-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6V8.9c.6-.4 1.2-.7 1.8-.9v-1.6z"/>
+                  </svg>
+                </a>
+                <a href="https://t.me/kakronabns" target="_blank" rel="noopener noreferrer" className="text-white hover:text-gray-300">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6m4.5 5.4c-.6.1-1.2.3-1.8.5v6.2c0 2.5-2 4.5-4.5 4.5S6 16.6 6 14.1s2-4.5 4.5-4.5c.3 0 .6 0 .9.1v-2.2c-.3 0-.6-.1-.9-.1-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6V8.9c.6-.4 1.2-.7 1.8-.9v-1.6z"/>
+                  </svg>
                 </a>
               </div>
             </div>
-            <div className="mb-6">
-              <p className="font-bold text-2xl poppins-font">Accept Payment:</p>
+            <div className="mb-2">
+              <p className="font-bold text-white">Accept Payment:</p>
               <div className="flex justify-center">
                 <img
                   alt="khqr"
                   src="https://www.daddytopup.com/_next/image?url=%2Fassets%2Fmain%2Fkhqr.webp&w=828&q=75"
-                  className="w-24 h-auto"
+                  className="w-[70px] h-auto"
                 />
               </div>
             </div>
             <div>
-              <p className="text-xl">
-                <a href="/term-and-policy" className="text-[#ff4d4d] hover:underline">
-                  <span className="font-bold">Privacy Policy</span> | <span className="font-bold">Terms & Conditions</span>
+              <p className="text-xs">
+                <a href="/term-and-policy" className="text-white">
+                  <span className="font-bold underline" style={{ textUnderlineOffset: '5px' }}>PRIVACY POLICY</span> |{' '}
+                  <span className="font-bold underline" style={{ textUnderlineOffset: '5px' }}>TERMS AND CONDITION</span>
                 </a>
               </p>
-              <p className="text-xl poppins-font">© 2025 MLBB Store. All Rights Reserved.</p>
+              <p className="text-xs text-white">COPYRIGHT © MLBB STORE. ALL RIGHTS RESERVED.</p>
             </div>
           </div>
         </footer>
