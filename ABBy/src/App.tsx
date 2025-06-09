@@ -103,6 +103,7 @@ const App = () => {
 
   useEffect(() => {
     if (!isAdminRoute && !isResellerRoute && form.game !== 'none') {
+      console.log('Fetching products for game:', form.game); // Debug log
       fetchProducts(form.game);
     }
   }, [form.game, isAdminRoute, isResellerRoute]);
@@ -144,12 +145,17 @@ const App = () => {
     setLoading(true);
     setIsThinking(true);
     try {
+      const timeout = setTimeout(() => {
+        setLoading(false);
+        setIsThinking(false);
+        alert('Request timed out. Please try again.');
+      }, 10000); // 10-second timeout
       const table = game === 'mlbb' ? 'mlbb_products' : 'freefire_products';
       const { data: products, error } = await supabase
         .from(table)
         .select('*')
         .order('id', { ascending: true });
-
+      clearTimeout(timeout);
       if (error) throw error;
 
       let transformedProducts = products.map(product => ({
@@ -295,6 +301,9 @@ const App = () => {
     <div className="min-h-screen bg-dark flex flex-col relative">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Kh+Ang+Chittbous&display=swap');
+        body {
+          background-color: #2bc442 !important; /* Ensure global background */
+        }
         .khmer-font {
           font-family: 'Kh Ang Chittbous', sans-serif;
         }
@@ -343,7 +352,7 @@ const App = () => {
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .inner-content.products-section {
-          background-color: transparent !important;
+          background-color: #2bc442 !important; /* Fix white background */
           padding: 0;
           border-radius: 0;
           box-shadow: none;
@@ -599,8 +608,11 @@ const App = () => {
         .social-menu a:hover {
           background-color: #f0f0f0;
         }
-        .products-section * {
-          background-color: transparent !important;
+        .products-section, .products-section * {
+          background-color: #2bc442 !important; /* Ensure no white background */
+        }
+        .loading-container {
+          background-color: #2bc442 !important; /* Fix loading background */
         }
       `}</style>
 
@@ -663,6 +675,7 @@ const App = () => {
 
         {showTopUp ? (
           <main className="container mx-auto px-4 py-8">
+            {console.log('Rendering top-up section', { form, products })} {/* Debug log */}
             <div className="header py-2">
               <img
                 src="https://raw.githubusercontent.com/Cheagjihvg/jackstore-asssets/refs/heads/main/Untitled-1%20(1).png"
@@ -779,9 +792,13 @@ const App = () => {
                   <h3 className="text-lg font-semibold text-white khmer-font">ផលិតផល Diamond</h3>
                 </div>
                 {loading ? (
-                  <div className="flex justify-center items-center py-8">
+                  <div className="flex justify-center items-center py-8 loading-container">
                     <Loader2 className="w-12 h-12 animate-spin text-white" />
                     <span className="ml-2 text-white">Loading products...</span>
+                  </div>
+                ) : products.length === 0 ? (
+                  <div className="text-white text-center py-8">
+                    No products available for this game. Please try again later.
                   </div>
                 ) : (
                   <ProductList
@@ -880,6 +897,7 @@ const App = () => {
                 <div
                   className="game-card"
                   onClick={() => {
+                    console.log('Setting game to mlbb'); // Debug log
                     setForm(prev => ({ ...prev, game: 'mlbb' }));
                     setShowTopUp(true);
                   }}
@@ -894,6 +912,7 @@ const App = () => {
                 <div
                   className="game-card"
                   onClick={() => {
+                    console.log('Setting game to freefire'); // Debug log
                     setForm(prev => ({ ...prev, game: 'freefire' }));
                     setShowTopUp(true);
                   }}
