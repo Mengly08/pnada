@@ -268,7 +268,7 @@ const App = () => {
   if (isAdminRoute) {
     return (
       <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#282828]">
+        <div className="min-h-screen flex items-center justify-center bg-[#2bc442]">
           <Loader2 className="w-10 h-10 animate-spin text-white" />
           <span className="ml-2 text-white">Loading admin panel...</span>
         </div>
@@ -281,7 +281,7 @@ const App = () => {
   if (isResellerRoute) {
     return (
       <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#282828]">
+        <div className="min-h-screen flex items-center justify-center bg-[#2bc442]">
           <Loader2 className="w-10 h-10 animate-spin text-white" />
           <span className="ml-2 text-white">Loading reseller panel...</span>
         </div>
@@ -299,7 +299,7 @@ const App = () => {
           font-family: 'Kh Ang Chittbous', sans-serif;
         }
         .bg-dark {
-          background-color: #282828;
+          background-color: #2bc442;
         }
         .price-box {
           background-color: #ffd700;
@@ -648,7 +648,7 @@ const App = () => {
       </nav>
 
       {isThinking && (
-        <div className="flex items-center justify-center py-2 bg-[#282828] text-white">
+        <div className="flex items-center justify-center py-2 bg-[#2bc442] text-white">
           <Loader2 className="w-6 h-6 animate-spin text-white" />
           <span className="ml-2 text-sm text-white">Grok is thinking...</span>
         </div>
@@ -656,7 +656,7 @@ const App = () => {
 
       <div className="flex-grow">
         <div className="container mx-auto px-4 py-6">
-          <div className="bg-[#282828] rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-[#2bc442] rounded-2xl shadow-xl overflow-hidden">
             <BannerSlider banners={storeConfig.banners} />
           </div>
         </div>
@@ -679,14 +679,14 @@ const App = () => {
                     setValidationResult(null);
                     setForm(prev => ({ ...prev, nickname: undefined }));
                   }}
-                  className="text-white hover:text-gray-300 transition-colors text-sm flex items-center gap-2 bg-[#282828] px-4 py-2 rounded-lg"
+                  className="text-white hover:text-gray-300 transition-colors text-sm flex items-center gap-2 bg-[#2bc442] px-4 py-2 rounded-lg"
                 >
                   <ArrowLeft className="w-5 h-5 text-white" /> Back to Games
                 </button>
                 {(form.userId || form.serverId) && (
                   <button
                     onClick={clearSavedInfo}
-                    className="text-white hover:text-gray-300 transition-colors text-sm flex items-center gap-2 bg-[#282828] px-4 py-2 rounded-lg"
+                    className="text-white hover:text-gray-300 transition-colors text-sm flex items-center gap-2 bg-[#2bc442] px-4 py-2 rounded-lg"
                   >
                     <XCircle className="w-5 h-5 text-white" /> Clear Saved Info
                   </button>
@@ -937,7 +937,7 @@ const App = () => {
           </button>
         </div>
 
-        <footer className="bg-[#282828] text-white py-4 w-full">
+        <footer className="bg-[#2bc442] text-white py-4 w-full">
           <div className="container mx-auto px-4 text-center">
             <div className="mb-2">
               <p className="font-bold text-white">Contact Us:</p>
