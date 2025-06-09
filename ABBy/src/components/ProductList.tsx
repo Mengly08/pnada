@@ -96,9 +96,9 @@ export function ProductList({ products, selectedProduct, onSelect, game }: Props
     <li key={product.id}>
       <button
         type="button"
-        className={`card relative flex justify-between items-center bg-[#737373] text-white p-2 rounded-xl w-full min-h-[72px] min-w-[140px] border-4 border-[#ff0000] shadow-xl transition-all duration-300 cursor-pointer ${
+        className={`card relative flex justify-between items-center bg-[#737373] text-white p-2 rounded-xl w-full min-h-[72px] min-w-[140px] border-4 border-[#22ff00] shadow-xl transition-all duration-300 cursor-pointer ${
           selectedProduct?.id === product.id
-            ? 'bg-green-500/50 ring-2 ring-[#ff0000]' // green overlay and border when selected
+            ? 'bg-green-500/50 ring-2 ring-[#22ff00]' // green overlay and border when selected
             : 'hover:bg-[#5a5a5a]'
         }`}
         onClick={() => {
