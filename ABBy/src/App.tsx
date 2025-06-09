@@ -268,7 +268,7 @@ const App = () => {
   if (isAdminRoute) {
     return (
       <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#ffffff]">
+        <div className="min-h-screen flex items-center justify-center bg-[url('https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/panda-chewing-bamboo-in-bamboo-forest-on-blurred-background-photo.png')] bg-cover bg-center">
           <Loader2 className="w-10 h-10 animate-spin text-[#2ef24f]" />
           <span className="ml-2 text-[#1a1a1a]">Loading admin panel...</span>
         </div>
@@ -281,7 +281,7 @@ const App = () => {
   if (isResellerRoute) {
     return (
       <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#ffffff]">
+        <div className="min-h-screen flex items-center justify-center bg-[url('https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/panda-chewing-bamboo-in-bamboo-forest-on-blurred-background-photo.png')] bg-cover bg-center">
           <Loader2 className="w-10 h-10 animate-spin text-[#2ef24f]" />
           <span className="ml-2 text-[#1a1a1a]">Loading reseller panel...</span>
         </div>
@@ -292,7 +292,7 @@ const App = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#ffffff] flex flex-col relative text-[#1a1a1a]">
+    <div className="min-h-screen bg-[url('https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/panda-chewing-bamboo-in-bamboo-forest-on-blurred-background-photo.png')] bg-cover bg-center flex flex-col relative text-[#1a1a1a]">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Kh+Ang+Chittbous&family=Poppins:wght@400;600&display=swap');
         .khmer-font { font-family: 'Kh Ang Chittbous', sans-serif; }
@@ -324,7 +324,7 @@ const App = () => {
           background: transparent; padding: 0; border-radius: 0; box-shadow: none;
         }
         .payment-box {
-          background: #fff; border: 2px solid #ff69b4; border-radius: 8px;
+          background: #fff; border: 2px solid #00fa2e; border-radius: 8px;
           padding: 8px 12px; margin-bottom: 16px; display: flex; align-items: center;
           justify-content: space-between; position: relative; transition: all 0.3s ease;
           cursor: pointer; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -332,7 +332,7 @@ const App = () => {
         .payment-box.selected::after {
           content: ''; position: absolute; right: 8px; top: 50%;
           transform: translateY(-50%); width: 12px; height: 12px;
-          background: #ff0000; border-radius: 50%; border: 2px solid #ff69b4;
+          background: #00fa2e; border-radius: 50%; border: 2px solid #00fa2e;
         }
         .payment-box:hover {
           transform: scale(1.04); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -346,7 +346,7 @@ const App = () => {
           padding: 8px; border-radius: 4px; width: 100%; text-align: center;
           transition: all 0.3s ease; font-family: 'Poppins', sans-serif;
         }
-        .input-field:focus { border-color: #2ef24f; outline: none; box-shadow: 0 0 8px rgba(255, 77, 77, 0.3); }
+        .input-field:focus { border-color: #2ef24f; outline: none; box-shadow: 0 0 8px rgba(0, 77, 77, 0.3); }
         .mlbb-form4 {
           display: flex; justify-content: space-between; align-items: center;
           background: linear-gradient(135deg, #d70040, #a1002f);
@@ -437,7 +437,7 @@ const App = () => {
         nav input:focus { box-shadow: 0 0 8px rgba(255, 215, 0, 0.5); }
         footer { background: #f9f9f9; padding: 2rem 1rem; border-top: 2px solid #e0e0e0; }
         footer a svg { transition: all 0.3s ease; }
-        footer a:hover svg { transform: rotate(20deg) scale(1.3); color: #2ef24f; }
+        footer a:hover svg { transform: rotate(20deg) scale(1.3); color: #00fa2e; }
         .support-button {
           background: linear-gradient(90deg, #2ef24f, #ff8c00);
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -492,7 +492,7 @@ const App = () => {
       </nav>
 
       {isThinking && (
-        <div className="flex items-center justify-center py-4 bg-[#f9f9f9] text-[#1a1a1a]">
+        <div className="flex items-center justify-center py-4 bg-[url('https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/panda-chewing-bamboo-in-bamboo-forest-on-blurred-background-photo.png')] bg-cover bg-center text-[#1a1a1a]">
           <Loader2 className="w-8 h-8 animate-spin text-[#2ef24f]" />
           <span className="ml-3 text-lg poppins-font">Processing...</span>
         </div>
@@ -500,7 +500,7 @@ const App = () => {
 
       <div className="flex-grow">
         <div className="container mx-auto px-6 py-6">
-          <div className="bg-[#f9f9f9] rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-[url('https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/panda-chewing-bamboo-in-bamboo-forest-on-blurred-background-photo.png')] bg-cover bg-center rounded-2xl shadow-xl overflow-hidden">
             <BannerSlider banners={storeConfig.banners} />
           </div>
         </div>
@@ -523,14 +523,14 @@ const App = () => {
                     setValidationResult(null);
                     setForm(prev => ({ ...prev, nickname: undefined }));
                   }}
-                  className="text-[#1a1a1a] hover:text-yellow-300 transition-all text-sm flex items-center gap-2 bg-[#f9f9f9] px-4 py-2 rounded-lg"
+                  className="text-[#1a1a1a] hover:text-yellow-300 transition-all text-sm flex items-center gap-2 bg-[url('https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/panda-chewing-bamboo-in-bamboo-forest-on-blurred-background-photo.png')] bg-cover bg-center px-4 py-2 rounded-lg"
                 >
                   <ArrowLeft className="w-5 h-5" /> <span className="poppins-font">Back to Games</span>
                 </button>
                 {(form.userId || form.serverId) && (
                   <button
                     onClick={clearSavedInfo}
-                    className="text-[#1a1a1a] hover:text-yellow-300 transition-all text-sm flex items-center gap-2 bg-[#f9f9f9] px-4 py-2 rounded-lg"
+                    className="text-[#1a1a1a] hover:text-yellow-300 transition-all text-sm flex items-center gap-2 bg-[url('https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/panda-chewing-bamboo-in-bamboo-forest-on-blurred-background-photo.png')] bg-cover bg-center px-4 py-2 rounded-lg"
                   >
                     <XCircle className="w-5 h-5" /> <span className="poppins-font">Clear Saved Info</span>
                   </button>
@@ -565,7 +565,7 @@ const App = () => {
                           setFormErrors(prev => ({ ...prev, userId: undefined }));
                         }}
                       />
-                      {formErrors.userId && <p className="text-red-500 text-xs mt-1">{formErrors.userId}</p>}
+                      {formErrors.userId && <p className="text-[#00fa2e] text-xs mt-1">{formErrors.userId}</p>}
                     </div>
                     {form.game === 'mlbb' && (
                       <div>
@@ -582,7 +582,7 @@ const App = () => {
                             setFormErrors(prev => ({ ...prev, serverId: undefined }));
                           }}
                         />
-                        {formErrors.serverId && <p className="text-red-500 text-xs mt-1">{formErrors.serverId}</p>}
+                        {formErrors.serverId && <p className="text-[#00fa2e] text-xs mt-1">{formErrors.serverId}</p>}
                       </div>
                     )}
                   </div>
@@ -603,7 +603,7 @@ const App = () => {
                       )}
                     </button>
                     {(validationResult?.success || validationResult?.status) && (
-                      <div className="flex items-center gap-2 text-green-500 text-sm poppins-font">
+                      <div className="flex items-center gap-2 text-[#00fa2e] text-sm poppins-font">
                         <CheckCircle2 className="w-4 h-4" />
                         <span>Account found: {form.nickname}</span>
                       </div>
@@ -660,7 +660,7 @@ const App = () => {
                     </div>
                   </div>
                 </div>
-                {formErrors.paymentMethod && <p className="text-red-500 text-xs mt-1">{formErrors.paymentMethod}</p>}
+                {formErrors.paymentMethod && <p className="text-[#00fa2e] text-xs mt-1">{formErrors.paymentMethod}</p>}
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
@@ -757,7 +757,7 @@ const App = () => {
         <div className="fixed bottom-6 right-6 z-50">
           <button
             onClick={() => window.open(storeConfig.supportUrl, '_blank')}
-            className="support-button flex items-center gap-4 bg-red-500 text-white px-4 py-3 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-110"
+            className="support-button flex items-center gap-4 bg-[#00fa2e] text-white px-4 py-3 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-110"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="text-white">
               <path fill="none" d="M0 0h24v24H0z"/>
@@ -767,11 +767,11 @@ const App = () => {
           </button>
         </div>
 
-        <footer className="bg-[#f9f9f9] text-[#1a1a1a] py-4">
-          <div className="container mx-auto px-4 text-center space-y-4">
-            <div className="mb-4">
+        <footer className="bg-[#f9f9f9] text-[#1a1a1a] py-2">
+          <div className="container mx-auto px-2 text-center space-y-2">
+            <div className="mb-2">
               <p className="font-bold text-lg poppins-font">Contact Us:</p>
-              <div className="flex justify-center gap-4">
+              <div className="flex justify-center gap-2">
                 <a href="https://www.facebook.com/share/1CVHbXejqR/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="text-[#1a1a1a] hover:text-blue-500">
                   <Facebook className="w-6 h-6" />
                 </a>
@@ -780,7 +780,7 @@ const App = () => {
                 </a>
               </div>
             </div>
-            <div className="mb-4">
+            <div className="mb-2">
               <p className="font-bold text-lg poppins-font">Accept Payment:</p>
               <div className="flex justify-center">
                 <img
