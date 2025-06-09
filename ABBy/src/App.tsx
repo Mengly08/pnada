@@ -269,7 +269,7 @@ const App = () => {
     return (
       <Suspense fallback={
         <div className="min-h-screen flex items-center justify-center bg-[#ffffff]">
-          <Loader2 className="w-10 h-10 animate-spin text-[#2ef24f]" />
+          <Loader2 className="w-10 h-10 animate-spin text-[#31ff26]" />
           <span className="ml-2 text-[#1a1a1a]">Loading admin panel...</span>
         </div>
       }>
@@ -282,7 +282,7 @@ const App = () => {
     return (
       <Suspense fallback={
         <div className="min-h-screen flex items-center justify-center bg-[#ffffff]">
-          <Loader2 className="w-10 h-10 animate-spin text-[#2ef24f]" />
+          <Loader2 className="w-10 h-10 animate-spin text-[#31ff26]" />
           <span className="ml-2 text-[#1a1a1a]">Loading reseller panel...</span>
         </div>
       }>
@@ -298,7 +298,7 @@ const App = () => {
         .khmer-font { font-family: 'Kh Ang Chittbous', sans-serif; }
         .poppins-font { font-family: 'Poppins', sans-serif; }
         .bg-light { background-color: #f9f9f9; }
-        .bg-accent { background: linear-gradient(90deg, #2ef24f, #ff8c00); }
+        .bg-accent { background: linear-gradient(90deg, #31ff26, #87f8fa); }
         .price-box {
           background: linear-gradient(135deg, #ffd700, #ffeb3b);
           padding: 4px 8px; border-radius: 4px; display: inline-block;
@@ -311,14 +311,14 @@ const App = () => {
           border-bottom: 2px solid #e0e0e0; padding-bottom: 8px;
         }
         .section-number {
-          width: 32px; height: 32px; background: #2ef24f; border-radius: 50%;
+          width: 32px; height: 32px; background: #31ff26; border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
           font-size: 1.25rem; font-weight: 700; color: #fff; margin-right: 8px;
         }
         .inner-content, .inner-content.payment-section {
-          background: linear-gradient(135deg, #d70040, #a1002f);
+          background: linear-gradient(135deg, #87f8fa, #87f8fa);
           padding: 16px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          border: 2px solid #2ef24f; color: #fff;
+          border: 2px solid #31ff26; color: #fff;
         }
         .inner-content.products-section {
           background: transparent; padding: 0; border-radius: 0; box-shadow: none;
@@ -332,7 +332,7 @@ const App = () => {
         .payment-box.selected::after {
           content: ''; position: absolute; right: 8px; top: 50%;
           transform: translateY(-50%); width: 12px; height: 12px;
-          background: #ff0000; border-radius: 50%; border: 2px solid #ff69b4;
+          background: #87f8fa; border-radius: 50%; border: 2px solid #ff69b4;
         }
         .payment-box:hover {
           transform: scale(1.04); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -346,10 +346,10 @@ const App = () => {
           padding: 8px; border-radius: 4px; width: 100%; text-align: center;
           transition: all 0.3s ease; font-family: 'Poppins', sans-serif;
         }
-        .input-field:focus { border-color: #2ef24f; outline: none; box-shadow: 0 0 8px rgba(255, 77, 77, 0.3); }
+        .input-field:focus { border-color: #31ff26; outline: none; box-shadow: 0 0 8px rgba(255, 77, 77, 0.3); }
         .mlbb-form4 {
           display: flex; justify-content: space-between; align-items: center;
-          background: linear-gradient(135deg, #d70040, #a1002f);
+          background: linear-gradient(135deg, #87f8fa, #87f8fa);
           padding: 10px; border-radius: 8px; width: 100%;
           position: fixed; bottom: 0; left: 0; right: 0;
           max-width: 100%; z-index: 1000; box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
@@ -360,7 +360,7 @@ const App = () => {
         .mlbb-container44 { display: flex; justify-content: flex-end; }
         .mlbb-button2, .check-id-button {
           display: flex; align-items: center; justify-content: center;
-          background: linear-gradient(90deg, #2ef24f, #ff8c00);
+          background: linear-gradient(90deg, #31ff26, #87f8fa);
           color: #fff; padding: 10px 24px; border-radius: 5px; border: none;
           cursor: pointer; font-size: 16px; font-weight: 600; transition: all 0.3s ease;
           min-width: 150px; height: 48px; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
@@ -424,7 +424,7 @@ const App = () => {
         .social-menu a:hover { background: #f9f9f9; transform: translateX(5px); }
         .products-section * { background-color: transparent !important; }
         nav {
-          background: linear-gradient(90deg, #2ef24f, #ff8c00);
+          background: linear-gradient(90deg, #31ff26, #87f8fa);
           padding: 1.5rem 2.5rem; border-bottom: 3px solid #fff;
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
@@ -437,13 +437,13 @@ const App = () => {
         nav input:focus { box-shadow: 0 0 8px rgba(255, 215, 0, 0.5); }
         footer { background: #f9f9f9; padding: 2rem 1rem; border-top: 2px solid #e0e0e0; }
         footer a svg { transition: all 0.3s ease; }
-        footer a:hover svg { transform: rotate(20deg) scale(1.3); color: #2ef24f; }
+        footer a:hover svg { transform: rotate(20deg) scale(1.3); color: #31ff26; }
         .support-button {
-          background: linear-gradient(90deg, #2ef24f, #ff8c00);
+          background: linear-gradient(90deg, #31ff26, #87f8fa);
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
         .support-button:hover {
-          background: linear-gradient(90deg, #ff8c00, #2ef24f);
+          background: linear-gradient(90deg, #87f8fa, #31ff26);
           box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
         }
       `}</style>
@@ -471,7 +471,7 @@ const App = () => {
         <div className="social-dropdown">
           <button
             onClick={() => setShowSocialDropdown(!showSocialDropdown)}
-            className="text-white hover:text-yellow-300 transition-all flex items-center gap-3 bg-[#2ef24f] px-5 py-3 rounded-full shadow-md"
+            className="text-white hover:text-yellow-300 transition-all flex items-center gap-3 bg-[#31ff26] px-5 py-3 rounded-full shadow-md"
           >
             <MessageCircle className="w-7 h-7" />
             <span className="poppins-font font-semibold">Contact Us</span>
@@ -493,7 +493,7 @@ const App = () => {
 
       {isThinking && (
         <div className="flex items-center justify-center py-4 bg-[#f9f9f9] text-[#1a1a1a]">
-          <Loader2 className="w-8 h-8 animate-spin text-[#2ef24f]" />
+          <Loader2 className="w-8 h-8 animate-spin text-[#31ff26]" />
           <span className="ml-3 text-lg poppins-font">Processing...</span>
         </div>
       )}
@@ -624,7 +624,7 @@ const App = () => {
                 </div>
                 {loading ? (
                   <div className="flex justify-center items-center py-8">
-                    <Loader2 className="w-12 h-12 animate-spin text-[#2ef24f]" />
+                    <Loader2 className="w-12 h-12 animate-spin text-[#31ff26]" />
                     <span className="ml-2 text-sm poppins-font">Loading products...</span>
                   </div>
                 ) : (
@@ -665,12 +665,12 @@ const App = () => {
                   <input
                     type="checkbox"
                     id="accept"
-                    className="w-5 h-5 text-[#2ef24f] border-[#2ef24f] rounded focus:ring-[#2ef24f]"
+                    className="w-5 h-5 text-[#31ff26] border-[#31ff26] rounded focus:ring-[#31ff26]"
                     checked
                     disabled
                   />
                   <label htmlFor="accept" className="text-gray-600 text-sm poppins-font">
-                    I agree to the <a href="/term-and-policy" className="text-[#2ef24f] hover:underline">Terms</a>
+                    I agree to the <a href="/term-and-policy" className="text-[#31ff26] hover:underline">Terms</a>
                   </label>
                 </div>
                 {form.product && (
@@ -721,6 +721,7 @@ const App = () => {
                 />
               </div>
               <div className="game-container">
+                {/* First Row: Mobile Legends KH and Free Fire */}
                 <div
                   className="game-card"
                   onClick={() => {
@@ -730,10 +731,10 @@ const App = () => {
                 >
                   <img
                     src="https://www.daddytopup.com/_next/image?url=https%3A%2F%2Fdaddy-cms.minttopup.xyz%2FUploads%2FImg_Resizer_20240801_2222_57312_4914487dd4.webp&w=1920&q=75"
-                    alt="Mobile Legends"
+                    alt="Mobile Legends KH"
                     className="game-image transition-transform hover:scale-105"
                   />
-                  <h3 className="text-sm font-semibold poppins-font text-center truncate mt-2">Mobile Legends</h3>
+                  <h3 className="text-sm font-semibold poppins-font text-center truncate mt-2">Mobile Legends KH</h3>
                 </div>
                 <div
                   className="game-card"
@@ -743,22 +744,35 @@ const App = () => {
                   }}
                 >
                   <img
-                    src="https://www.daddytopup.com/_next/image?url=https%3A%2F%2Fdaddy-cms.minttopup.xyz%2FUploads%2Ffree_fire_logo_7b069d4084.jpg&w=750&q=75"
+                    src="https://www.daddytopup.com/_next/image?url=https%3A%2F%2Fdaddy-cms.minttopup.xyz%2Fuploads%2Ffree_fire_logo_7b069d4084.jpg&w=750&q=75"
                     alt="Free Fire"
                     className="game-image transition-transform hover:scale-105"
                   />
                   <h3 className="text-sm font-semibold poppins-font text-center truncate mt-2">Free Fire</h3>
                 </div>
+                {/* Second Row: Mobile Legends PH */}
                 <div className="game-card disabled" title="Coming Soon">
                   <div className="relative">
                     <img
-                      src="https://www.daddytopup.com/_next/image?url=https%3A%2F%2Fdaddy-cms.minttopup.xyz%2FUploads%2Fmlbb_ph_4ffb701419.webp&w=750&q=75"
+                      src="https://www.daddytopup.com/_next/image?url=https%3A%2F%2Fdaddy-cms.minttopup.xyz%2Fuploads%2Fmlbb_ph_4ffb701419.webp&w=750&q=75"
                       alt="Mobile Legends PH"
                       className="game-image"
                     />
                     <span className="coming-soon">Coming Soon</span>
                   </div>
                   <h3 className="text-sm font-semibold poppins-font text-center truncate mt-2">Mobile Legends PH</h3>
+                </div>
+                {/* Placeholder to maintain two-column layout */}
+                <div className="game-card disabled" style={{ visibility: 'hidden' }}>
+                  <div className="relative">
+                    <img
+                      src="https://www.daddytopup.com/_next/image?url=https%3A%2F%2Fdaddy-cms.minttopup.xyz%2Fuploads%2Fmlbb_ph_4ffb701419.webp&w=750&q=75"
+                      alt="Placeholder"
+                      className="game-image"
+                    />
+                    <span className="coming-soon">Coming Soon</span>
+                  </div>
+                  <h3 className="text-sm font-semibold poppins-font text-center truncate mt-2">Placeholder</h3>
                 </div>
               </div>
             </div>
@@ -803,7 +817,7 @@ const App = () => {
             </div>
             <div>
               <p className="text-base">
-                <a href="/term-and-policy" className="text-[#2ef24f] hover:underline">
+                <a href="/term-and-policy" className="text-[#31ff26] hover:underline">
                   <span className="font-bold">Privacy Policy</span> | <span className="font-bold">Terms & Conditions</span>
                 </a>
               </p>
