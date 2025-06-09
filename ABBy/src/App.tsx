@@ -240,9 +240,7 @@ const App = () => {
     }
     if (!selectedPayment) errors.paymentMethod = 'Please select a payment method';
     if ((form.game === 'mlbb' && !validationResult?.success) || (form.game === 'freefire' && !validationResult?.status)) {
-      alert(`Please check your ${form.game === 'mlbb' ? 'Mobile Legends' : 'Free Fire'} account first
-
-`);
+      alert(`Please check your ${form.game === 'mlbb' ? 'Mobile Legends' : 'Free Fire'} account first`);
       return;
     }
 
@@ -264,7 +262,7 @@ const App = () => {
   };
 
   const handlePaymentClick = () => {
-    setSelectedPayment(prev => (prev === 'khqr' ? null : 'kh');
+    setSelectedPayment(prev => (prev === 'khqr' ? null : 'khqr'));
   };
 
   if (isAdminRoute) {
@@ -672,7 +670,7 @@ const App = () => {
                 className="w-full h-auto max-h-48 sm:max-h-64 object-contain"
               />
             </div>
-            <div className="max-w-4xl mx/auto space-y-6">
+            <div className="max-w-4xl mx-auto space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <button
                   onClick={() => {
