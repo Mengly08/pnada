@@ -1,4 +1,4 @@
-mport React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Loader2, XCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { ProductList } from './components/ProductList';
 import { PaymentModal } from './components/PaymentModal';
