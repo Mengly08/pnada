@@ -103,7 +103,7 @@ const App = () => {
 
   useEffect(() => {
     if (!isAdminRoute && !isResellerRoute && form.game !== 'none') {
-      console.log('Fetching products for game:', form.game); // Debug log
+      console.log('Fetching products for game:', form.game);
       fetchProducts(form.game);
     }
   }, [form.game, isAdminRoute, isResellerRoute]);
@@ -149,7 +149,7 @@ const App = () => {
         setLoading(false);
         setIsThinking(false);
         alert('Request timed out. Please try again.');
-      }, 10000); // 10-second timeout
+      }, 10000);
       const table = game === 'mlbb' ? 'mlbb_products' : 'freefire_products';
       const { data: products, error } = await supabase
         .from(table)
@@ -302,7 +302,7 @@ const App = () => {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Kh+Ang+Chittbous&display=swap');
         body {
-          background-color: #2bc442 !important; /* Ensure global background */
+          background-color: #2bc442 !important;
         }
         .khmer-font {
           font-family: 'Kh Ang Chittbous', sans-serif;
@@ -352,7 +352,7 @@ const App = () => {
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .inner-content.products-section {
-          background-color: #2bc442 !important; /* Fix white background */
+          background-color: #2bc442 !important;
           padding: 0;
           border-radius: 0;
           box-shadow: none;
@@ -609,10 +609,97 @@ const App = () => {
           background-color: #f0f0f0;
         }
         .products-section, .products-section * {
-          background-color: #2bc442 !important; /* Ensure no white background */
+          background-color: #2bc442 !important;
         }
         .loading-container {
-          background-color: #2bc442 !important; /* Fix loading background */
+          background-color: #2bc442 !important;
+        }
+        /* Flash Sale Styles */
+        .bg-muted {
+          background-color: #1a3c34;
+        }
+        .text-foreground {
+          color: #ffffff;
+        }
+        .text-primary {
+          color: #2bc442;
+        }
+        .text-destructive {
+          color: #ff4d4f;
+        }
+        .red-line-through {
+          text-decoration: line-through;
+        }
+        .fs-countdown {
+          display: flex;
+          align-items: center;
+        }
+        .time {
+          font-size: 1rem;
+          font-weight: bold;
+          color: #ffffff;
+        }
+        .separator {
+          font-size: 1rem;
+          color: #ffffff;
+          margin: 0 4px;
+        }
+        .marquee-content {
+          display: flex;
+          gap: 1rem;
+        }
+        .animate-marquee {
+          animation: marquee 20s linear infinite;
+        }
+        .group:hover .animate-marquee {
+          animation-play-state: paused;
+        }
+        @keyframes marquee {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
+        }
+        .bar {
+          width: 100%;
+          height: 8px;
+          background-color: #e0e0e0;
+          border-radius: 4px;
+          margin-top: 4px;
+          position: relative;
+        }
+        .progress {
+          height: 100%;
+          background-color: #2bc442;
+          border-radius: 4px;
+          transition: width 0.3s ease-in-out;
+        }
+        .progress-text {
+          font-size: 0.75rem;
+          color: #ffffff;
+          margin-top: 4px;
+          display: block;
+        }
+        .border-murky-800 {
+          border: 1px solid rgba(26, 60, 52, 0.75);
+        }
+        .bg-murky-800 {
+          background-color: #1a3c34;
+        }
+        .bg-primary-500 {
+          background-color: #2bc442;
+        }
+        .text-primary-foreground {
+          color: #ffffff;
+        }
+        .w-square-diagonal {
+          width: 96px;
+          transform: rotate(45deg);
+        }
+        .text-xxs {
+          font-size: 0.65rem;
         }
       `}</style>
 
@@ -671,11 +758,140 @@ const App = () => {
           <div className="bg-[#2bc442] rounded-2xl shadow-xl overflow-hidden">
             <BannerSlider banners={storeConfig.banners} />
           </div>
+
+          <div className="container mt-6">
+            <div className="rounded-2xl bg-muted/50">
+              <div className="px-4 pb-3 pt-4">
+                <h3 className="flex items-center space-x-4 text-foreground">
+                  <div className="text-lg font-semibold uppercase leading-relaxed tracking-wider flex items-center">
+                    <lottie-player
+                      src="https://lottie.host/72527c22-6566-4eda-b453-dc61dd77ef2b/rt3d8phYjG.json"
+                      speed="1"
+                      style={{ width: '25px', height: '30px' }}
+                      loop
+                      autoplay
+                      direction="1"
+                      mode="normal"
+                      background="transparent"
+                    ></lottie-player>
+                    FLASHSALE
+                  </div>
+                  <div className="flex items-center gap-1 text-sm capitalize">
+                    <div className="fs-countdown ml-3">
+                      <div className="time" id="hours">14</div>
+                      <div className="separator">:</div>
+                      <div className="time" id="minutes">19</div>
+                      <div className="separator">:</div>
+                      <div className="time" id="seconds">49</div>
+                    </div>
+                  </div>
+                </h3>
+                <p className="pl-6 text-xs text-foreground">Order now! Limited supplies.</p>
+              </div>
+              <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden pb-2 pt-1">
+                <div className="group flex overflow-hidden p-2 [--gap:1rem] [gap:var(--gap)] flex-row container [--duration:20s]">
+                  <div
+                    data-run-marquee="true"
+                    data-run-marquee-vertical="false"
+                    className="flex shrink-0 justify-around [gap:var(--gap)] animate-marquee flex-row group-hover:[animation-play-state:paused]"
+                  >
+                    <div id="special_deals">
+                      <div className="list swiper-wrapper marquee-content">
+                        {[
+                          {
+                            href: "https://happytopup.com/id/mobile-legends",
+                            image: "/assets/thumbnail/fd3bcd628921c82a8931aadf0aadf0818d5e7f70.JPEG",
+                            title: "MLBB KH - 86 Diamonds",
+                            originalPrice: "$1.20",
+                            discountedPrice: "$1.20",
+                            progress: "995%",
+                            remaining: "995",
+                            type: "Promotion",
+                            discount: "$0.00"
+                          },
+                          {
+                            href: "https://happytopup.com/id/mobile-legends",
+                            image: "/assets/thumbnail/fd3bcd628921c82a8931aadf0aadf0818d5e7f70.JPEG",
+                            title: "MLBB KH - 257 Diamonds",
+                            originalPrice: "$3.59",
+                            discountedPrice: "$3.59",
+                            progress: "11%",
+                            remaining: "11",
+                            type: "Promotion",
+                            discount: "$0.00"
+                          },
+                          {
+                            href: "https://happytopup.com/id/free-fire",
+                            image: "/assets/thumbnail/f7421aead19147b22b9c4dae8af8f5ef5eb33518.JPEG",
+                            title: "Free Fire - 25 Diamonds",
+                            originalPrice: "$0.23",
+                            discountedPrice: "$0.10",
+                            progress: "94%",
+                            remaining: "94",
+                            type: "Event",
+                            discount: "$0.13"
+                          },
+                          {
+                            href: "https://happytopup.com/id/free-fire",
+                            image: "/assets/thumbnail/f7421aead19147b22b9c4dae8af8f5ef5eb33518.JPEG",
+                            title: "Free Fire - Level Up",
+                            originalPrice: "$3.99",
+                            discountedPrice: "$3.99",
+                            progress: "9999999%",
+                            remaining: "9999999",
+                            type: "",
+                            discount: "$0.00"
+                          }
+                        ].map((item, index) => (
+                          <a
+                            key={index}
+                            className="relative w-[265px] cursor-pointer rounded-xl p-4 border-murky-800/75 bg-murky-800"
+                            href={item.href}
+                            style={{ outline: 'none' }}
+                          >
+                            <div className="flex flex-row items-center gap-3">
+                              <img
+                                alt=""
+                                loading="lazy"
+                                width="48"
+                                height="48"
+                                decoding="async"
+                                className="rounded-lg bg-muted"
+                                src={item.image}
+                                style={{ color: 'transparent' }}
+                              />
+                              <div className="flex flex-col space-y-1">
+                                <figcaption className="text-sm font-medium text-foreground">{item.title}</figcaption>
+                                <p className="text-xs font-medium text-destructive line-through red-line-through">{item.originalPrice}</p>
+                                <p className="text-xs font-medium text-primary">{item.discountedPrice}</p>
+                                <div className="bar">
+                                  <div className="progress" style={{ width: item.progress }}></div>
+                                  <span className="progress-text">Remaining: {item.remaining}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="mt-2 text-sm text-foreground">{item.type}</div>
+                            <div className="w-24 absolute aspect-square -top-[9px] -right-[9px] overflow-hidden rounded-sm">
+                              <div className="absolute top-0 left-0 bg-primary/50 h-2 w-2"></div>
+                              <div className="absolute bottom-0 right-0 bg-primary/50 h-2 w-2"></div>
+                              <div className="absolute block w-square-diagonal py-1 text-center text-xxs font-semibold uppercase bottom-0 right-0 rotate-45 origin-bottom-right shadow-sm bg-primary-500 text-primary-foreground">
+                                ECONOMICAL {item.discount}
+                              </div>
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {showTopUp ? (
           <main className="container mx-auto px-4 py-8">
-            {console.log('Rendering top-up section', { form, products })} {/* Debug log */}
+            {console.log('Rendering top-up section', { form, products })}
             <div className="header py-2">
               <img
                 src="https://raw.githubusercontent.com/Cheagjihvg/jackstore-asssets/refs/heads/main/Untitled-1%20(1).png"
@@ -897,7 +1113,7 @@ const App = () => {
                 <div
                   className="game-card"
                   onClick={() => {
-                    console.log('Setting game to mlbb'); // Debug log
+                    console.log('Setting game to mlbb');
                     setForm(prev => ({ ...prev, game: 'mlbb' }));
                     setShowTopUp(true);
                   }}
@@ -912,7 +1128,7 @@ const App = () => {
                 <div
                   className="game-card"
                   onClick={() => {
-                    console.log('Setting game to freefire'); // Debug log
+                    console.log('Setting game to freefire');
                     setForm(prev => ({ ...prev, game: 'freefire' }));
                     setShowTopUp(true);
                   }}
