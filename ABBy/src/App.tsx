@@ -1,5 +1,5 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { Loader2, XCircle, ArrowLeft, Search, Facebook, MessageCircle, CheckCircle2 } from 'lucide-react';
+import { Loader2, XCircle, ArrowLeft, Search, Facebook, MessageCircle, CheckCircle2, ArrowRight } from 'lucide-react';
 import axios from 'axios';
 import { ProductList } from './components/ProductList';
 import { PaymentModal } from './components/PaymentModal';
@@ -103,7 +103,6 @@ const App = () => {
 
   useEffect(() => {
     if (!isAdminRoute && !isResellerRoute && form.game !== 'none') {
-      console.log('Fetching products for game:', form.game);
       fetchProducts(form.game);
     }
   }, [form.game, isAdminRoute, isResellerRoute]);
@@ -274,7 +273,7 @@ const App = () => {
   if (isAdminRoute) {
     return (
       <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#2bc442]">
+        <div className="min-h-screen flex items-center justify-center bg-[#f971ff]">
           <Loader2 className="w-10 h-10 animate-spin text-white" />
           <span className="ml-2 text-white">Loading admin panel...</span>
         </div>
@@ -287,7 +286,7 @@ const App = () => {
   if (isResellerRoute) {
     return (
       <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#2bc442]">
+        <div className="min-h-screen flex items-center justify-center bg-[#f971ff]">
           <Loader2 className="w-10 h-10 animate-spin text-white" />
           <span className="ml-2 text-white">Loading reseller panel...</span>
         </div>
@@ -302,13 +301,13 @@ const App = () => {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Kh+Ang+Chittbous&display=swap');
         body {
-          background-color: #2bc442 !important;
+          background-color: #f971ff !important;
         }
         .khmer-font {
           font-family: 'Kh Ang Chittbous', sans-serif;
         }
         .bg-dark {
-          background-color: #2bc442;
+          background-color: #f971ff;
         }
         .price-box {
           background-color: #ffd700;
@@ -346,20 +345,20 @@ const App = () => {
         }
         .inner-content,
         .inner-content.payment-section {
-          background-color: #00FF00 !important;
+          background-color: #ffffff !important;
           padding: 16px;
           border-radius: 8px;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .inner-content.products-section {
-          background-color: #2bc442 !important;
+          background-color: #f971ff !important;
           padding: 0;
           border-radius: 0;
           box-shadow: none;
         }
         .payment-box {
           background-color: #ffffff;
-          border: 2px solid #00FF00;
+          border: 2px solid #f971ff;
           border-radius: 8px;
           padding: 8px 12px;
           margin-bottom: 16px;
@@ -378,9 +377,9 @@ const App = () => {
           transform: translateY(-50%);
           width: 12px;
           height: 12px;
-          background-color: #00FF00;
+          background-color: #f971ff;
           border-radius: 50%;
-          border: 2px solid #00FF00;
+          border: 2px solid #f971ff;
         }
         .payment-box:hover {
           transform: scale(1.02);
@@ -414,7 +413,7 @@ const App = () => {
         .input-field {
           background-color: #ffffff;
           color: #000000;
-          border: 1px solid #ffff00;
+          border: 1px solid #f971ff;
           padding: 8px;
           border-radius: 4px;
           width: 100%;
@@ -424,7 +423,7 @@ const App = () => {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          background-color: #00FF00;
+          background-color: #ffffff;
           padding: 10px;
           border-radius: 8px;
           width: 100%;
@@ -438,17 +437,17 @@ const App = () => {
         .mlbb-container43 {
           display: flex;
           flex-direction: column;
-          color: #fff;
+          color: #000000;
         }
         .mlbb-text30, .mlbb-text33 {
           font-size: 14px;
           margin-bottom: 5px;
-          color: #fff;
+          color: #000000;
         }
         .mlbb-text32, .mlbb-text35 {
           font-weight: bold;
           margin-left: 5px;
-          color: #fff;
+          color: #000000;
         }
         .mlbb-container44 {
           display: flex;
@@ -458,8 +457,8 @@ const App = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          background-color: #fff;
-          color: #000000;
+          background-color: #f971ff;
+          color: #ffffff;
           padding: 10px 24px;
           border-radius: 5px;
           border: 2px solid #000000;
@@ -472,25 +471,25 @@ const App = () => {
         }
         .mlbb-button2:hover, .check-id-button:hover {
           background-color: #000000;
-          color: #fff;
+          color: #f971ff;
         }
         .mlbb-button2:disabled, .check-id-button:disabled {
           opacity: 0.5;
           cursor: not-allowed;
         }
         .mlbb-button2:disabled:hover, .check-id-button:disabled:hover {
-          background-color: #fff;
-          color: #000000;
+          background-color: #f971ff;
+          color: #ffffff;
         }
         .mlbb-icon64 {
           margin-right: 8px;
         }
         .mlbb-text36, .check-id-text {
           text-transform: uppercase;
-          color: #000000;
+          color: #ffffff;
         }
         .mlbb-button2:hover .mlbb-text36, .check-id-button:hover .check-id-text {
-          color: #fff;
+          color: #f971ff;
         }
         .game-card {
           display: flex;
@@ -609,10 +608,10 @@ const App = () => {
           background-color: #f0f0f0;
         }
         .products-section, .products-section * {
-          background-color: #2bc442 !important;
+          background-color: #f971ff !important;
         }
         .loading-container {
-          background-color: #2bc442 !important;
+          background-color: #f971ff !important;
         }
         /* Flash Sale Styles */
         .bg-muted {
@@ -622,7 +621,7 @@ const App = () => {
           color: #ffffff;
         }
         .text-primary {
-          color: #2bc442;
+          color: #f971ff;
         }
         .text-destructive {
           color: #ff4d4f;
@@ -672,7 +671,7 @@ const App = () => {
         }
         .progress {
           height: 100%;
-          background-color: #2bc442;
+          background-color: #f971ff;
           border-radius: 4px;
           transition: width 0.3s ease-in-out;
         }
@@ -689,7 +688,7 @@ const App = () => {
           background-color: #1a3c34;
         }
         .bg-primary-500 {
-          background-color: #2bc442;
+          background-color: #f971ff;
         }
         .text-primary-foreground {
           color: #ffffff;
@@ -701,9 +700,31 @@ const App = () => {
         .text-xxs {
           font-size: 0.65rem;
         }
+        /* Comment Section Styles */
+        .border-murky-600 {
+          border-color: #2a4c44;
+        }
+        .text-darkColor {
+          color: #000000;
+        }
+        .bg-gradient-to-b {
+          background: linear-gradient(to bottom, #1a3c34, #1a3c34);
+        }
+        .clip-path-number {
+          clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+        .text-besar {
+          font-size: 3rem;
+        }
+        .text-secondary-foreground {
+          color: #d1d5db;
+        }
+        .text-murky-20 {
+          color: #e5e7eb;
+        }
       `}</style>
 
-      <nav className="bg-green-600 text-white p-3 shadow-lg sticky top-0 z-50 flex items-center justify-between">
+      <nav className="bg-[#f971ff] text-white p-3 shadow-lg sticky top-0 z-50 flex items-center justify-between">
         <a href="/" className="flex items-center">
           <div className="logo-container">
             <img
@@ -747,7 +768,7 @@ const App = () => {
       </nav>
 
       {isThinking && (
-        <div className="flex items-center justify-center py-2 bg-[#2bc442] text-white">
+        <div className="flex items-center justify-center py-2 bg-[#f971ff] text-white">
           <Loader2 className="w-6 h-6 animate-spin text-white" />
           <span className="ml-2 text-sm text-white">Grok is thinking...</span>
         </div>
@@ -755,7 +776,7 @@ const App = () => {
 
       <div className="flex-grow">
         <div className="container mx-auto px-4 py-6">
-          <div className="bg-[#2bc442] rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-[#f971ff] rounded-2xl shadow-xl overflow-hidden">
             <BannerSlider banners={storeConfig.banners} />
           </div>
 
@@ -796,21 +817,21 @@ const App = () => {
                     className="flex shrink-0 justify-around [gap:var(--gap)] animate-marquee flex-row group-hover:[animation-play-state:paused]"
                   >
                     <div id="special_deals">
-                      <div className="list swiper-wrapper marquee-content">
+                      <div className="list marquee-content">
                         {[
                           {
-                            href: "https://happytopup.com/id/mobile-legends",
+                            href: "https://xiatopup.com/id/mobile-legends",
                             image: "/assets/thumbnail/fd3bcd628921c82a8931aadf0aadf0818d5e7f70.JPEG",
                             title: "MLBB KH - 86 Diamonds",
                             originalPrice: "$1.20",
                             discountedPrice: "$1.20",
-                            progress: "995%",
+                            progress: "95%",
                             remaining: "995",
                             type: "Promotion",
                             discount: "$0.00"
                           },
                           {
-                            href: "https://happytopup.com/id/mobile-legends",
+                            href: "https://xiatopup.com/id/mobile-legends",
                             image: "/assets/thumbnail/fd3bcd628921c82a8931aadf0aadf0818d5e7f70.JPEG",
                             title: "MLBB KH - 257 Diamonds",
                             originalPrice: "$3.59",
@@ -821,7 +842,7 @@ const App = () => {
                             discount: "$0.00"
                           },
                           {
-                            href: "https://happytopup.com/id/free-fire",
+                            href: "https://xiatopup.com/id/free-fire",
                             image: "/assets/thumbnail/f7421aead19147b22b9c4dae8af8f5ef5eb33518.JPEG",
                             title: "Free Fire - 25 Diamonds",
                             originalPrice: "$0.23",
@@ -832,13 +853,13 @@ const App = () => {
                             discount: "$0.13"
                           },
                           {
-                            href: "https://happytopup.com/id/free-fire",
+                            href: "https://xiatopup.com/id/free-fire",
                             image: "/assets/thumbnail/f7421aead19147b22b9c4dae8af8f5ef5eb33518.JPEG",
                             title: "Free Fire - Level Up",
                             originalPrice: "$3.99",
                             discountedPrice: "$3.99",
-                            progress: "9999999%",
-                            remaining: "9999999",
+                            progress: "99%",
+                            remaining: "9999",
                             type: "",
                             discount: "$0.00"
                           }
@@ -891,7 +912,6 @@ const App = () => {
 
         {showTopUp ? (
           <main className="container mx-auto px-4 py-8">
-            {console.log('Rendering top-up section', { form, products })}
             <div className="header py-2">
               <img
                 src="https://raw.githubusercontent.com/Cheagjihvg/jackstore-asssets/refs/heads/main/Untitled-1%20(1).png"
@@ -908,14 +928,14 @@ const App = () => {
                     setValidationResult(null);
                     setForm(prev => ({ ...prev, nickname: undefined }));
                   }}
-                  className="text-white hover:text-gray-300 transition-colors text-sm flex items-center gap-2 bg-[#2bc442] px-4 py-2 rounded-lg"
+                  className="text-white hover:text-gray-300 transition-colors text-sm flex items-center gap-2 bg-[#f971ff] px-4 py-2 rounded-lg"
                 >
                   <ArrowLeft className="w-5 h-5 text-white" /> Back to Games
                 </button>
                 {(form.userId || form.serverId) && (
                   <button
                     onClick={clearSavedInfo}
-                    className="text-white hover:text-gray-300 transition-colors text-sm flex items-center gap-2 bg-[#2bc442] px-4 py-2 rounded-lg"
+                    className="text-white hover:text-gray-300 transition-colors text-sm flex items-center gap-2 bg-[#f971ff] px-4 py-2 rounded-lg"
                   >
                     <XCircle className="w-5 h-5 text-white" /> Clear Saved Info
                   </button>
@@ -927,7 +947,7 @@ const App = () => {
               <div className="inner-content">
                 <div className="section-header">
                   <div className="section-number">01</div>
-                  <h3 className="text-base font-semibold text-white khmer-font">បញ្ចូលព័ត៌មានរបស់អ្នក</h3>
+                  <h3 className="text-base font-semibold text-black khmer-font">បញ្ចូលព័ត៌មានរបស់អ្នក</h3>
                   <img
                     src="https://zttopup.com/_next/image?url=%2Fassets%2Fzttopup%2Fhello-kitty.gif&w=1920&q=75"
                     alt="Hello Kitty"
@@ -950,7 +970,7 @@ const App = () => {
                           setFormErrors(prev => ({ ...prev, userId: undefined }));
                         }}
                       />
-                      {formErrors.userId && <p className="text-green-400 text-xs mt-1">{formErrors.userId}</p>}
+                      {formErrors.userId && <p className="text-[#f971ff] text-xs mt-1">{formErrors.userId}</p>}
                     </div>
                     {form.game === 'mlbb' && (
                       <div>
@@ -967,7 +987,7 @@ const App = () => {
                             setFormErrors(prev => ({ ...prev, serverId: undefined }));
                           }}
                         />
-                        {formErrors.serverId && <p className="text-green-400 text-xs mt-1">{formErrors.serverId}</p>}
+                        {formErrors.serverId && <p className="text-[#f971ff] text-xs mt-1">{formErrors.serverId}</p>}
                       </div>
                     )}
                   </div>
@@ -988,13 +1008,13 @@ const App = () => {
                       )}
                     </button>
                     {(validationResult?.success || validationResult?.status) && (
-                      <div className="flex items-center gap-2 text-green-400 text-sm">
+                      <div className="flex items-center gap-2 text-[#f971ff] text-sm">
                         <CheckCircle2 className="w-4 h-4" />
                         <span>Account found: {form.nickname}</span>
                       </div>
                     )}
                   </div>
-                  <div className="mt-4 text-white text-xs khmer-font">
+                  <div className="mt-4 text-black text-xs khmer-font">
                     ដើម្បីឃើញ UserID សូមចូលទៅក្នុងហ្គេម ហើយចុចរូបភាព Avatar នៅខាងឆ្វេងអេក្រង់កញ្ចក់ ហើយចុចទៅកាន់ "Check ID" ពេលនោះ User ID នឹងបង្ហាញឲ្យឃើញ បន្ទាប់មកសូមយក User ID នោះមកបំពេញ។ ឧទាហរណ៍: User ID: 123456789, Zone ID: 1234។
                   </div>
                 </form>
@@ -1031,7 +1051,7 @@ const App = () => {
               <div className="inner-content payment-section">
                 <div className="section-header">
                   <div className="section-number">03</div>
-                  <h3 className="text-base font-semibold text-white khmer-font">វិធីបង់ប្រាក់</h3>
+                  <h3 className="text-base font-semibold text-black khmer-font">វិធីបង់ប្រាក់</h3>
                 </div>
                 <div
                   className={`payment-box ${selectedPayment === 'khqr' ? 'selected' : ''}`}
@@ -1049,19 +1069,124 @@ const App = () => {
                     </div>
                   </div>
                 </div>
-                {formErrors.paymentMethod && <p className="text-green-400 text-xs mt-1">{formErrors.paymentMethod}</p>}
+                {formErrors.paymentMethod && <p className="text-[#f971ff] text-xs mt-1">{formErrors.paymentMethod}</p>}
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     id="accept"
-                    className="w-5 h-5 text-white border-white rounded focus:ring-white"
+                    className="w-5 h-5 text-[#f971ff] border-[#f971ff] rounded focus:ring-[#f971ff]"
                     checked
                     disabled
                   />
-                  <label htmlFor="accept" className="text-white text-sm khmer-font">
-                    ខ្ញុំយល់ព្រមតាម <a href="/term-and-policy" className="text-white hover:underline">លក្ខខណ្ឌ</a>
+                  <label htmlFor="accept" className="text-black text-sm khmer-font">
+                    ខ្ញុំយល់ព្រមតាម <a href="/term-and-policy" className="text-[#f971ff] hover:underline">លក្ខខណ្ឌ</a>
                   </label>
                 </div>
+
+                {/* Comment Section */}
+                <div className="mt-4 block rounded-xl bg-murky-800 shadow-2xl md:hidden">
+                  <div className="flex border-b border-murky-600">
+                    <div className="flex flex-row items-center gap-1 text-darkColor rounded-md">
+                      <div className="items-center justify-start flex bg-gradient-to-b from-murky-800 to-murky-800 clip-path-number p-4 h-12 w-16" style={{ borderTopLeftRadius: '12px' }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" className="h-4 w-4">
+                          <path fillRule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" clipRule="evenodd"></path>
+                        </svg>
+                      </div>
+                      <h3 className="px-2 py-2 text-base font-semibold leading-6 text-white sm:px-4">Comment</h3>
+                    </div>
+                  </div>
+                  <div className="flow-root p-6">
+                    <div className="flex flex-col overflow-hidden">
+                      <div className="mx-6 flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" className="h-8 w-8 flex-shrink-0 text-yellow-400">
+                          <path fillRule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" clipRule="evenodd"></path>
+                        </svg>
+                        <div>
+                          <span className="text-5xl text-besar">0.0</span> <span> / </span><span>5.0</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <div className="mx-6 flex items-center justify-center text-xs font-bold">0% Buyers are satisfied with this product.</div>
+                        <div className="mx-6 flex items-center justify-center gap-2 text-xs">From 1 Comment.</div>
+                      </div>
+                    </div>
+                    <div className="flex flex-col overflow-hidden pt-6">
+                      {[...Array(5)].map((_, i) => (
+                        <ul key={5 - i} className="rating-list" style={{ listStyleType: 'none', paddingLeft: 0 }}>
+                          <li className="rating-item" style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
+                            <div className="rating-value" style={{ width: '30px', textAlign: 'right', marginRight: '10px' }}>
+                              {5 - i}
+                            </div>
+                            <div className="star-rating" style={{ display: 'flex', alignItems: 'center', marginRight: '10px' }}>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                                aria-hidden="true"
+                                style={{ height: '20px', width: '20px', color: '#ffc107' }}
+                              >
+                                <path fillRule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382-1.831-4.401z" clipRule="evenodd"></path>
+                              </svg>
+                            </div>
+                            <div className="bar" style={{ flexGrow: 1, height: '10px', backgroundColor: '#ddd', borderRadius: '5px', overflow: 'hidden' }}>
+                              <div className="progress" style={{ height: '100%', backgroundColor: '#ffc107', borderRadius: '5px', width: '0%' }}></div>
+                            </div>
+                            <div className="count" style={{ width: '50px', marginLeft: '0px', textAlign: 'right' }}>0</div>
+                          </li>
+                        </ul>
+                      ))}
+                    </div>
+                    <div className="mt-6">
+                      <p className="text-sm text-secondary-foreground">Do you like this product? Tell us and other prospective buyers about your experience.</p>
+                    </div>
+                    <hr />
+                    <div className="flow-root pt-5">
+                      <div className="-my-6 divide-y">
+                        <div className="py-3">
+                          <div className="flex items-center">
+                            <div className="w-full">
+                              <div className="flex items-start justify-between">
+                                <h4 className="mt-0.5 text-xs font-bold text-white">Be****en</h4>
+                                <div className="flex items-center">
+                                  {[...Array(5)].map((_, i) => (
+                                    <svg
+                                      key={i}
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      viewBox="0 0 20 20"
+                                      fill="white"
+                                      aria-hidden="true"
+                                      className="text-yellow-400 h-4 w-4 flex-shrink-0"
+                                    >
+                                      <path fillRule="evenodd" d="M10.868 2.884c-.321-.772-1.415-.772-1.736 0l-1.83 4.401-4.753.381c-.833.067-1.171 1.107-.536 1.651l3.62 3.102-1.106 4.637c-.194.813.691 1.456 1.405 1.02L10 15.591l4.069 2.485c.713.436 1.598-.207 1.404-1.02l-1.106-4.637 3.62-3.102c.635-.544.297-1.584-.536-1.65l-4.752-.382l-1.831-4.401z" clipRule="evenodd"></path>
+                                    </svg>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex w-full justify-between pt-1 text-xxs">
+                            <span>Weekly Pass</span>
+                            <span>2025-06-05 19:22:30</span>
+                          </div>
+                          <div className="text-murky-20 mt-1 space-y-6 text-sm italic">
+                            <div>“The topup process is fast and the price is very cheap!”</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex justify-end pt-5 mt-5">
+                      <a
+                        className="inline-flex items-center justify-center whitespace-nowrap text-xs font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input hover:bg-accent/75 hover:text-accent-foreground h-8 rounded-md px-4 bg-[#1a3c34]/50 pr-3 flex items-center gap-2"
+                        href="/id/reviews"
+                        style={{ outline: 'none' }}
+                      >
+                        <span>See all reviews</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
                 {form.product && (
                   <form className="mlbb-form4" onSubmit={handleSubmit}>
                     <div className="mlbb-container43">
@@ -1088,7 +1213,7 @@ const App = () => {
                         <svg width="24" height="24" viewBox="0 0 24 24" className="mlbb-icon64">
                           <g fill="none" fillRule="evenodd">
                             <path d="m12.calendar_month 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.10-.01z"></path>
-                            <path d="M5 6.5a.5.5 0 1 1 .5-.5H16a1 1 0 1 0 0-2H5.5A2.5 2.5 0 0 0 3 6.5V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5.5a.5.5 0 0 1-.5-.5M15.5 15a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" fill="#0a86aa"></path>
+                            <path d="M5 6.5a.5.5 0 1 1 .5-.5H16a1 1 0 0 0 0-2H5.5A2.5 2.5 0 0 0 3 6.5V18a2 2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0-2H5.5a.5.5 0 0 1-.5-.5M15.5 15a1.5 1.5 0 1 0 0-3a1.5 1.5 0 .0 .0 3 0 .0"></path>
                           </g>
                         </svg>
                         <span className="mlbb-text36">Pay Now</span>
@@ -1097,7 +1222,6 @@ const App = () => {
                   </form>
                 )}
               </div>
-            </div>
           </main>
         ) : (
           <main className="container mx-auto px-4 py-6">
@@ -1106,7 +1230,7 @@ const App = () => {
                 <img
                   src="https://raw.githubusercontent.com/Cheagjihvg/jackstore-asssets/refs/heads/main/Untitled-1%20(1).png"
                   alt="Banner"
-                  className="w-full h-auto max-h-48 sm:max-h-64 object-contain"
+                  className="w-full h-auto max-h-48 sm:max-h-64 object max-h-12px sm:h-auto contain"
                 />
               </div>
               <div className="game-container">
@@ -1114,12 +1238,13 @@ const App = () => {
                   className="game-card"
                   onClick={() => {
                     console.log('Setting game to mlbb');
+                    setShowTopUp(true);
                     setForm(prev => ({ ...prev, game: 'mlbb' }));
                     setShowTopUp(true);
                   }}
                 >
                   <img
-                    src="https://www.daddytopup.com/_next/image?url=https%3A%2F%2Fdaddy-cms.minttopup.xyz%2FUploads%2FImg_Resizer_20240801_2222_57312_4914487dd4.webp&w=1920&q=75"
+                    src="https://res.cloudinary.com/dhztk4abr/image/upload/v1746748734/products/nq9h3azwlgffpt02c82q.png?w=384&q=75"
                     alt="Mobile Legends"
                     className="game-image"
                   />
@@ -1134,7 +1259,7 @@ const App = () => {
                   }}
                 >
                   <img
-                    src="https://www.daddytopup.com/_next/image?url=https%3A%2F%2Fdaddy-cms.minttopup.xyz%2FUploads%2Ffree_fire_logo_7b069d4084.jpg&w=750&q=75"
+                    src="https://play-lh.googleusercontent.com/sKh_B4ZLfu0hf3zqx9z98b2-APe2rxDb8dIW-QqFHyS3cpzDK2Qq8tAbRAz3rXzOFtdAw"
                     alt="Free Fire"
                     className="game-image"
                   />
@@ -1143,13 +1268,13 @@ const App = () => {
                 <div className="game-card disabled" title="Coming Soon">
                   <div className="relative">
                     <img
-                      src="https://www.daddytopup.com/_next/image?url=https%3A%2F%2Fdaddy-cms.minttopup.xyz%2FUploads%2Fmlbb_ph_4ffb701419.webp&w=750&q=75"
+                      src="https://mob.cloudinary.com/daddy-retopup.com/_next/image?url=https%3A%2F%2F%2fdaddy-cms.minttopup.xyz%2FUploads%2Fmlbb_ph_4ffb701419.webp&w=750&q=75"
                       alt="Mobile Legends PH"
                       className="game-image"
                     />
                     <span className="coming-soon">Coming Soon</span>
                   </div>
-                  <h3 className="text-sm font-semibold text-white text-center truncate mt-2">Mobile Legends PH</h3>
+                  <h3 className="text-sm font-semibold text-center text-white truncate">Mobile Legends PH</h3>
                 </div>
               </div>
             </div>
@@ -1159,8 +1284,7 @@ const App = () => {
         <div className="fixed bottom-6 right-6 z-50">
           <button
             onClick={() => window.open(storeConfig.supportUrl, '_blank')}
-            className="flex items-center gap-2 bg-white text-black px-4 py-3 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
-          >
+            className="flex items-center gap-2 bg-white text-black px-4 py-3 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105">
             <div className="relative">
               <div className="absolute inset-0 bg-gray-300/30 rounded-full animate-ping opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="text-black">
@@ -1172,14 +1296,14 @@ const App = () => {
           </button>
         </div>
 
-        <footer className="bg-[#2bc442] text-white py-4 w-full">
+        <footer className="bg-[#f971ff] text-white py-4 w-full">
           <div className="container mx-auto px-4 text-center">
             <div className="mb-2">
               <p className="font-bold text-white">Contact Us:</p>
               <div className="flex justify-center gap-4">
                 <a href="https://www.facebook.com/share/1CVHbXejqR/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="text-white hover:text-gray-300">
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2.04c-5.5 0-10 4.49-10 10.02 0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89 1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7a10 10 0 0 0 8.44-9.9c0-5.53-4.5-10.02-10-10.02"/>
+                    <path d="M12 2.04c-5.5 0-10 4.49-10 10.02c0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89 1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7a10 10 0 0 0 8.44-9.9c0-5.53-4.5-10.02-10-10.02"/>
                   </svg>
                 </a>
                 <a href="https://t.me/kakronabns" target="_blank" rel="noopener noreferrer" className="text-white hover:text-gray-300">
@@ -1207,8 +1331,8 @@ const App = () => {
             <div>
               <p className="text-xs">
                 <a href="/term-and-policy" className="text-white">
-                  <span className="font-bold underline" style={{ textUnderlineOffset: '5px' }}>PRIVACY POLICY</span> |{' '}
-                  <span className="font-bold underline" style={{ textUnderlineOffset: '5px' }}>TERMS AND CONDITION</span>
+                  <span className="font-bold underline" style={{ textUnderlineOffset: '3px' }}>PRIVACY POLICY</span> |{' '}
+                  <span className="font-bold underline" style={{ textUnderlineOffset: '3px' }}>TERMS AND CONDITION</span>
                 </a>
               </p>
               <p className="text-xs text-white">COPYRIGHT © MLBB STORE. ALL RIGHTS RESERVED.</p>
