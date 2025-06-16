@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
 
-export default function PandaTopup() {
+function App() {
   const [currentBanner, setCurrentBanner] = useState(0)
   const [currentTime, setCurrentTime] = useState("")
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -53,7 +53,6 @@ export default function PandaTopup() {
 
   const banners = [
     "/placeholder.svg?height=400&width=800&text=Mobile+Legends+Banner",
-    "/placeholder.svg?height=400&width=800&text=Free+Fire+Banner",
     "/placeholder.svg?height=400&width=800&text=MLBB+Special+Offer",
   ]
 
@@ -703,3 +702,5 @@ export default function PandaTopup() {
     </div>
   )
 }
+
+export default App
