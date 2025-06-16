@@ -32,6 +32,24 @@ export default function PandaTopup() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [showPromoPopup, setShowPromoPopup] = useState(true)
+  const [showCheckout, setShowCheckout] = useState(false)
+  const [form, setForm] = useState({
+    userId: "",
+    serverId: "",
+    product: null,
+    game: "mlbb",
+    nickname: undefined,
+  })
+  const [orderFormat, setOrderFormat] = useState("")
+  const [discountPercent, setDiscountPercent] = useState(0)
+
+  // Store config for popup banner
+  const storeConfig = {
+    popupBanner: {
+      enabled: true,
+      image: "/placeholder.svg?height=300&width=400&text=Special+Offer",
+    },
+  }
 
   const banners = [
     "/placeholder.svg?height=400&width=800&text=Mobile+Legends+Banner",
@@ -156,6 +174,54 @@ export default function PandaTopup() {
     setCurrentBanner((prev) => (prev - 1 + banners.length) % banners.length)
   }
 
+  const handleClosePayment = () => {
+    setShowCheckout(false)
+  }
+
+  // Mock PaymentModal component
+  const PaymentModal = ({ form, orderFormat, onClose, discountPercent }) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold">Payment Details</h3>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+        <div className="space-y-4">
+          <p>
+            <strong>Order:</strong> {orderFormat}
+          </p>
+          <p>
+            <strong>Game:</strong> {form.game}
+          </p>
+          <p>
+            <strong>Discount:</strong> {discountPercent}%
+          </p>
+          <Button className="w-full bg-green-600 hover:bg-green-700 text-white">Proceed to Payment</Button>
+        </div>
+      </div>
+    </div>
+  )
+
+  // Mock PopupBanner component
+  const PopupBanner = ({ image, onClose }) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="relative bg-white rounded-lg overflow-hidden max-w-sm mx-4">
+        <Button variant="ghost" size="icon" className="absolute top-2 right-2 z-10" onClick={onClose}>
+          <X className="w-4 h-4" />
+        </Button>
+        <Image
+          src={image || "/placeholder.svg"}
+          alt="Special Offer"
+          width={400}
+          height={300}
+          className="w-full h-auto"
+        />
+      </div>
+    </div>
+  )
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -222,6 +288,7 @@ export default function PandaTopup() {
                 size="icon"
                 className="text-gray-700 hover:bg-gray-100"
                 aria-label="View Shopping Cart"
+                onClick={() => setShowCheckout(true)}
               >
                 <ShoppingCart className="w-5 h-5" />
               </Button>
@@ -618,6 +685,21 @@ export default function PandaTopup() {
           </div>
         </div>
       </footer>
+
+      {/* Payment Modal */}
+      {showCheckout && (
+        <PaymentModal
+          form={form}
+          orderFormat={orderFormat}
+          onClose={handleClosePayment}
+          discountPercent={discountPercent}
+        />
+      )}
+
+      {/* Popup Banner */}
+      {storeConfig.popupBanner.enabled && showPromoPopup && (
+        <PopupBanner image={storeConfig.popupBanner.image} onClose={() => setShowPromoPopup(false)} />
+      )}
     </div>
   )
 }
