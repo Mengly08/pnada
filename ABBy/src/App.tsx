@@ -1,1026 +1,634 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { Loader2, XCircle, ArrowLeft, Search, Facebook, MessageCircle, CheckCircle2 } from 'lucide-react';
-import axios from 'axios';
-import { ProductList } from './components/ProductList';
-import { PaymentModal } from './components/PaymentModal';
-import { BannerSlider } from './components/BannerSlider';
-import { PopupBanner } from './components/PopupBanner';
-import { supabase } from './lib/supabase';
-import storeConfig from './lib/config';
+"use client"
 
-const AdminPage = lazy(() => import('./pages/AdminPage').then(module => ({ default: module.AdminPage })));
-const ResellerPage = lazy(() => import('./pages/ResellerPage').then(module => ({ default: module.ResellerPage })));
+import { useState, useEffect } from "react"
+import {
+  ChevronLeft,
+  ChevronRight,
+  MessageCircle,
+  Shield,
+  Zap,
+  Clock,
+  Search,
+  Bell,
+  Menu,
+  X,
+  User,
+  Settings,
+  Gamepad2,
+  ShoppingCart,
+  Heart,
+  CreditCard,
+  Flame,
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import Image from "next/image"
 
-const App = () => {
-  const [form, setForm] = useState(() => {
-    const savedForm = localStorage.getItem('customerInfo');
-    return savedForm ? JSON.parse(savedForm) : {
-      userId: '',
-      serverId: '',
-      product: null,
-      game: 'mlbb',
-      nickname: undefined
-    };
-  });
+export default function PandaTopup() {
+  const [currentBanner, setCurrentBanner] = useState(0)
+  const [currentTime, setCurrentTime] = useState("")
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [showPromoPopup, setShowPromoPopup] = useState(true)
 
-  const [showTopUp, setShowTopUp] = useState(false);
-  const [showCheckout, setShowCheckout] = useState(false);
-  const [orderFormat, setOrderFormat] = useState('');
-  const [formErrors, setFormErrors] = useState({ userId: '', serverId: '', paymentMethod: '' });
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isAdminRoute, setIsAdminRoute] = useState(false);
-  const [isResellerRoute, setIsResellerRoute] = useState(false);
-  const [isResellerLoggedIn, setIsResellerLoggedIn] = useState(false);
-  const [showPopupBanner, setShowPopupBanner] = useState(true);
-  const [paymentCooldown, setPaymentCooldown] = useState(0);
-  const [cooldownInterval, setCooldownInterval] = useState(null);
-  const [selectedPayment, setSelectedPayment] = useState(null);
-  const [validating, setValidating] = useState(false);
-  const [validationResult, setValidationResult] = useState(null);
-  const [isThinking, setIsThinking] = useState(false);
-  const [showSocialDropdown, setShowSocialDropdown] = useState(false);
+  const banners = [
+    "/placeholder.svg?height=400&width=800&text=Mobile+Legends+Banner",
+    "/placeholder.svg?height=400&width=800&text=Free+Fire+Banner",
+    "/placeholder.svg?height=400&width=800&text=MLBB+Special+Offer",
+  ]
 
-  const diamondCombinations = {
-    '86': { total: '86', breakdown: '86+0bonus' },
-    '172': { total: '172', breakdown: '172+0bonus' },
-    '257': { total: '257', breakdown: '257+0bonus' },
-    '343': { total: '343', breakdown: '257+86bonus' },
-    '429': { total: '429', breakdown: '257+172bonus' },
-    '514': { total: '514', breakdown: '514+0bonus' },
-    '600': { total: '600', breakdown: '514+86bonus' },
-    '706': { total: '706', breakdown: '706+0bonus' },
-    '792': { total: '792', breakdown: '706+86bonus' },
-    '878': { total: '878', breakdown: '706+172bonus' },
-    '963': { total: '963', breakdown: '706+257bonus' },
-    '1049': { total: '1049', breakdown: '963+86bonus' },
-    '1135': { total: '1135', breakdown: '963+172bonus' },
-    '1220': { total: '1220', breakdown: '963+257bonus' },
-    '1412': { total: '1412', breakdown: '1412+0bonus' },
-    '1584': { total: '1584', breakdown: '1412+172bonus' },
-    '1756': { total: '1756', breakdown: '1412+344bonus' },
-    '1926': { total: '1926', breakdown: '1412+514bonus' },
-    '2195': { total: '2195', breakdown: '2195+0bonus' },
-    '2384': { total: '2384', breakdown: '2195+189bonus' },
-    '2637': { total: '2637', breakdown: '2195+442bonus' },
-    '2810': { total: '2810', breakdown: '2195+615bonus' }
-  };
+  const popularGames = [
+    {
+      id: 1,
+      name: "COIN TOPUP",
+      subtitle: "Your balance:",
+      image: "/placeholder.svg?height=80&width=80",
+      available: true,
+      popular: false,
+      price: "TOPUP",
+    },
+    {
+      id: 2,
+      name: "Mobile Legends",
+      subtitle: "Instant",
+      image: "/placeholder.svg?height=80&width=80",
+      available: true,
+      popular: true,
+      price: "TOPUP",
+    },
+    {
+      id: 3,
+      name: "Free Fire",
+      subtitle: "Instant",
+      image: "/placeholder.svg?height=80&width=80",
+      available: true,
+      popular: true,
+      price: "TOPUP",
+    },
+  ]
 
-  const formatItemDisplay = (product) => {
-    if (!product) return 'None';
-    const identifier = product.diamonds || product.name;
-    const combo = diamondCombinations[identifier];
-    if (!combo) return identifier;
-    return combo.breakdown.endsWith('+0bonus') ? combo.total : `${combo.total} (${combo.breakdown})`;
-  };
+  const gameCategories = [
+    {
+      id: 1,
+      name: "MOBILE LEGENDS",
+      developer: "MOONTON",
+      image: "/placeholder.svg?height=120&width=200",
+      badge: "តម្លៃទាបខ្លាំង",
+      badgeColor: "bg-red-500",
+    },
+    {
+      id: 2,
+      name: "MLBB PH SG MY",
+      developer: "MOONTON",
+      image: "/placeholder.svg?height=120&width=200",
+      badge: "តម្លៃទាប",
+      badgeColor: "bg-green-500",
+    },
+    {
+      id: 3,
+      name: "MOBILE LEGENDS",
+      developer: "INDONESIA 🇮🇩",
+      image: "/placeholder.svg?height=120&width=200",
+      badge: "តម្លៃទាប",
+      badgeColor: "bg-green-500",
+    },
+    {
+      id: 4,
+      name: "FREE FIRE",
+      developer: "GARENA",
+      image: "/placeholder.svg?height=120&width=200",
+      badge: "តម្លៃទាប",
+      badgeColor: "bg-green-500",
+    },
+    {
+      id: 5,
+      name: "FREE FIRE VN",
+      developer: "GARENA",
+      image: "/placeholder.svg?height=120&width=200",
+      badge: "តម្លៃទាប",
+      badgeColor: "bg-green-500",
+    },
+    {
+      id: 6,
+      name: "FREE FIRE THAI",
+      developer: "GARENA",
+      image: "/placeholder.svg?height=120&width=200",
+      badge: "តម្លៃទាប",
+      badgeColor: "bg-green-500",
+    },
+  ]
 
   useEffect(() => {
-    const checkRoute = () => {
-      const path = window.location.pathname;
-      setIsAdminRoute(path === '/adminlogintopup');
-      setIsResellerRoute(path === '/reseller');
-      const resellerAuth = localStorage.getItem('jackstore_reseller_auth');
-      setIsResellerLoggedIn(resellerAuth === 'true');
-    };
-    checkRoute();
-    window.addEventListener('popstate', checkRoute);
-    return () => window.removeEventListener('popstate', checkRoute);
-  }, []);
+    const timer = setInterval(() => {
+      setCurrentBanner((prev) => (prev + 1) % banners.length)
+    }, 5000)
+    return () => clearInterval(timer)
+  }, [banners.length])
 
   useEffect(() => {
-    const savedForm = localStorage.getItem('customerInfo');
-    if (savedForm) {
-      const parsedForm = JSON.parse(savedForm);
-      if (parsedForm.game === 'mlbb_ph') {
-        parsedForm.game = 'mlbb';
-        localStorage.setItem('customerInfo', JSON.stringify(parsedForm));
-        setForm(parsedForm);
-      } else {
-        setForm(parsedForm);
-      }
+    const updateTime = () => {
+      const now = new Date()
+      setCurrentTime(
+        now.toLocaleString("en-US", {
+          timeZone: "Asia/Bangkok",
+          hour12: true,
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      )
     }
-  }, []);
+    updateTime()
+    const interval = setInterval(updateTime, 1000)
+    return () => clearInterval(interval)
+  }, [])
 
-  useEffect(() => {
-    if (!isAdminRoute && !isResellerRoute && form.game !== 'none') {
-      console.log('Fetching products for game:', form.game); // Debug log
-      fetchProducts(form.game);
-    }
-  }, [form.game, isAdminRoute, isResellerRoute]);
-
-  useEffect(() => {
-    return () => {
-      if (cooldownInterval) clearInterval(cooldownInterval);
-    };
-  }, [cooldownInterval]);
-
-  useEffect(() => {
-    if (form.userId || form.serverId || form.nickname) {
-      localStorage.setItem('customerInfo', JSON.stringify({
-        userId: form.userId,
-        serverId: form.serverId,
-        game: form.game,
-        product: null,
-        nickname: form.nickname
-      }));
-    }
-  }, [form.userId, form.serverId, form.game, form.nickname]);
-
-  const startPaymentCooldown = () => {
-    setPaymentCooldown(7);
-    if (cooldownInterval) clearInterval(cooldownInterval);
-    const interval = setInterval(() => {
-      setPaymentCooldown(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    setCooldownInterval(interval);
-  };
-
-  const fetchProducts = async (game) => {
-    setLoading(true);
-    setIsThinking(true);
-    try {
-      const timeout = setTimeout(() => {
-        setLoading(false);
-        setIsThinking(false);
-        alert('Request timed out. Please try again.');
-      }, 10000); // 10-second timeout
-      const table = game === 'mlbb' ? 'mlbb_products' : 'freefire_products';
-      const { data: products, error } = await supabase
-        .from(table)
-        .select('*')
-        .order('id', { ascending: true });
-      clearTimeout(timeout);
-      if (error) throw error;
-
-      let transformedProducts = products.map(product => ({
-        id: product.id,
-        name: product.name,
-        diamonds: product.diamonds || undefined,
-        price: product.price,
-        currency: product.currency,
-        type: product.type,
-        game,
-        image: product.image || undefined,
-        code: product.code || undefined
-      }));
-
-      const isReseller = localStorage.getItem('jackstore_reseller_auth') === 'true';
-      if (isReseller) {
-        const { data: resellerPrices, error: resellerError } = await supabase
-          .from('reseller_prices')
-          .select('*')
-          .eq('game', game);
-        if (!resellerError && resellerPrices) {
-          transformedProducts = transformedProducts.map(product => {
-            const resellerPrice = resellerPrices.find(
-              rp => rp.product_id === product.id && rp.game === product.game
-            );
-            return resellerPrice ? { ...product, price: resellerPrice.price, resellerPrice: resellerPrice.price } : product;
-          });
-        }
-      }
-      setProducts(transformedProducts);
-    } catch (error) {
-      console.error(`Error fetching products for ${game}:`, error.message);
-      setProducts([]);
-      alert('Failed to load products. Please check your Supabase configuration and try again.');
-    } finally {
-      setLoading(false);
-      setIsThinking(false);
-    }
-  };
-
-  const validateAccount = async () => {
-    if (!form.userId || (form.game === 'mlbb' && !form.serverId)) return;
-
-    setValidating(true);
-    setValidationResult(null);
-
-    try {
-      let response;
-      if (form.game === 'mlbb') {
-        response = await axios.get(
-          `https://api.isan.eu.org/nickname/ml?id=${encodeURIComponent(form.userId)}&zone=${encodeURIComponent(form.serverId)}`
-        );
-      } else if (form.game === 'freefire') {
-        response = await axios.get(
-          `https://rapidasiagame.com/api/v1/idff.php?UserId=${encodeURIComponent(form.userId)}`
-        );
-      }
-
-      if (form.game === 'mlbb' && response.data.success) {
-        setValidationResult(response.data);
-        setForm(prev => ({ ...prev, nickname: response.data.name }));
-      } else if (form.game === 'freefire' && response.data.status === 'success') {
-        setValidationResult(response.data);
-        setForm(prev => ({ ...prev, nickname: response.data.username }));
-      } else {
-        setValidationResult(null);
-        alert('Account not found. Please check your User ID and Zone ID.');
-      }
-    } catch (error) {
-      console.error('Failed to validate account:', error.message);
-      setValidationResult(null);
-      alert('Failed to validate account. Please try again.');
-    } finally {
-      setValidating(false);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (paymentCooldown > 0) return;
-
-    const errors = {};
-    if (!form.userId) errors.userId = 'User ID is required';
-    if (form.game === 'mlbb' && !form.serverId) errors.serverId = 'Zone ID is required';
-    if (!form.product) {
-      alert('Please select a product');
-      return;
-    }
-    if (!selectedPayment) errors.paymentMethod = 'Please select a payment method';
-    if ((form.game === 'mlbb' && !validationResult?.success) || (form.game === 'freefire' && !validationResult?.status)) {
-      alert(`Please check your ${form.game === 'mlbb' ? 'Mobile Legends' : 'Free Fire'} account first`);
-      return;
-    }
-
-    setFormErrors(errors);
-    if (Object.keys(errors).length > 0) return;
-
-    const productIdentifier = form.product.code || form.product.diamonds || form.product.name;
-    const format = form.game === 'mlbb'
-      ? `${form.userId} ${form.serverId} ${productIdentifier}`
-      : `${form.userId} 0 ${productIdentifier}`;
-    setOrderFormat(format);
-    setShowCheckout(true);
-  };
-
-  const clearSavedInfo = () => {
-    localStorage.removeItem('customerInfo');
-    setForm({ userId: '', serverId: '', product: null, game: form.game, nickname: undefined });
-    setValidationResult(null);
-  };
-
-  const handlePaymentClick = () => {
-    setSelectedPayment(prev => (prev === 'khqr' ? null : 'khqr'));
-  };
-
-  if (isAdminRoute) {
-    return (
-      <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#2bc442]">
-          <Loader2 className="w-10 h-10 animate-spin text-white" />
-          <span className="ml-2 text-white">Loading admin panel...</span>
-        </div>
-      }>
-        <AdminPage />
-      </Suspense>
-    );
+  const nextBanner = () => {
+    setCurrentBanner((prev) => (prev + 1) % banners.length)
   }
 
-  if (isResellerRoute) {
-    return (
-      <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#2bc442]">
-          <Loader2 className="w-10 h-10 animate-spin text-white" />
-          <span className="ml-2 text-white">Loading reseller panel...</span>
-        </div>
-      }>
-        <ResellerPage onLogin={() => { setIsResellerLoggedIn(true); window.location.href = '/'; }} />
-      </Suspense>
-    );
+  const prevBanner = () => {
+    setCurrentBanner((prev) => (prev - 1 + banners.length) % banners.length)
   }
 
   return (
-    <div className="min-h-screen bg-dark flex flex-col relative">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Kh+Ang+Chittbous&display=swap');
-        body {
-          background-color: #2bc442 !important; /* Ensure global background */
-        }
-        .khmer-font {
-          font-family: 'Kh Ang Chittbous', sans-serif;
-        }
-        .bg-dark {
-          background-color: #2bc442;
-        }
-        .price-box {
-          background-color: #ffd700;
-          padding: 4px 8px;
-          border-radius: 4px;
-          display: inline-block;
-        }
-        .logo-container {
-          width: 60px;
-          height: 60px;
-        }
-        .logo-image {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
-        .section-header {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 16px;
-        }
-        .section-number {
-          width: 32px;
-          height: 32px;
-          background-color: #ffffff;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.25rem;
-          font-weight: bold;
-          color: #000000;
-          margin-right: 8px;
-        }
-        .inner-content,
-        .inner-content.payment-section {
-          background-color: #00FF00 !important;
-          padding: 16px;
-          border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .inner-content.products-section {
-          background-color: #2bc442 !important; /* Fix white background */
-          padding: 0;
-          border-radius: 0;
-          box-shadow: none;
-        }
-        .payment-box {
-          background-color: #ffffff;
-          border: 2px solid #00FF00;
-          border-radius: 8px;
-          padding: 8px 12px;
-          margin-bottom: 16px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          position: relative;
-          transition: transform 0.2s ease-in-out;
-          cursor: pointer;
-        }
-        .payment-box.selected::after {
-          content: '';
-          position: absolute;
-          right: 8px;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 12px;
-          height: 12px;
-          background-color: #00FF00;
-          border-radius: 50%;
-          border: 2px solid #00FF00;
-        }
-        .payment-box:hover {
-          transform: scale(1.02);
-        }
-        .payment-content {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          flex: 1;
-        }
-        .payment-image {
-          width: 32px;
-          height: 32px;
-          object-fit: contain;
-          border-radius: 4px;
-        }
-        .payment-text {
-          flex: 1;
-        }
-        .payment-text p:first-child {
-          font-size: 1rem;
-          font-weight-semibold;
-          color: #000000;
-          margin-bottom: 2px;
-        }
-        .payment-text p:last-child {
-          font-size: 0.8rem;
-          color: #000000;
-          opacity: 0.7;
-        }
-        .input-field {
-          background-color: #ffffff;
-          color: #000000;
-          border: 1px solid #ffff00;
-          padding: 8px;
-          border-radius: 4px;
-          width: 100%;
-          text-align: center;
-        }
-        .mlbb-form4 {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          background-color: #00FF00;
-          padding: 10px;
-          border-radius: 8px;
-          width: 100%;
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          z-index: 1000;
-          box-shadow: 0 -2px 10px rgba(0, 0,0,0.2);
-        }
-        .mlbb-container43 {
-          display: flex;
-          flex-direction: column;
-          color: #fff;
-        }
-        .mlbb-text30, .mlbb-text33 {
-          font-size: 14px;
-          margin-bottom: 5px;
-          color: #fff;
-        }
-        .mlbb-text32, .mlbb-text35 {
-          font-weight: bold;
-          margin-left: 5px;
-          color: #fff;
-        }
-        .mlbb-container44 {
-          display: flex;
-          justify-content: flex-end;
-        }
-        .mlbb-button2, .check-id-button {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background-color: #fff;
-          color: #000000;
-          padding: 10px 24px;
-          border-radius: 5px;
-          border: 2px solid #000000;
-          cursor: pointer;
-          font-size: 16px;
-          font-weight: 700;
-          transition: background-color 0.3s, color 0.3s;
-          min-width: 150px;
-          height: 48px;
-        }
-        .mlbb-button2:hover, .check-id-button:hover {
-          background-color: #000000;
-          color: #fff;
-        }
-        .mlbb-button2:disabled, .check-id-button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-        .mlbb-button2:disabled:hover, .check-id-button:disabled:hover {
-          background-color: #fff;
-          color: #000000;
-        }
-        .mlbb-icon64 {
-          margin-right: 8px;
-        }
-        .mlbb-text36, .check-id-text {
-          text-transform: uppercase;
-          color: #000000;
-        }
-        .mlbb-button2:hover .mlbb-text36, .check-id-button:hover .check-id-text {
-          color: #fff;
-        }
-        .game-card {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          cursor: pointer;
-          transition: transform 0.2s;
-        }
-        .game-card:hover {
-          transform: scale(1.05);
-        }
-        .game-card.disabled {
-          cursor: not-allowed;
-          opacity: 0.6;
-        }
-        .game-card.disabled:hover {
-          transform: none;
-        }
-        .game-image {
-          width: 100%;
-          max-width: 200px;
-          min-width: 200px;
-          aspect-ratio: 1 / 1;
-          object-fit: contain;
-          border-radius: 8px;
-        }
-        .game-container {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(140px, 200px));
-          gap: 1.5rem;
-          justify-content: center;
-          width: 100%;
-          max-width: 1200px;
-          padding-bottom: 1.5rem;
-        }
-        .coming-soon {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          background-color: rgba(0, 0, 0, 0.7);
-          color: white;
-          padding: 8px 16px;
-          border-radius: 4px;
-          font-size: 1rem;
-          font-weight: bold;
-          text-align: center;
-        }
-        @media (max-width: 480px) {
-          .game-container {
-            grid-template-columns: repeat(2, minmax(140px, 160px));
-            gap: 1rem;
-          }
-          .game-image {
-            max-width: 140px;
-            min-width: 140px;
-          }
-          .game-card h3 {
-            font-size: 0.9rem;
-            color: #ffffff;
-          }
-        }
-        @media (min-width: 481px) and (max-width: 768px) {
-          .game-container {
-            grid-template-columns: repeat(2, minmax(160px, 180px));
-            gap: 1.25rem;
-          }
-          .game-image {
-            max-width: 160px;
-            min-width: 160px;
-          }
-          .game-card h3 {
-            font-size: 0.95rem;
-            color: #ffffff;
-          }
-        }
-        @media (min-width: 769px) {
-          .game-container {
-            grid-template-columns: repeat(2, minmax(180px, 200px));
-            gap: 1.5rem;
-          }
-          .game-image {
-            max-width: 200px;
-            min-width: 200px;
-          }
-          .game-card h3 {
-            font-size: 1rem;
-            color: #ffffff;
-          }
-        }
-        .social-dropdown {
-          position: relative;
-        }
-        .social-menu {
-          position: absolute;
-          top: 100%;
-          right: 0;
-          background-color: #ffffff;
-          border-radius: 4px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-          display: flex;
-          flex-direction: column;
-          padding: 8px;
-          z-index: 1000;
-        }
-        .social-menu a {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 8px;
-          color: #000000;
-          text-decoration: none;
-          transition: background-color 0.2s;
-        }
-        .social-menu a:hover {
-          background-color: #f0f0f0;
-        }
-        .products-section, .products-section * {
-          background-color: #2bc442 !important; /* Ensure no white background */
-        }
-        .loading-container {
-          background-color: #2bc442 !important; /* Fix loading background */
-        }
-      `}</style>
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            {/* Left Section */}
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden text-gray-700"
+                onClick={() => setIsMenuOpen(true)}
+              >
+                <Menu className="w-6 h-6" />
+              </Button>
 
-      <nav className="bg-green-600 text-white p-3 shadow-lg sticky top-0 z-50 flex items-center justify-between">
-        <a href="/" className="flex items-center">
-          <div className="logo-container">
-            <img
-              src="https://raw.githubusercontent.com/Mengly08/picsa/refs/heads/main/profile.png"
-              alt="Logo"
-              className="logo-image"
-            />
-          </div>
-        </a>
-        <div className="flex items-center w-1/2 max-w-md">
-          <div className="relative w-full">
-            <input
-              type="text"
-              placeholder="Search..."
-              className="w-full pl-10 pr-4 py-2 rounded-full bg-white text-black focus:outline-none focus:ring-2 focus:ring-white"
-            />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
-          </div>
-        </div>
-        <div className="social-dropdown">
-          <button
-            onClick={() => setShowSocialDropdown(!showSocialDropdown)}
-            className="text-white hover:text-gray-300 transition-colors flex items-center gap-2"
-          >
-            <MessageCircle className="w-6 h-6" />
-            <span>Contact Us</span>
-          </button>
-          {showSocialDropdown && (
-            <div className="social-menu">
-              <a href="https://www.facebook.com/share/1CVHbXejqR/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer">
-                <Facebook className="w-5 h-5" />
-                Facebook
-              </a>
-              <a href="https://t.me/kakrona_168" target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="w-5 h-5" />
-                Telegram
-              </a>
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold text-xl">P</span>
+                  </div>
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full"></div>
+                </div>
+                <div className="hidden md:block">
+                  <h1 className="text-2xl font-bold text-gray-800">PANDA TOPUP</h1>
+                  <p className="text-sm text-gray-600">Premium Gaming Store</p>
+                </div>
+              </div>
             </div>
-          )}
-        </div>
-      </nav>
 
-      {isThinking && (
-        <div className="flex items-center justify-center py-2 bg-[#2bc442] text-white">
-          <Loader2 className="w-6 h-6 animate-spin text-white" />
-          <span className="ml-2 text-sm text-white">Grok is thinking...</span>
+            {/* Center Section - Icons */}
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-gray-700 hover:bg-gray-100"
+                onClick={() => setIsSearchOpen(true)}
+              >
+                <Search className="w-5 h-5" />
+              </Button>
+
+              <Button variant="ghost" size="icon" className="text-gray-700 hover:bg-gray-100">
+                <Gamepad2 className="w-5 h-5" />
+              </Button>
+
+              <Button variant="ghost" size="icon" className="text-gray-700 hover:bg-gray-100">
+                <div className="w-4 h-4 grid grid-cols-2 gap-0.5">
+                  <div className="w-1.5 h-1.5 bg-current rounded-sm"></div>
+                  <div className="w-1.5 h-1.5 bg-current rounded-sm"></div>
+                  <div className="w-1.5 h-1.5 bg-current rounded-sm"></div>
+                  <div className="w-1.5 h-1.5 bg-current rounded-sm"></div>
+                </div>
+              </Button>
+
+              <Button variant="ghost" size="icon" className="text-gray-700 hover:bg-gray-100">
+                <ShoppingCart className="w-5 h-5" />
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-gray-700 hover:bg-gray-100 relative"
+                onClick={() => setIsNotificationOpen(true)}
+              >
+                <Bell className="w-5 h-5" />
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
+              </Button>
+
+              {isLoggedIn ? (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-700 hover:bg-gray-100"
+                  onClick={() => setIsProfileOpen(true)}
+                >
+                  <User className="w-5 h-5" />
+                </Button>
+              ) : (
+                <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={() => setIsLoggedIn(true)}>
+                  Log In
+                </Button>
+              )}
+
+              <div className="text-right hidden lg:block">
+                <p className="text-xs text-gray-600">{currentTime}</p>
+                <div className="flex items-center space-x-1 mt-1">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-green-600">Online</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        {/* Hero Banner */}
+        <section className="container mx-auto px-4 py-8">
+          <Card className="overflow-hidden border-gray-200">
+            <div className="relative h-64 md:h-96 group">
+              <Image
+                src={banners[currentBanner] || "/placeholder.svg"}
+                alt={`Banner ${currentBanner + 1}`}
+                fill
+                className="object-cover transition-all duration-700 ease-in-out"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+
+              {/* Banner Content */}
+              <div className="absolute bottom-8 left-8 text-white">
+                <h2 className="text-3xl md:text-5xl font-bold mb-2">Mobile Legends & Free Fire</h2>
+                <p className="text-lg mb-4">Get diamonds and items instantly with special offers for MLBB and FF</p>
+                <Button className="bg-green-600 hover:bg-green-700">Buy Now</Button>
+              </div>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300"
+                onClick={prevBanner}
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300"
+                onClick={nextBanner}
+              >
+                <ChevronRight className="w-6 h-6" />
+              </Button>
+
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                {banners.map((_, index) => (
+                  <button
+                    key={index}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      index === currentBanner ? "bg-white scale-125" : "bg-white/50 hover:bg-white/80"
+                    }`}
+                    onClick={() => setCurrentBanner(index)}
+                  />
+                ))}
+              </div>
+            </div>
+          </Card>
+        </section>
+
+        {/* Popular Games Section */}
+        <section className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
+                <Flame className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold text-gray-800">Popular</h2>
+                <div className="flex items-center space-x-4 mt-2">
+                  <span className="text-gray-600">Super Deals</span>
+                  <div className="flex items-center space-x-1 text-green-600 font-mono">
+                    <span id="hours">00</span>
+                    <span>:</span>
+                    <span id="minutes">00</span>
+                    <span>:</span>
+                    <span id="seconds">00</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex space-x-2">
+              <Button variant="outline" size="icon" className="border-gray-300">
+                <ChevronLeft className="w-5 h-5" />
+              </Button>
+              <Button variant="outline" size="icon" className="border-gray-300">
+                <ChevronRight className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {popularGames.map((game) => (
+              <Card
+                key={game.id}
+                className="relative overflow-hidden border-gray-200 hover:border-green-300 transition-all duration-300 group cursor-pointer hover:shadow-lg"
+              >
+                {game.popular && (
+                  <div className="absolute top-2 right-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs font-bold px-2 py-1 rounded-full z-10">
+                    HOT
+                  </div>
+                )}
+
+                <CardContent className="p-4 text-center">
+                  <div className="relative mb-4">
+                    <div className="w-16 h-16 mx-auto rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center">
+                      <Image
+                        src={game.image || "/placeholder.svg"}
+                        alt={game.name}
+                        width={64}
+                        height={64}
+                        className="object-cover"
+                      />
+                    </div>
+                    {game.available && (
+                      <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      </div>
+                    )}
+                  </div>
+
+                  <h3 className="text-sm font-bold text-gray-800 mb-1">{game.name}</h3>
+                  <p className="text-xs text-gray-600 mb-2">{game.subtitle}</p>
+
+                  <Button size="sm" className="w-full bg-green-600 hover:bg-green-700 text-white text-xs">
+                    {game.price}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="border-gray-200 p-6 text-center hover:shadow-lg transition-shadow">
+              <Shield className="w-12 h-12 text-green-500 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-gray-800 mb-2">Secure Payment</h3>
+              <p className="text-gray-600">100% secure with KHQR & ABA Pay</p>
+            </Card>
+            <Card className="border-gray-200 p-6 text-center hover:shadow-lg transition-shadow">
+              <Zap className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-gray-800 mb-2">Instant Delivery</h3>
+              <p className="text-gray-600">Get your items in 1-5 minutes</p>
+            </Card>
+            <Card className="border-gray-200 p-6 text-center hover:shadow-lg transition-shadow">
+              <Clock className="w-12 h-12 text-blue-500 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-gray-800 mb-2">24/7 Support</h3>
+              <p className="text-gray-600">Round-the-clock assistance</p>
+            </Card>
+          </div>
+        </section>
+
+        {/* Game Categories */}
+        <section className="container mx-auto px-4 py-8">
+          <div className="flex items-center space-x-3 mb-8">
+            <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
+              <ShoppingCart className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-800">Games Shop</h2>
+              <p className="text-gray-600">Browse all available games</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {gameCategories.map((category) => (
+              <Card
+                key={category.id}
+                className="relative overflow-hidden border-gray-200 hover:border-green-300 transition-all duration-300 group cursor-pointer hover:shadow-lg"
+              >
+                <div className="relative h-32 bg-gray-100">
+                  <Image
+                    src={category.image || "/placeholder.svg"}
+                    alt={category.name}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+
+                  <div
+                    className={`absolute top-3 right-3 ${category.badgeColor} text-white text-xs font-bold px-2 py-1 rounded-full`}
+                  >
+                    {category.badge}
+                  </div>
+                </div>
+
+                <CardContent className="p-4">
+                  <h3 className="text-lg font-bold text-gray-800 mb-1">{category.name}</h3>
+                  <p className="text-sm text-gray-600 mb-3">{category.developer}</p>
+
+                  <Button className="w-full bg-green-600 hover:bg-green-700 text-white">Browse Items</Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+      </main>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setIsMenuOpen(false)} />
+          <div className="absolute left-0 top-0 h-full w-80 bg-white p-6">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl font-bold text-gray-800">Menu</h2>
+              <Button variant="ghost" size="icon" className="text-gray-700" onClick={() => setIsMenuOpen(false)}>
+                <X className="w-6 h-6" />
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <Button variant="ghost" className="w-full justify-start text-gray-700">
+                <Gamepad2 className="w-5 h-5 mr-3" />
+                Games
+              </Button>
+              <Button variant="ghost" className="w-full justify-start text-gray-700">
+                <ShoppingCart className="w-5 h-5 mr-3" />
+                Transactions
+              </Button>
+              <Button variant="ghost" className="w-full justify-start text-gray-700">
+                <CreditCard className="w-5 h-5 mr-3" />
+                Recharge
+              </Button>
+              <Button variant="ghost" className="w-full justify-start text-gray-700">
+                <Heart className="w-5 h-5 mr-3" />
+                Favorites
+              </Button>
+              <Button variant="ghost" className="w-full justify-start text-gray-700">
+                <Settings className="w-5 h-5 mr-3" />
+                Settings
+              </Button>
+            </div>
+          </div>
         </div>
       )}
 
-      <div className="flex-grow">
-        <div className="container mx-auto px-4 py-6">
-          <div className="bg-[#2bc442] rounded-2xl shadow-xl overflow-hidden">
-            <BannerSlider banners={storeConfig.banners} />
-          </div>
-        </div>
-
-        {showTopUp ? (
-          <main className="container mx-auto px-4 py-8">
-            {console.log('Rendering top-up section', { form, products })} {/* Debug log */}
-            <div className="header py-2">
-              <img
-                src="https://raw.githubusercontent.com/Cheagjihvg/jackstore-asssets/refs/heads/main/Untitled-1%20(1).png"
-                alt="Banner"
-                className="w-full h-auto max-h-48 sm:max-h-64 object-contain"
-              />
-            </div>
-            <div className="max-w-4xl mx-auto space-y-6">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <button
-                  onClick={() => {
-                    setShowTopUp(false);
-                    setShowCheckout(false);
-                    setValidationResult(null);
-                    setForm(prev => ({ ...prev, nickname: undefined }));
-                  }}
-                  className="text-white hover:text-gray-300 transition-colors text-sm flex items-center gap-2 bg-[#2bc442] px-4 py-2 rounded-lg"
-                >
-                  <ArrowLeft className="w-5 h-5 text-white" /> Back to Games
-                </button>
-                {(form.userId || form.serverId) && (
-                  <button
-                    onClick={clearSavedInfo}
-                    className="text-white hover:text-gray-300 transition-colors text-sm flex items-center gap-2 bg-[#2bc442] px-4 py-2 rounded-lg"
-                  >
-                    <XCircle className="w-5 h-5 text-white" /> Clear Saved Info
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="p-6 rounded-lg">
-              <div className="inner-content">
-                <div className="section-header">
-                  <div className="section-number">01</div>
-                  <h3 className="text-base font-semibold text-white khmer-font">បញ្ចូលព័ត៌មានរបស់អ្នក</h3>
-                  <img
-                    src="https://zttopup.com/_next/image?url=%2Fassets%2Fzttopup%2Fhello-kitty.gif&w=1920&q=75"
-                    alt="Hello Kitty"
-                    className="w-10 h-10 ml-auto"
-                  />
-                </div>
-                <form className="space-y-4">
-                  <div className="flex justify-center gap-4">
-                    <div>
-                      <input
-                        type="text"
-                        name="userId"
-                        className="input-field"
-                        placeholder="User ID"
-                        value={form.userId}
-                        onChange={(e) => {
-                          const value = e.target.value.trim().replace(/[^0-9]/g, '');
-                          setForm(prev => ({ ...prev, userId: value, nickname: undefined }));
-                          setValidationResult(null);
-                          setFormErrors(prev => ({ ...prev, userId: undefined }));
-                        }}
-                      />
-                      {formErrors.userId && <p className="text-green-400 text-xs mt-1">{formErrors.userId}</p>}
-                    </div>
-                    {form.game === 'mlbb' && (
-                      <div>
-                        <input
-                          type="text"
-                          name="zoneId"
-                          className="input-field"
-                          placeholder="Zone ID"
-                          value={form.serverId}
-                          onChange={(e) => {
-                            const value = e.target.value.trim().replace(/[^0-9]/g, '');
-                            setForm(prev => ({ ...prev, serverId: value, nickname: undefined }));
-                            setValidationResult(null);
-                            setFormErrors(prev => ({ ...prev, serverId: undefined }));
-                          }}
-                        />
-                        {formErrors.serverId && <p className="text-green-400 text-xs mt-1">{formErrors.serverId}</p>}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex justify-center items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={validateAccount}
-                      disabled={validating || !form.userId || (form.game === 'mlbb' && !form.serverId)}
-                      className="check-id-button"
-                    >
-                      {validating ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                          <span className="check-id-text">Checking...</span>
-                        </>
-                      ) : (
-                        <span className="check-id-text">Check ID</span>
-                      )}
-                    </button>
-                    {(validationResult?.success || validationResult?.status) && (
-                      <div className="flex items-center gap-2 text-green-400 text-sm">
-                        <CheckCircle2 className="w-4 h-4" />
-                        <span>Account found: {form.nickname}</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="mt-4 text-white text-xs khmer-font">
-                    ដើម្បីឃើញ UserID សូមចូលទៅក្នុងហ្គេម ហើយចុចរូបភាព Avatar នៅខាងឆ្វេងអេក្រង់កញ្ចក់ ហើយចុចទៅកាន់ "Check ID" ពេលនោះ User ID នឹងបង្ហាញឲ្យឃើញ បន្ទាប់មកសូមយក User ID នោះមកបំពេញ។ ឧទាហរណ៍: User ID: 123456789, Zone ID: 1234។
-                  </div>
-                </form>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-lg">
-              <div className="inner-content products-section">
-                <div className="section-header">
-                  <div className="section-number">02</div>
-                  <h3 className="text-lg font-semibold text-white khmer-font">ផលិតផល Diamond</h3>
-                </div>
-                {loading ? (
-                  <div className="flex justify-center items-center py-8 loading-container">
-                    <Loader2 className="w-12 h-12 animate-spin text-white" />
-                    <span className="ml-2 text-white">Loading products...</span>
-                  </div>
-                ) : products.length === 0 ? (
-                  <div className="text-white text-center py-8">
-                    No products available for this game. Please try again later.
-                  </div>
-                ) : (
-                  <ProductList
-                    products={products}
-                    selectedProduct={form.product}
-                    onSelect={(product) => setForm(prev => ({ ...prev, product }))}
-                    game={form.game}
-                  />
-                )}
-              </div>
-            </div>
-
-            <div className="p-6 rounded-lg">
-              <div className="inner-content payment-section">
-                <div className="section-header">
-                  <div className="section-number">03</div>
-                  <h3 className="text-base font-semibold text-white khmer-font">វិធីបង់ប្រាក់</h3>
-                </div>
-                <div
-                  className={`payment-box ${selectedPayment === 'khqr' ? 'selected' : ''}`}
-                  onClick={handlePaymentClick}
-                >
-                  <div className="payment-content">
-                    <img
-                      src="https://www.daddytopup.com/_next/image?url=%2Fassets%2Fmain%2Fkhqr.webp&w=1920&q=75"
-                      alt="KHQR"
-                      className="payment-image"
-                    />
-                    <div className="payment-text">
-                      <p>ABA KHQR</p>
-                      <p className="khmer-font">ស្កែនដើម្បីបង់ប្រាក់ជាមួយកម្មវិធីធនាគារណាមួយ</p>
-                    </div>
-                  </div>
-                </div>
-                {formErrors.paymentMethod && <p className="text-green-400 text-xs mt-1">{formErrors.paymentMethod}</p>}
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="accept"
-                    className="w-5 h-5 text-white border-white rounded focus:ring-white"
-                    checked
-                    disabled
-                  />
-                  <label htmlFor="accept" className="text-white text-sm khmer-font">
-                    ខ្ញុំយល់ព្រមតាម <a href="/term-and-policy" className="text-white hover:underline">លក្ខខណ្ឌ</a>
-                  </label>
-                </div>
-                {form.product && (
-                  <form className="mlbb-form4" onSubmit={handleSubmit}>
-                    <div className="mlbb-container43">
-                      <span id="price-show" className="mlbb-text30">
-                        <span>Total:</span>
-                        <span className="mlbb-text32">${form.product ? form.product.price.toFixed(2) : '0.00'}</span>
-                      </span>
-                      <span id="item-show" className="mlbb-text33">
-                        <span>Item:</span>
-                        <span className="mlbb-text35">{formatItemDisplay(form.product)}</span>
-                      </span>
-                    </div>
-                    <div className="mlbb-container44">
-                      <button
-                        type="submit"
-                        disabled={
-                          (!validationResult?.success && !validationResult?.status) ||
-                          !form.product ||
-                          paymentCooldown > 0 ||
-                          !selectedPayment
-                        }
-                        className="mlbb-button2 button"
-                      >
-                        <svg width="24" height="24" viewBox="0 0 24 24" className="mlbb-icon64">
-                          <g fill="none" fillRule="evenodd">
-                            <path d="m12.calendar_month 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.10-.01z"></path>
-                            <path d="M5 6.5a.5.5 0 1 1 .5-.5H16a1 1 0 1 0 0-2H5.5A2.5 2.5 0 0 0 3 6.5V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5.5a.5.5 0 0 1-.5-.5M15.5 15a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" fill="#0a86aa"></path>
-                          </g>
-                        </svg>
-                        <span className="mlbb-text36">Pay Now</span>
-                      </button>
-                    </div>
-                  </form>
-                )}
-              </div>
-            </div>
-          </main>
-        ) : (
-          <main className="container mx-auto px-4 py-6">
-            <div className="flex flex-col items-center">
-              <div className="header py-2">
-                <img
-                  src="https://raw.githubusercontent.com/Cheagjihvg/jackstore-asssets/refs/heads/main/Untitled-1%20(1).png"
-                  alt="Banner"
-                  className="w-full h-auto max-h-48 sm:max-h-64 object-contain"
-                />
-              </div>
-              <div className="game-container">
-                <div
-                  className="game-card"
-                  onClick={() => {
-                    console.log('Setting game to mlbb'); // Debug log
-                    setForm(prev => ({ ...prev, game: 'mlbb' }));
-                    setShowTopUp(true);
-                  }}
-                >
-                  <img
-                    src="https://www.daddytopup.com/_next/image?url=https%3A%2F%2Fdaddy-cms.minttopup.xyz%2FUploads%2FImg_Resizer_20240801_2222_57312_4914487dd4.webp&w=1920&q=75"
-                    alt="Mobile Legends"
-                    className="game-image"
-                  />
-                  <h3 className="text-sm font-semibold text-white text-center truncate mt-2">Mobile Legends</h3>
-                </div>
-                <div
-                  className="game-card"
-                  onClick={() => {
-                    console.log('Setting game to freefire'); // Debug log
-                    setForm(prev => ({ ...prev, game: 'freefire' }));
-                    setShowTopUp(true);
-                  }}
-                >
-                  <img
-                    src="https://www.daddytopup.com/_next/image?url=https%3A%2F%2Fdaddy-cms.minttopup.xyz%2FUploads%2Ffree_fire_logo_7b069d4084.jpg&w=750&q=75"
-                    alt="Free Fire"
-                    className="game-image"
-                  />
-                  <h3 className="text-sm font-semibold text-white text-center truncate mt-2">Free Fire</h3>
-                </div>
-                <div className="game-card disabled" title="Coming Soon">
-                  <div className="relative">
-                    <img
-                      src="https://www.daddytopup.com/_next/image?url=https%3A%2F%2Fdaddy-cms.minttopup.xyz%2FUploads%2Fmlbb_ph_4ffb701419.webp&w=750&q=75"
-                      alt="Mobile Legends PH"
-                      className="game-image"
-                    />
-                    <span className="coming-soon">Coming Soon</span>
-                  </div>
-                  <h3 className="text-sm font-semibold text-white text-center truncate mt-2">Mobile Legends PH</h3>
-                </div>
-              </div>
-            </div>
-          </main>
-        )}
-
-        <div className="fixed bottom-6 right-6 z-50">
-          <button
-            onClick={() => window.open(storeConfig.supportUrl, '_blank')}
-            className="flex items-center gap-2 bg-white text-black px-4 py-3 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
-          >
+      {/* Promo Popup */}
+      {showPromoPopup && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-sm">
+          <Card className="bg-white border-gray-200 shadow-2xl overflow-hidden">
             <div className="relative">
-              <div className="absolute inset-0 bg-gray-300/30 rounded-full animate-ping opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="text-black">
-                <path fill="none" d="M0 0h24v24H0z"/>
-                <path fill="currentColor" d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"/>
-              </svg>
-            </div>
-            <span className="font-medium">Support</span>
-          </button>
-        </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 z-10"
+                onClick={() => setShowPromoPopup(false)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
 
-        <footer className="bg-[#2bc442] text-white py-4 w-full">
-          <div className="container mx-auto px-4 text-center">
-            <div className="mb-2">
-              <p className="font-bold text-white">Contact Us:</p>
-              <div className="flex justify-center gap-4">
-                <a href="https://www.facebook.com/share/1CVHbXejqR/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="text-white hover:text-gray-300">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2.04c-5.5 0-10 4.49-10 10.02 0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89 1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7a10 10 0 0 0 8.44-9.9c0-5.53-4.5-10.02-10-10.02"/>
-                  </svg>
-                </a>
-                <a href="https://t.me/kakronabns" target="_blank" rel="noopener noreferrer" className="text-white hover:text-gray-300">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6m4.5 5.4c-.6.1-1.2.3-1.8.5v6.2c0 2.5-2 4.5-4.5 4.5S6 16.6 6 14.1s2-4.5 4.5-4.5c.3 0 .6 0 .9.1v-2.2c-.3 0-.6-.1-.9-.1-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6V8.9c.6-.4 1.2-.7 1.8-.9v-1.6z"/>
-                  </svg>
-                </a>
-                <a href="https://t.me/kakronabns" target="_blank" rel="noopener noreferrer" className="text-white hover:text-gray-300">
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6m4.5 5.4c-.6.1-1.2.3-1.8.5v6.2c0 2.5-2 4.5-4.5 4.5S6 16.6 6 14.1s2-4.5 4.5-4.5c.3 0 .6 0 .9.1v-2.2c-.3 0-.6-.1-.9-.1-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6V8.9c.6-.4 1.2-.7 1.8-.9v-1.6z"/>
-                  </svg>
-                </a>
+              <div className="flex items-center p-4">
+                <div className="w-16 h-16 rounded-lg overflow-hidden mr-4 bg-gray-100">
+                  <Image
+                    src="/placeholder.svg?height=64&width=64"
+                    alt="Promo"
+                    width={64}
+                    height={64}
+                    className="object-cover"
+                  />
+                </div>
+
+                <div className="flex-1">
+                  <h3 className="font-bold text-sm text-gray-800">Mobile Legends Weekly Pass តម្លៃពិសេស 1.27$</h3>
+                  <p className="text-xs text-gray-600 mt-1">🔥 ទិញឥឡូវនេះ!</p>
+                  <p className="text-xs text-gray-400 mt-1">5 mins ago</p>
+                  <p className="text-xs text-green-600 mt-1">✔ verified by PANDA TOPUP</p>
+                </div>
               </div>
             </div>
-            <div className="mb-2">
-              <p className="font-bold text-white">Accept Payment:</p>
-              <div className="flex justify-center">
-                <img
-                  alt="khqr"
-                  src="https://www.daddytopup.com/_next/image?url=%2Fassets%2Fmain%2Fkhqr.webp&w=828&q=75"
-                  className="w-[70px] h-auto"
-                />
+          </Card>
+        </div>
+      )}
+
+      {/* Support Buttons */}
+      <div className="fixed bottom-6 left-6 z-50 flex flex-col space-y-3">
+        <Button
+          size="lg"
+          className="bg-green-600 hover:bg-green-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+        >
+          <MessageCircle className="w-6 h-6 mr-2" />
+          Live Chat
+        </Button>
+      </div>
+
+      <div className="fixed bottom-6 right-6 z-40">
+        <Button
+          size="lg"
+          className="bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+        >
+          <MessageCircle className="w-6 h-6 mr-2" />
+          Telegram
+        </Button>
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-gray-50 border-t border-gray-200 mt-16">
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-xl">P</span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-800">PANDA TOPUP</h3>
               </div>
-            </div>
-            <div>
-              <p className="text-xs">
-                <a href="/term-and-policy" className="text-white">
-                  <span className="font-bold underline" style={{ textUnderlineOffset: '5px' }}>PRIVACY POLICY</span> |{' '}
-                  <span className="font-bold underline" style={{ textUnderlineOffset: '5px' }}>TERMS AND CONDITION</span>
-                </a>
+              <p className="text-gray-600 text-sm">
+                Experience seamless online game top-up services with unbeatable deals on Mobile Legends, Free Fire, and
+                more.
               </p>
-              <p className="text-xs text-white">COPYRIGHT © MLBB STORE. ALL RIGHTS RESERVED.</p>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-bold text-gray-800 mb-4">Follow Us</h4>
+              <div className="flex space-x-4">
+                <Button variant="ghost" size="icon" className="text-gray-600 hover:text-blue-600">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2.04c-5.5 0-10 4.49-10 10.02 0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89 1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7a10 10 0 0 0 8.44-9.9c0-5.53-4.5-10.02-10-10.02" />
+                  </svg>
+                </Button>
+                <Button variant="ghost" size="icon" className="text-gray-600 hover:text-blue-600">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.94-.65-.33-1.01.21-1.59.14-.15 2.71-2.48 2.76-2.69.01-.05.01-.1-.02-.14-.04-.05-.1-.03-.14-.02-.06.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.40-.36-.01-1.04-.20-1.55-.37-.63-.2-1.13-.31-1.09-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.12.27" />
+                  </svg>
+                </Button>
+                <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19.321 5.562a5 5 0 0 1-.443-.258a6.2 6.2 0 0 1-1.137-.966c-.849-.971-1.166-1.956-1.282-2.645h.004c-.097-.573-.057-.943-.05-.943h-3.865v14.943q.002.3-.008.595l-.004.073q0 .016-.003.033v.009a3.28 3.28 0 0 1-1.65 2.604a3.2 3.2 0 0 1-1.6.422c-1.8 0-3.26-1.468-3.26-3.281s1.46-3.282 3.26-3.282c.341 0 .68.054 1.004.16l.005-3.936a7.18 7.18 0 0 0-5.532 1.62a7.6 7.6 0 0 0-1.655 2.04c-.163.281-.779 1.412-.853 3.246c-.047 1.04.266 2.12.415 2.565v.01c.093.262.457 1.158 1.049 1.913a7.9 7.9 0 0 0 1.674 1.58v-.01l.009.01c1.87 1.27 3.945 1.187 3.945 1.187c.359-.015 1.562 0 2.928-.647c1.515-.718 2.377-1.787 2.377-1.787a7.4 7.4 0 0 0 1.296-2.153c.35-.92.466-2.022.466-2.462V8.273c.047.028.672.441.672.441s.9.577 2.303.952c1.006.267 2.363.324 2.363.324V6.153c-.475.052-1.44-.098-2.429-.59" />
+                  </svg>
+                </Button>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-bold text-gray-800 mb-4">We Accept</h4>
+              <div className="flex space-x-3">
+                <div className="bg-gray-100 rounded-lg p-2">
+                  <span className="text-gray-800 font-bold text-sm">KHQR</span>
+                </div>
+                <div className="bg-gray-100 rounded-lg p-2">
+                  <span className="text-gray-800 font-bold text-sm">ABA</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-bold text-gray-800 mb-4">Contact</h4>
+              <div className="space-y-2 text-gray-600 text-sm">
+                <p>Telegram: @pandatopup</p>
+                <p>Phone: +855 88 676 2892</p>
+                <p>Email: support@pandatopup.com</p>
+              </div>
             </div>
           </div>
-        </footer>
 
-        {showCheckout && (
-          <PaymentModal
-            form={form}
-            orderFormat={orderFormat}
-            onClose={() => {
-              setShowCheckout(false);
-              startPaymentCooldown();
-            }}
-            discountPercent={0}
-          />
-        )}
+          <div className="border-t border-gray-200 mt-8 pt-8 text-center">
+            <p className="text-gray-500 text-sm">© 2025 PANDA TOPUP. All rights reserved. | Developed by PANDA Team</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  )
+}
 
-        {storeConfig.popupBanner.enabled && showPopupBanner && (
-          <PopupBanner
-            image={storeConfig.popupBanner.image}
-            onClose={() => setShowPopupBanner(false)}
-          />
-        )}
-      </div>
+{showCheckout && (
+        <PaymentModal
+          form={form}
+          orderFormat={orderFormat}
+          onClose={handleClosePayment}
+          discountPercent={discountPercent}
+        />
+      )}
+
+      {storeConfig.popupBanner.enabled && showPopupBanner && (
+        <PopupBanner
+          image={storeConfig.popupBanner.image}
+          onClose={() => setShowPopupBanner(false)}
+        />
+      )}
     </div>
   );
-};
+}
 
 export default App;
