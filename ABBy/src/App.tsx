@@ -203,7 +203,12 @@ export default function PandaTopup() {
                 <Gamepad2 className="w-5 h-5" />
               </Button>
 
-              <Button variant="ghost" size="icon" className="text-gray-700 hover:bg-gray-100" aria-label="Check Free Fire Events">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-gray-700 hover:bg-gray-100"
+                aria-label="Check Free Fire Events"
+              >
                 <div className="w-4 h-4 grid grid-cols-2 gap-0.5">
                   <div className="w-1.5 h-1.5 bg-current rounded-sm"></div>
                   <div className="w-1.5 h-1.5 bg-current rounded-sm"></div>
@@ -212,7 +217,12 @@ export default function PandaTopup() {
                 </div>
               </Button>
 
-              <Button variant="ghost" size="icon" className="text-gray-700 hover:bg-gray-100" aria-label="View Shopping Cart">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-gray-700 hover:bg-gray-100"
+                aria-label="View Shopping Cart"
+              >
                 <ShoppingCart className="w-5 h-5" />
               </Button>
 
@@ -571,42 +581,43 @@ export default function PandaTopup() {
                 <Button variant="ghost" size="icon" className="text-gray-600 hover:text-blue-600">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.94-.65-.33-1.01.21-1.59.14-.15 2.71-2.48 2.76-2.69.01-.05.01-.1-.02-.14-.04-.05-.1-.03-.14-.02-.06.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.40-.36-.01-1.04-.20-1.55-.37-.63-.2-1.13-.31-1.09-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.12.27" />
-                </svg>
-              </Button>
-              <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19.321 5.562a5 5 0 0 1-.443-.258a6.2 6.2 0 0 1-1.137-.966c-.849-.971-1.166-1.956-1.282-2.645h.004c-.097-.573-.057-.943-.05-.943h-3.865v14.943q.002.3-.008.595l-.004.073q0 .016-.003.033v.009a3.28 3.28 0 0 1-1.65 2.604a3.2 3.2 0 0 1-1.6.422c-1.8 0-3.26-1.468-3.26-3.281s1.46-3.282 3.26-3.282c.341 0 .68.054 1.004.16l.005-3.936a7.18 7.18 0 0 0-5.532 1.62a7.6 7.6 0 0 0-1.655 2.04c-.163.281-.779 1.412-.853 3.246c-.047 1.04.266 2.12.415 2.565v.01c.093.262.457 1.158 1.049 1.913a7.9 7.9 0 0 0 1.674 1.58v-.01l.009.01c1.87 1.27 3.945 1.187 3.945 1.187c.359-.015 1.562 0 2.928-.647c1.515-.718 2.377-1.787 2.377-1.787a7.4 7.4 0 0 0 1.296-2.153c.35-.92.466-2.022.466-2.462V8.273c.047.028.672.441.672.441s.9.577 2.303.952c1.006.267 2.363.324 2.363.324V6.153c-.475.052-1.44-.098-2.429-.59" />
-                </svg>
-              </Button>
-            </div>
-          </div>
-
-          <div>
-            <h4 className="text-lg font-bold text-gray-800 mb-4">We Accept</h4>
-            <div className="flex space-x-3">
-              <div className="bg-gray-100 rounded-lg p-2">
-                <span className="text-gray-800 font-bold text-sm">KHQR</span>
-              </div>
-              <div className="bg-gray-100 rounded-lg p-2">
-                <span className="text-gray-800 font-bold text-sm">ABA</span>
+                  </svg>
+                </Button>
+                <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19.321 5.562a5 5 0 0 1-.443-.258a6.2 6.2 0 0 1-1.137-.966c-.849-.971-1.166-1.956-1.282-2.645h.004c-.097-.573-.057-.943-.05-.943h-3.865v14.943q.002.3-.008.595l-.004.073q0 .016-.003.033v.009a3.28 3.28 0 0 1-1.65 2.604a3.2 3.2 0 0 1-1.6.422c-1.8 0-3.26-1.468-3.26-3.281s1.46-3.282 3.26-3.282c.341 0 .68.054 1.004.16l.005-3.936a7.18 7.18 0 0 0-5.532 1.62a7.6 7.6 0 0 0-1.655 2.04c-.163.281-.779 1.412-.853 3.246c-.047 1.04.266 2.12.415 2.565v.01c.093.262.457 1.158 1.049 1.913a7.9 7.9 0 0 0 1.674 1.58v-.01l.009.01c1.87 1.27 3.945 1.187 3.945 1.187c.359-.015 1.562 0 2.928-.647c1.515-.718 2.377-1.787 2.377-1.787a7.4 7.4 0 0 0 1.296-2.153c.35-.92.466-2.022.466-2.462V8.273c.047.028.672.441.672.441s.9.577 2.303.952c1.006.267 2.363.324 2.363.324V6.153c-.475.052-1.44-.098-2.429-.59" />
+                  </svg>
+                </Button>
               </div>
             </div>
-          </div>
 
-          <div>
-            <h4 className="text-lg font-bold text-gray-800 mb-4">Contact</h4>
-            <div className="space-y-2 text-gray-600 text-sm">
-              <p>Telegram: @pandatopup</p>
-              <p>Phone: +855 88 676 2892</p>
-              <p>Email: support@pandatopup.com</p>
+            <div>
+              <h4 className="text-lg font-bold text-gray-800 mb-4">We Accept</h4>
+              <div className="flex space-x-3">
+                <div className="bg-gray-100 rounded-lg p-2">
+                  <span className="text-gray-800 font-bold text-sm">KHQR</span>
+                </div>
+                <div className="bg-gray-100 rounded-lg p-2">
+                  <span className="text-gray-800 font-bold text-sm">ABA</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-lg font-bold text-gray-800 mb-4">Contact</h4>
+              <div className="space-y-2 text-gray-600 text-sm">
+                <p>Telegram: @pandatopup</p>
+                <p>Phone: +855 88 676 2892</p>
+                <p>Email: support@pandatopup.com</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="border-t border-gray-200 mt-8 pt-8 text-center">
-          <p className="text-gray-500 text-sm">© 2025 PANDA TOPUP. All rights reserved. Developed by PANDA Team</p>
+          <div className="border-t border-gray-200 mt-8 pt-8 text-center">
+            <p className="text-gray-500 text-sm">© 2025 PANDA TOPUP. All rights reserved. Developed by PANDA Team</p>
+          </div>
         </div>
       </footer>
     </div>
-  )\
+  )
 }
