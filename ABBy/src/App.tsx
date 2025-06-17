@@ -19,9 +19,9 @@ import {
   CreditCard,
   Flame,
 } from "lucide-react"
-// Verify these imports exist and the @ alias is configured correctly
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+// Removed problematic imports to fix build error
+// import { Button } from "@/components/ui/button"
+// import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
 
 function App() {
@@ -178,15 +178,18 @@ function App() {
     setShowCheckout(false)
   }
 
-  // Mock PaymentModal component
+  // Mock PaymentModal component, replacing Button and Card
   const PaymentModal = ({ form, orderFormat, onClose, discountPercent }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-bold">Payment Details</h3>
-          <Button variant="ghost" size="icon" onClick={onClose}>
+          <button
+            className="p-2 rounded-full hover:bg-gray-100 text-gray-700"
+            onClick={onClose}
+          >
             <X className="w-4 h-4" />
-          </Button>
+          </button>
         </div>
         <div className="space-y-4">
           <p>
@@ -198,19 +201,26 @@ function App() {
           <p>
             <strong>Discount:</strong> {discountPercent}%
           </p>
-          <Button className="w-full bg-green-600 hover:bg-green-700 text-white">Proceed to Payment</Button>
+          <button
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md"
+          >
+            Proceed to Payment
+          </button>
         </div>
       </div>
     </div>
   )
 
-  // Mock PopupBanner component
+  // Mock PopupBanner component, replacing Button
   const PopupBanner = ({ image, onClose }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="relative bg-white rounded-lg overflow-hidden max-w-sm mx-4">
-        <Button variant="ghost" size="icon" className="absolute top-2 right-2 z-10" onClick={onClose}>
+        <button
+          className="absolute top-2 right-2 p-2 rounded-full hover:bg-gray-100 z-10"
+          onClick={onClose}
+        >
           <X className="w-4 h-4" />
-        </Button>
+        </button>
         <Image
           src={image || "/placeholder.svg"}
           alt="Special Offer"
@@ -230,14 +240,12 @@ function App() {
           <div className="flex items-center justify-between">
             {/* Left Section */}
             <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden text-gray-700"
+              <button
+                className="md:hidden p-2 rounded-full hover:bg-gray-100 text-gray-700"
                 onClick={() => setIsMenuOpen(true)}
               >
                 <Menu className="w-6 h-6" />
-              </Button>
+              </button>
 
               <div className="flex items-center space-x-3">
                 <div className="relative">
@@ -255,24 +263,23 @@ function App() {
 
             {/* Center Section - Icons */}
             <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-gray-700 hover:bg-gray-100"
+              <button
+                className="p-2 rounded-full text-gray-700 hover:bg-gray-100"
                 onClick={() => setIsSearchOpen(true)}
                 aria-label="Search Mobile Legends and Free Fire"
               >
                 <Search className="w-5 h-5" />
-              </Button>
+              </button>
 
-              <Button variant="ghost" size="icon" className="text-gray-700 hover:bg-gray-100" aria-label="Browse MLBBatedral de la Santa Cruz y Santa Eulalia">
+              <button
+                className="p-2 rounded-full text-gray-700 hover:bg-gray-100"
+                aria-label="Browse MLBB"
+              >
                 <Gamepad2 className="w-5 h-5" />
-              </Button>
+              </button>
 
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-gray-700 hover:bg-gray-100"
+              <button
+                className="p-2 rounded-full text-gray-700 hover:bg-gray-100"
                 aria-label="Check Free Fire Events"
               >
                 <div className="w-4 h-4 grid grid-cols-2 gap-0.5">
@@ -281,41 +288,38 @@ function App() {
                   <div className="w-1.5 h-1.5 bg-current rounded-sm"></div>
                   <div className="w-1.5 h-1.5 bg-current rounded-sm"></div>
                 </div>
-              </Button>
+              </button>
 
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-gray-700 hover:bg-gray-100"
-                aria-label="View Shopping Cathedral de la Santa Cruz y Santa Eulalia"
+              <button
+                className="p-2 rounded-full text-gray-700 hover:bg-gray-100"
+                aria-label="View Shopping Cart"
                 onClick={() => setShowCheckout(true)}
               >
                 <ShoppingCart className="w-5 h-5" />
-              </Button>
+              </button>
 
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-gray-700 hover:bg-gray-100 relative"
+              <button
+                className="p-2 rounded-full text-gray-700 hover:bg-gray-100 relative"
                 onClick={() => setIsNotificationOpen(true)}
               >
                 <Bell className="w-5 h-5" />
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
-              </Button>
+              </button>
 
               {isLoggedIn ? (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-gray-700 hover:bg-gray-100"
+                <button
+                  className="p-2 rounded-full text-gray-700 hover:bg-gray-100"
                   onClick={() => setIsProfileOpen(true)}
                 >
                   <User className="w-5 h-5" />
-                </Button>
+                </button>
               ) : (
-                <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={() => setIsLoggedIn(true)}>
+                <button
+                  className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md"
+                  onClick={() => setIsLoggedIn(true)}
+                >
                   Log In
-                </Button>
+                </button>
               )}
 
               <div className="text-right hidden lg:block">
@@ -333,7 +337,7 @@ function App() {
       <main>
         {/* Hero Banner */}
         <section className="container mx-auto px-4 py-8">
-          <Card className="overflow-hidden border-gray-200">
+          <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
             <div className="relative h-64 md:h-96 group">
               <Image
                 src={banners[currentBanner] || "/placeholder.svg"}
@@ -347,26 +351,24 @@ function App() {
               <div className="absolute bottom-8 left-8 text-white">
                 <h2 className="text-3xl md:text-5xl font-bold mb-2">Mobile Legends & Free Fire</h2>
                 <p className="text-lg mb-4">Get diamonds and items instantly with special offers for MLBB and FF</p>
-                <Button className="bg-green-600 hover:bg-green-700">Buy Now</Button>
+                <button className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md">
+                  Buy Now
+                </button>
               </div>
 
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300"
+              <button
+                className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300"
                 onClick={prevBanner}
               >
                 <ChevronLeft className="w-6 h-6" />
-              </Button>
+              </button>
 
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-all duration-300"
+              <button
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300"
                 onClick={nextBanner}
               >
                 <ChevronRight className="w-6 h-6" />
-              </Button>
+              </button>
 
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
                 {banners.map((_, index) => (
@@ -380,7 +382,7 @@ function App() {
                 ))}
               </div>
             </div>
-          </Card>
+          </div>
         </section>
 
         {/* Popular Games Section */}
@@ -406,20 +408,20 @@ function App() {
             </div>
 
             <div className="flex space-x-2">
-              <Button variant="outline" size="icon" className="border-gray-300">
+              <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-100">
                 <ChevronLeft className="w-5 h-5" />
-              </Button>
-              <Button variant="outline" size="icon" className="border-gray-300">
+              </button>
+              <button className="p-2 border border-gray-300 rounded-md hover:bg-gray-100">
                 <ChevronRight className="w-5 h-5" />
-              </Button>
+              </button>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {popularGames.map((game) => (
-              <Card
+              <div
                 key={game.id}
-                className="relative overflow-hidden border-gray-200 hover:border-green-300 transition-all duration-300 group cursor-pointer hover:shadow-lg"
+                className="relative rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden hover:border-green-300 transition-all duration-300 group cursor-pointer hover:shadow-lg"
               >
                 {game.popular && (
                   <div className="absolute top-2 right-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs font-bold px-2 py-1 rounded-full z-10">
@@ -427,7 +429,7 @@ function App() {
                   </div>
                 )}
 
-                <CardContent className="p-4 text-center">
+                <div className="p-4 text-center">
                   <div className="relative mb-4">
                     <div className="w-16 h-16 mx-auto rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center">
                       <Image
@@ -448,11 +450,11 @@ function App() {
                   <h3 className="text-sm font-bold text-gray-800 mb-1">{game.name}</h3>
                   <p className="text-xs text-gray-600 mb-2">{game.subtitle}</p>
 
-                  <Button size="sm" className="w-full bg-green-600 hover:bg-green-700 text-white text-xs">
+                  <button className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-3 rounded-md text-xs">
                     {game.price}
-                  </Button>
-                </CardContent>
-              </Card>
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </section>
@@ -460,21 +462,21 @@ function App() {
         {/* Features Section */}
         <section className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="border-gray-200 p-6 text-center hover:shadow-lg transition-shadow">
+            <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-6 text-center hover:shadow-lg transition-shadow">
               <Shield className="w-12 h-12 text-green-500 mx-auto mb-4" />
               <h3 className="text-xl font-bold text-gray-800 mb-2">Secure Payment</h3>
               <p className="text-gray-600">100% secure with KHQR & ABA Pay</p>
-            </Card>
-            <Card className="border-gray-200 p-6 text-center hover:shadow-lg transition-shadow">
+            </div>
+            <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-6 text-center hover:shadow-lg transition-shadow">
               <Zap className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
               <h3 className="text-xl font-bold text-gray-800 mb-2">Instant Delivery</h3>
               <p className="text-gray-600">Get your items in 1-5 minutes</p>
-            </Card>
-            <Card className="border-gray-200 p-6 text-center hover:shadow-lg transition-shadow">
+            </div>
+            <div className="rounded-lg border border-gray-200 bg-white shadow-sm p-6 text-center hover:shadow-lg transition-shadow">
               <Clock className="w-12 h-12 text-blue-500 mx-auto mb-4" />
               <h3 className="text-xl font-bold text-gray-800 mb-2">24/7 Support</h3>
               <p className="text-gray-600">Round-the-clock assistance</p>
-            </Card>
+            </div>
           </div>
         </section>
 
@@ -492,9 +494,9 @@ function App() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {gameCategories.map((category) => (
-              <Card
+              <div
                 key={category.id}
-                className="relative overflow-hidden border-gray-200 hover:border-green-300 transition-all duration-300 group cursor-pointer hover:shadow-lg"
+                className="relative rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden hover:border-green-300 transition-all duration-300 group cursor-pointer hover:shadow-lg"
               >
                 <div className="relative h-32 bg-gray-100">
                   <Image
@@ -512,13 +514,15 @@ function App() {
                   </div>
                 </div>
 
-                <CardContent className="p-4">
+                <div className="p-4">
                   <h3 className="text-lg font-bold text-gray-800 mb-1">{category.name}</h3>
                   <p className="text-sm text-gray-600 mb-3">{category.developer}</p>
 
-                  <Button className="w-full bg-green-600 hover:bg-green-700 text-white">Browse Items</Button>
-                </CardContent>
-              </Card>
+                  <button className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md">
+                    Browse Items
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         </section>
@@ -531,32 +535,32 @@ function App() {
           <div className="absolute left-0 top-0 h-full w-80 bg-white p-6">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-xl font-bold text-gray-800">Menu</h2>
-              <Button variant="ghost" size="icon" className="text-gray-700" onClick={() => setIsMenuOpen(false)}>
+              <button className="p-2 rounded-full hover:bg-gray-100 text-gray-700" onClick={() => setIsMenuOpen(false)}>
                 <X className="w-6 h-6" />
-              </Button>
+              </button>
             </div>
 
             <div className="space-y-4">
-              <Button variant="ghost" className="w-full justify-start text-gray-700">
+              <button className="w-full flex items-center text-gray-700 hover:bg-gray-100 p-2 rounded-md">
                 <Gamepad2 className="w-5 h-5 mr-3" />
                 MLBB
-              </Button>
-              <Button variant="ghost" className="w-full justify-start text-gray-700">
+              </button>
+              <button className="w-full flex items-center text-gray-700 hover:bg-gray-100 p-2 rounded-md">
                 <Flame className="w-5 h-5 mr-3" />
                 Free Fire
-              </Button>
-              <Button variant="ghost" className="w-full justify-start text-gray-700">
+              </button>
+              <button className="w-full flex items-center text-gray-700 hover:bg-gray-100 p-2 rounded-md">
                 <ShoppingCart className="w-5 h-5 mr-3" />
                 My Orders
-              </Button>
-              <Button variant="ghost" className="w-full justify-start text-gray-700">
+              </button>
+              <button className="w-full flex items-center text-gray-700 hover:bg-gray-100 p-2 rounded-md">
                 <CreditCard className="w-5 h-5 mr-3" />
                 Top Up
-              </Button>
-              <Button variant="ghost" className="w-full justify-start text-gray-700">
+              </button>
+              <button className="w-full flex items-center text-gray-700 hover:bg-gray-100 p-2 rounded-md">
                 <Settings className="w-5 h-5 mr-3" />
                 Settings
-              </Button>
+              </button>
             </div>
           </div>
         </div>
@@ -565,16 +569,14 @@ function App() {
       {/* Promo Popup */}
       {showPromoPopup && (
         <div className="fixed bottom-6 right-6 z-50 max-w-sm">
-          <Card className="bg-white border-gray-200 shadow-2xl overflow-hidden">
+          <div className="rounded-lg border border-gray-200 bg-white shadow-2xl overflow-hidden">
             <div className="relative">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-2 right-2 z-10"
+              <button
+                className="absolute top-2 right-2 p-2 rounded-full hover:bg-gray-100"
                 onClick={() => setShowPromoPopup(false)}
               >
                 <X className="w-4 h-4" />
-              </Button>
+              </button>
 
               <div className="flex items-center p-4">
                 <div className="w-16 h-16 rounded-lg overflow-hidden mr-4 bg-gray-100">
@@ -595,29 +597,27 @@ function App() {
                 </div>
               </div>
             </div>
-          </Card>
+          </div>
         </div>
       )}
 
       {/* Support Buttons */}
       <div className="fixed bottom-6 left-6 z-50 flex flex-col space-y-3">
-        <Button
-          size="lg"
-          className="bg-green-600 hover:bg-green-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+        <button
+          className="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center"
         >
           <MessageCircle className="w-6 h-6 mr-2" />
           Live Chat
-        </Button>
+        </button>
       </div>
 
       <div className="fixed bottom-6 right-6 z-40">
-        <Button
-          size="lg"
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+        <button
+          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center"
         >
           <MessageCircle className="w-6 h-6 mr-2" />
           Telegram
-        </Button>
+        </button>
       </div>
 
       {/* Footer */}
@@ -640,21 +640,21 @@ function App() {
             <div>
               <h4 className="text-lg font-bold text-gray-800 mb-4">Follow Us</h4>
               <div className="flex space-x-4">
-                <Button variant="ghost" size="icon" className="text-gray-600 hover:text-blue-600">
+                <button className="p-2 rounded-full text-gray-600 hover:text-blue-600">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.94-.65-.33-1.01.21-1.59.14-.15 2.71-2.48 2.76-2.69.01-.05.01-.1-.02-.14-.04-.05-.1-.03-.14-.02-.06.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.40-.36-.01-1.04-.20-1.55-.37-.63-.2-1.13-.31-1.09-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.12.27" />
                   </svg>
-                </Button>
-                <Button variant="ghost" size="icon" className="text-gray-600 hover:text-blue-600">
+                </button>
+                <button className="p-2 rounded-full text-gray-600 hover:text-blue-600">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.94-.65-.33-1.01.21-1.59.14-.15 2.71-2.48 2.76-2.69.01-.05.01-.1-.02-.14-.04-.05-.1-.03-.14-.02-.06.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.40-.36-.01-1.04-.20-1.55-.37-.63-.2-1.13-.31-1.09-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.12.27" />
                   </svg>
-                </Button>
-                <Button variant="ghost" size="icon" className="text-gray-600 hover:text-pink-600">
+                </button>
+                <button className="p-2 rounded-full text-gray-600 hover:text-pink-600">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M19.321 5.562a5 5 0 0 1-.443-.258a6.2 6.2 0 0 1-1.137-.966c-.849-.971-1.166-1.956-1.282-2.645h.004c-.097-.573-.057-.943-.05-.943h-3.865v14.943q.002.3-.008.595l-.004.073q0 .016-.003.033v.009a3.28 3.28 0 0 1-1.65 2.604a3.2 3.2 0 0 1-1.6.422c-1.8 0-3.26-1.468-3.26-3.281s1.46-3.282 3.26-3.282c.341 0 .68.054 1.004.16l.005-3.936a7.18 7.18 0 0 0-5.532 1.62a7.6 7.6 0 0 0-1.655 2.04c-.163.281-.779 1.412-.853 3.246c-.047 1.04.266 2.12.415 2.565v.01c.093.262.457 1.158 1.049 1.913a7.9 7.9 0 0 0 1.674 1.58v-.01l.009.01c1.87 1.27 3.945 1.187 3.945 1.187c.359-.015 1.562 0 2.928-.647c1.515-.718 2.377-1.787 2.377-1.787a7.4 7.4 0 0 0 1.296-2.153c.35-.92.466-2.022.466-2.462V8.273c.047.028.672.441.672.441s.9.577 2.303.952c1.006.267 2.363.324 2.363.324V6.153c-.475.052-1.44-.098-2.429-.59" />
                   </svg>
-                </Button>
+                </button>
               </div>
             </div>
 
