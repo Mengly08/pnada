@@ -98,14 +98,14 @@ export function ProductList({ products, selectedProduct, onSelect, game }: Props
       }}
       className={`relative group flex items-center border rounded-md cursor-pointer transition-all duration-300 px-2 py-2 w-full ${
         selectedProduct?.id === product.id
-          ? 'border-2 border-green-500 bg-[#f7cdfa] shadow-green-500/50 shadow-lg'
+          ? 'border-2 border-green-500 bg-[#9cff93] shadow-green-500/50 shadow-lg'
           : 'border-black/10 hover:border-black/50 bg-white hover:bg-gray-100'
       }`}
       style={{ minHeight: '50px' }}
     >
       {/* Price badge */}
       <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20">
-        <div className="bg-[#f900df] text-white px-2 py-0.5 rounded-full shadow-lg text-xs font-bold border border-white w-[50px] h-[20px] flex items-center justify-center">
+        <div className="bg-[#15ff00] text-white px-2 py-0.5 rounded-full shadow-lg text-xs font-bold border border-white w-[50px] h-[20px] flex items-center justify-center">
           ${product.price.toFixed(2)}
         </div>
       </div>
@@ -138,7 +138,7 @@ export function ProductList({ products, selectedProduct, onSelect, game }: Props
   );
 
   return (
-    <div className="space-y-6 bg-[#f7cdfa] px-2 py-4 rounded-md w-full">
+    <div className="space-y-6 bg-[#9cff93] px-2 py-4 rounded-md w-full">
       <div className="w-full">
         {isLoading && products.length === 0 && (
           <div className="text-center py-4">
