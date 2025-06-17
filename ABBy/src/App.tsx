@@ -492,7 +492,7 @@ function App() {
               {/* Banner Image Added Here */}
               <div className="w-full max-w-4xl mb-8">
                 <img
-                  src="https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-17_23-29-27.jpg"
+                  src="https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-17_23-29-27%20(2).jpg"
                   alt="Banner"
                   className="banner-image"
                 />
