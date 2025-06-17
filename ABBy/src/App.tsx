@@ -19,10 +19,10 @@ import {
   CreditCard,
   Flame,
 } from "lucide-react"
-// Removed problematic imports to fix build error
+// Removed problematic imports to fix build errors
 // import { Button } from "@/components/ui/button"
 // import { Card, CardContent } from "@/components/ui/card"
-import Image from "next/image"
+// import Image from "next/image"
 
 function App() {
   const [currentBanner, setCurrentBanner] = useState(0)
@@ -178,7 +178,7 @@ function App() {
     setShowCheckout(false)
   }
 
-  // Mock PaymentModal component, replacing Button and Card
+  // Mock PaymentModal component, using <button> and <div>
   const PaymentModal = ({ form, orderFormat, onClose, discountPercent }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
@@ -211,7 +211,7 @@ function App() {
     </div>
   )
 
-  // Mock PopupBanner component, replacing Button
+  // Mock PopupBanner component, using <button> and <img>
   const PopupBanner = ({ image, onClose }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="relative bg-white rounded-lg overflow-hidden max-w-sm mx-4">
@@ -221,11 +221,9 @@ function App() {
         >
           <X className="w-4 h-4" />
         </button>
-        <Image
+        <img
           src={image || "/placeholder.svg"}
           alt="Special Offer"
-          width={400}
-          height={300}
           className="w-full h-auto"
         />
       </div>
@@ -339,11 +337,10 @@ function App() {
         <section className="container mx-auto px-4 py-8">
           <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
             <div className="relative h-64 md:h-96 group">
-              <Image
+              <img
                 src={banners[currentBanner] || "/placeholder.svg"}
                 alt={`Banner ${currentBanner + 1}`}
-                fill
-                className="object-cover transition-all duration-700 ease-in-out"
+                className="w-full h-full object-cover transition-all duration-700 ease-in-out"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
 
@@ -432,12 +429,10 @@ function App() {
                 <div className="p-4 text-center">
                   <div className="relative mb-4">
                     <div className="w-16 h-16 mx-auto rounded-2xl overflow-hidden bg-gray-100 flex items-center justify-center">
-                      <Image
+                      <img
                         src={game.image || "/placeholder.svg"}
                         alt={game.name}
-                        width={64}
-                        height={64}
-                        className="object-cover"
+                        className="w-full h-full object-cover"
                       />
                     </div>
                     {game.available && (
@@ -499,11 +494,10 @@ function App() {
                 className="relative rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden hover:border-green-300 transition-all duration-300 group cursor-pointer hover:shadow-lg"
               >
                 <div className="relative h-32 bg-gray-100">
-                  <Image
+                  <img
                     src={category.image || "/placeholder.svg"}
                     alt={category.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
 
@@ -580,12 +574,10 @@ function App() {
 
               <div className="flex items-center p-4">
                 <div className="w-16 h-16 rounded-lg overflow-hidden mr-4 bg-gray-100">
-                  <Image
+                  <img
                     src="/placeholder.svg?height=64&width=64"
                     alt="Promo"
-                    width={64}
-                    height={64}
-                    className="object-cover"
+                    className="w-full h-full object-cover"
                   />
                 </div>
 
