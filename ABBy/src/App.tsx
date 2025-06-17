@@ -126,52 +126,26 @@ const App = () => {
     setLoading(true)
     setIsThinking(true)
     try {
-      // Mock products for demo
-      const mockProducts =
-        game === "mlbb"
-          ? [
-              { id: "1", name: "86 Diamonds", diamonds: "86", price: 1.99, currency: "USD", type: "diamonds", game },
-              { id: "2", name: "172 Diamonds", diamonds: "172", price: 3.99, currency: "USD", type: "diamonds", game },
-              { id: "3", name: "257 Diamonds", diamonds: "257", price: 5.99, currency: "USD", type: "diamonds", game },
-              { id: "4", name: "343 Diamonds", diamonds: "343", price: 7.99, currency: "USD", type: "diamonds", game },
-              { id: "5", name: "514 Diamonds", diamonds: "514", price: 11.99, currency: "USD", type: "diamonds", game },
-              { id: "6", name: "706 Diamonds", diamonds: "706", price: 15.99, currency: "USD", type: "diamonds", game },
-            ]
-          : [
-              { id: "1", name: "100 Diamonds", diamonds: "100", price: 1.99, currency: "USD", type: "diamonds", game },
-              { id: "2", name: "210 Diamonds", diamonds: "210", price: 3.99, currency: "USD", type: "diamonds", game },
-              { id: "3", name: "355 Diamonds", diamonds: "355", price: 5.99, currency: "USD", type: "diamonds", game },
-              { id: "4", name: "720 Diamonds", diamonds: "720", price: 11.99, currency: "USD", type: "diamonds", game },
-              {
-                id: "5",
-                name: "1450 Diamonds",
-                diamonds: "1450",
-                price: 23.99,
-                currency: "USD",
-                type: "diamonds",
-                game,
-              },
-              {
-                id: "6",
-                name: "2180 Diamonds",
-                diamonds: "2180",
-                price: 35.99,
-                currency: "USD",
-                type: "diamonds",
-                game,
-              },
-            ]
+      const response = await fetch('/productslist.txt')
+      if (!response.ok) throw new Error('Failed to fetch products')
+      const text = await response.text()
+      const productsData = JSON.parse(text)
+      
+      const filteredProducts = productsData.filter(product => product.game === game).map(product => ({
+        ...product,
+        id: product.id.toString(),
+        price: parseFloat(product.price)
+      }))
 
-      setTimeout(() => {
-        setProducts(mockProducts)
-        setLoading(false)
-        setIsThinking(false)
-      }, 1000)
+      setProducts(filteredProducts)
+      setLoading(false)
+      setIsThinking(false)
     } catch (error) {
       console.error(`Error fetching products for ${game}:`, error.message)
       setProducts([])
       setLoading(false)
       setIsThinking(false)
+      alert("Failed to load products. Please try again later.")
     }
   }
 
@@ -256,26 +230,26 @@ const App = () => {
 
   const ProductList = ({ products, selectedProduct, onSelect, game }) => {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-4">
         {products.map((product) => (
           <div
             key={product.id}
             className={`
-              bg-white rounded-lg p-4 cursor-pointer transition-all duration-200 border-2
+              bg-white rounded-lg p-4 cursor-pointer transition-all duration-300 border-2
               ${
                 selectedProduct?.id === product.id
-                  ? "border-green-500 bg-green-50 transform scale-105"
-                  : "border-gray-200 hover:border-green-300 hover:shadow-md"
+                  ? "border-green-500 bg-green-50 transform scale-105 shadow-lg"
+                  : "border-gray-200 hover:border-green-400 hover:shadow-lg hover:scale-102"
               }
             `}
             onClick={() => onSelect(product)}
           >
             <div className="text-center">
               <h3 className="font-semibold text-sm text-gray-800 mb-1">
-                {product.diamonds ? `${product.diamonds} Diamonds` : product.name}
+                {product.diamonds ? formatItemDisplay(product) : product.name}
               </h3>
-              <p className="text-green-600 font-bold text-lg">${product.price.toFixed(2)}</p>
-              {product.type && <p className="text-xs text-gray-500 mt-1">{product.type}</p>}
+              <p className="text-green-600 font-bold text-lg price-box">${product.price.toFixed(2)}</p>
+              {product.type && <p className="text-xs text-gray-500 mt-1 capitalize">{product.type}</p>}
             </div>
           </div>
         ))}
@@ -285,11 +259,11 @@ const App = () => {
 
   const PaymentModal = ({ form, orderFormat, onClose, discountPercent }) => {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg max-w-md w-full p-6">
+      <div className="こちらfixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 animate-fadeIn">
+        <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl transform transition-all duration-300">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-800">Payment Details</h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <h2 className="text-2xl font-bold text-gray-800">Payment Details</h2>
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
               <XCircle className="w-6 h-6" />
             </button>
           </div>
@@ -300,13 +274,13 @@ const App = () => {
               <p className="text-sm text-gray-600">Game: {form.game === "mlbb" ? "Mobile Legends" : "Free Fire"}</p>
               <p className="text-sm text-gray-600">User ID: {form.userId}</p>
               {form.game === "mlbb" && <p className="text-sm text-gray-600">Zone ID: {form.serverId}</p>}
-              <p className="text-sm text-gray-600">Item: {form.product?.name}</p>
+              <p className="text-sm text-gray-600">Item: {formatItemDisplay(form.product)}</p>
               <p className="text-lg font-bold text-green-600">Total: ${form.product?.price.toFixed(2)}</p>
             </div>
 
             <div className="border-t pt-4">
               <h3 className="font-semibold text-gray-700 mb-2">Payment Method</h3>
-              <div className="flex items-center gap-2 p-3 border rounded-lg">
+              <div className="flex items-center gap-2 p-3 border rounded-lg bg-gray-50">
                 <img
                   src="https://www.daddytopup.com/_next/image?url=%2Fassets%2Fmain%2Fkhqr.webp&w=1920&q=75"
                   alt="KHQR"
@@ -320,7 +294,7 @@ const App = () => {
               <p className="text-xs text-gray-500 mb-4">Order Format: {orderFormat}</p>
               <button
                 onClick={onClose}
-                className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors"
+                className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors duration-300"
               >
                 Proceed to Payment
               </button>
@@ -345,14 +319,19 @@ const App = () => {
           background-color: #22c55e;
         }
         .price-box {
-          background-color: #ffd700;
-          padding: 4px 8px;
-          border-radius: 4px;
+          background-color: #fef08a;
+          padding: 6px 12px;
+          border-radius: 6px;
           display: inline-block;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .logo-container {
-          width: 60px;
-          height: 60px;
+          width: 80px;
+          height: 80px;
+          transition: transform 0.3s ease;
+        }
+        .logo-container:hover {
+          transform: scale(1.1);
         }
         .logo-image {
           width: 100%;
@@ -363,27 +342,31 @@ const App = () => {
           display: flex;
           align-items: center;
           gap: 12px;
-          margin-bottom: 16px;
+          margin-bottom: 20px;
         }
         .section-number {
-          width: 32px;
-          height: 32px;
+          width: 40px;
+          height: 40px;
           background-color: #ffffff;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 1.25rem;
+          font-size: 1.5rem;
           font-weight: bold;
-          color: #000000;
-          margin-right: 8px;
+          color: #16a34a;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .inner-content,
         .inner-content.payment-section {
           background-color: #16a34a !important;
-          padding: 16px;
-          border-radius: 8px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          padding: 20px;
+          border-radius: 12px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          transition: transform 0.3s ease;
+        }
+        .inner-content:hover {
+          transform: translateY(-4px);
         }
         .inner-content.products-section {
           background-color: #22c55e !important;
@@ -395,79 +378,89 @@ const App = () => {
           background-color: #ffffff;
           border: 2px solid #16a34a;
           border-radius: 8px;
-          padding: 8px 12px;
+          padding: 12px 16px;
           margin-bottom: 16px;
           display: flex;
           align-items: center;
           justify-content: space-between;
           position: relative;
-          transition: transform 0.2s ease-in-out;
+          transition: all 0.3s ease;
           cursor: pointer;
         }
+        .payment-box.selected {
+          border-color: #22c55e;
+          background-color: #f0fdf4;
+        }
         .payment-box.selected::after {
-          content: '';
+          content: '✓';
           position: absolute;
-          right: 8px;
+          right: 12px;
           top: 50%;
           transform: translateY(-50%);
-          width: 12px;
-          height: 12px;
+          width: 24px;
+          height: 24px;
           background-color: #16a34a;
+          color: white;
           border-radius: 50%;
-          border: 2px solid #16a34a;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 14px;
         }
         .payment-box:hover {
-          transform: scale(1.02);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         .payment-content {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 12px;
           flex: 1;
         }
         .payment-image {
-          width: 32px;
-          height: 32px;
+          width: 40px;
+          height: 40px;
           object-fit: contain;
-          border-radius: 4px;
-        }
-        .payment-text {
-          flex: 1;
+          border-radius: 6px;
         }
         .payment-text p:first-child {
-          font-size: 1rem;
-          font-weight-semibold;
-          color: #000000;
-          margin-bottom: 2px;
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: #1f2937;
         }
         .payment-text p:last-child {
-          font-size: 0.8rem;
-          color: #000000;
-          opacity: 0.7;
+          font-size: 0.9rem;
+          color: #4b5563;
         }
         .input-field {
           background-color: #ffffff;
-          color: #000000;
-          border: 1px solid #16a34a;
-          padding: 8px;
-          border-radius: 4px;
+          color: #1f2937;
+          border: 2px solid #16a34a;
+          padding: 10px;
+          border-radius: 6px;
           width: 100%;
           text-align: center;
+          transition: border-color 0.3s ease;
+        }
+        .input-field:focus {
+          border-color: #22c55e;
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
         }
         .mlbb-form4 {
           display: flex;
           justify-content: space-between;
           align-items: center;
           background-color: #16a34a;
-          padding: 10px;
-          border-radius: 8px;
+          padding: 12px;
+          border-radius: 12px;
           width: 100%;
           position: fixed;
           bottom: 0;
           left: 0;
           right: 0;
           z-index: 1000;
-          box-shadow: 0 -2px 10px rgba(0, 0,0,0.2);
+          box-shadow: 0 -4px 12px rgba(0, 0,0,0.2);
         }
         .mlbb-container43 {
           display: flex;
@@ -475,14 +468,14 @@ const App = () => {
           color: #fff;
         }
         .mlbb-text30, .mlbb-text33 {
-          font-size: 14px;
-          margin-bottom: 5px;
+          font-size: 15px;
+          margin-bottom: 6px;
           color: #fff;
         }
         .mlbb-text32, .mlbb-text35 {
           font-weight: bold;
-          margin-left: 5px;
-          color: #fff;
+          margin-left: 6px;
+          color: #fef08a;
         }
         .mlbb-container44 {
           display: flex;
@@ -492,36 +485,38 @@ const App = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          background-color: #fff;
-          color: #000000;
-          padding: 10px 24px;
-          border-radius: 5px;
-          border: 2px solid #000000;
+          background-color: #fef08a;
+          color: #1f2937;
+          padding: 12px 28px;
+          border-radius: 8px;
+          border: 2px solid #16a34a;
           cursor: pointer;
           font-size: 16px;
           font-weight: 700;
-          transition: background-color 0.3s, color 0.3s;
-          min-width: 150px;
-          height: 48px;
+          transition: all 0.3s ease;
+          min-width: 160px;
+          height: 50px;
         }
         .mlbb-button2:hover, .check-id-button:hover {
-          background-color: #000000;
+          background-color: #16a34a;
           color: #fff;
+          border-color: #fef08a;
         }
         .mlbb-button2:disabled, .check-id-button:disabled {
           opacity: 0.5;
           cursor: not-allowed;
         }
         .mlbb-button2:disabled:hover, .check-id-button:disabled:hover {
-          background-color: #fff;
-          color: #000000;
+          background-color: #fef08a;
+          color: #1f2937;
+          border-color: #16a34a;
         }
         .mlbb-icon64 {
           margin-right: 8px;
         }
         .mlbb-text36, .check-id-text {
           text-transform: uppercase;
-          color: #000000;
+          color: #1f2937;
         }
         .mlbb-button2:hover .mlbb-text36, .check-id-button:hover .check-id-text {
           color: #fff;
@@ -531,77 +526,90 @@ const App = () => {
           flex-direction: column;
           align-items: center;
           cursor: pointer;
-          transition: transform 0.2s;
+          transition: all 0.3s ease;
           background: linear-gradient(135deg, #16a34a, #22c55e);
-          border-radius: 12px;
-          padding: 16px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          border-radius: 16px;
+          padding: 20px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
           position: relative;
           overflow: hidden;
         }
         .game-card:hover {
-          transform: scale(1.05);
+          transform: translateY(-4px);
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
         }
         .game-card.disabled {
           cursor: not-allowed;
-          opacity: 0.6;
+          opacity: 0.7;
         }
         .game-card.disabled:hover {
           transform: none;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         .game-image {
           width: 100%;
-          max-width: 200px;
-          min-width: 200px;
+          max-width: 220px;
+          min-width: 180px;
           aspect-ratio: 1 / 1;
           object-fit: contain;
-          border-radius: 8px;
+          border-radius: 12px;
+          transition: transform 0.3s ease;
+        }
+        .game-card:hover .game-image {
+          transform: scale(1.05);
         }
         .game-container {
           display: grid;
-          grid-template-columns: repeat(2, minmax(140px, 200px));
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
           gap: 1.5rem;
           justify-content: center;
           width: 100%;
           max-width: 1200px;
-          padding-bottom: 1.5rem;
+          padding-bottom: 2rem;
         }
         .coming-soon {
           position: absolute;
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          background-color: rgba(0, 0, 0, 0.8);
-          color: white;
-          padding: 8px 16px;
-          border-radius: 4px;
-          font-size: 1rem;
+          background-color: rgba(0, 0, 0, 0.85);
+          color: #fef08a;
+          padding: 10px 20px;
+          border-radius: 6px;
+          font-size: 1.1rem;
           font-weight: bold;
           text-align: center;
+          text-transform: uppercase;
         }
         .banner-slider {
           background: linear-gradient(135deg, #16a34a, #22c55e);
-          border-radius: 12px;
+          border-radius: 16px;
           overflow: hidden;
-          margin-bottom: 2rem;
+          margin-bottom: 2.5rem;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         .popular-section {
           background: linear-gradient(135deg, #16a34a, #22c55e);
-          border-radius: 12px;
-          padding: 20px;
-          margin-bottom: 2rem;
+          border-radius: 16px;
+          padding: 24px;
+          margin-bottom: 2.5rem;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         .popular-card {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 8px;
-          padding: 12px;
+          background: rgba(255, 255, 255, 0.15);
+          border-radius: 12px;
+          padding: 16px;
           margin: 8px;
-          backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          transition: transform 0.3s ease;
+        }
+        .popular-card:hover {
+          transform: translateY(-4px);
         }
         @media (max-width: 480px) {
           .game-container {
-            grid-template-columns: repeat(2, minmax(140px, 160px));
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 1rem;
           }
           .game-image {
@@ -615,7 +623,7 @@ const App = () => {
         }
         @media (min-width: 481px) and (max-width: 768px) {
           .game-container {
-            grid-template-columns: repeat(2, minmax(160px, 180px));
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 1.25rem;
           }
           .game-image {
@@ -629,12 +637,12 @@ const App = () => {
         }
         @media (min-width: 769px) {
           .game-container {
-            grid-template-columns: repeat(2, minmax(180px, 200px));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 1.5rem;
           }
           .game-image {
-            max-width: 200px;
-            min-width: 200px;
+            max-width: 220px;
+            min-width: 180px;
           }
           .game-card h3 {
             font-size: 1rem;
@@ -649,24 +657,28 @@ const App = () => {
           top: 100%;
           right: 0;
           background-color: #ffffff;
-          border-radius: 4px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
           display: flex;
           flex-direction: column;
-          padding: 8px;
+          padding: 12px;
           z-index: 1000;
+          transform: translateY(4px);
+          transition: all 0.3s ease;
         }
         .social-menu a {
           display: flex;
           align-items: center;
-          gap: 8px;
-          padding: 8px;
-          color: #000000;
+          gap: 10px;
+          padding: 10px;
+          color: #1f2937;
           text-decoration: none;
-          transition: background-color 0.2s;
+          transition: all 0.2s ease;
+          border-radius: 6px;
         }
         .social-menu a:hover {
           background-color: #f0f0f0;
+          color: #16a34a;
         }
         .products-section, .products-section * {
           background-color: #22c55e !important;
@@ -674,9 +686,16 @@ const App = () => {
         .loading-container {
           background-color: #22c55e !important;
         }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
       `}</style>
 
-      <nav className="bg-green-600 text-white p-3 shadow-lg sticky top-0 z-50 flex items-center justify-between">
+      <nav className="bg-green-600 text-white p-4 shadow-xl sticky top-0 z-50 flex items-center justify-between">
         <a href="/" className="flex items-center">
           <div className="logo-container">
             <img
@@ -690,16 +709,16 @@ const App = () => {
           <div className="relative w-full">
             <input
               type="text"
-              placeholder="Search..."
-              className="w-full pl-10 pr-4 py-2 rounded-full bg-white text-black focus:outline-none focus:ring-2 focus:ring-white"
+              placeholder="Search games or products..."
+              className="w-full pl-12 pr-4 py-2 rounded-full bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
             />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
           </div>
         </div>
         <div className="social-dropdown">
           <button
             onClick={() => setShowSocialDropdown(!showSocialDropdown)}
-            className="text-white hover:text-gray-300 transition-colors flex items-center gap-2"
+            className="text-white hover:text-gray-200 transition-colors flex items-center gap-2 bg-green-700 px-4 py-2 rounded-lg"
           >
             <MessageCircle className="w-6 h-6" />
             <span>Contact Us</span>
@@ -724,22 +743,22 @@ const App = () => {
       </nav>
 
       {isThinking && (
-        <div className="flex items-center justify-center py-2 bg-green-600 text-white">
+        <div className="flex items-center justify-center py-3 bg-green-700 text-white">
           <Loader2 className="w-6 h-6 animate-spin text-white" />
-          <span className="ml-2 text-sm text-white">Loading...</span>
+          <span className="ml-2 text-sm font-medium">Loading...</span>
         </div>
       )}
 
       <div className="flex-grow">
         {/* Banner Slider */}
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-4 py-8">
           <div className="banner-slider">
-            <div className="relative h-48 md:h-64 overflow-hidden">
+            <div className="relative h-56 md:h-72 lg:h-80 overflow-hidden">
               <img src="https://i.imgur.com/mWkJX0f.png" alt="Banner" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+              <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
                 <div className="text-center text-white">
-                  <h2 className="text-2xl md:text-4xl font-bold mb-2">LUFFY TOPUP</h2>
-                  <p className="text-sm md:text-lg">Fast and reliable gaming top-ups</p>
+                  <h2 className="text-3xl md:text-5xl font-bold mb-3 animate-fadeIn">LUFFY TOPUP</h2>
+                  <p className="text-base md:text-xl">Your trusted platform for instant gaming top-ups</p>
                 </div>
               </div>
             </div>
@@ -747,8 +766,8 @@ const App = () => {
         </div>
 
         {showTopUp ? (
-          <main className="container mx-auto px-4 py-8">
-            <div className="max-w-4xl mx-auto space-y-6">
+          <main className="container mx-auto px-4 py-10">
+            <div className="max-w-5xl mx-auto space-y-8">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <button
                   onClick={() => {
@@ -757,35 +776,35 @@ const App = () => {
                     setValidationResult(null)
                     setForm((prev) => ({ ...prev, nickname: undefined }))
                   }}
-                  className="text-white hover:text-gray-300 transition-colors text-sm flex items-center gap-2 bg-green-600 px-4 py-2 rounded-lg"
+                  className="text-white hover:text-gray-200 transition-colors text-sm flex items-center gap-2 bg-green-600 px-5 py-3 rounded-lg shadow-md hover:bg-green-700"
                 >
-                  <ArrowLeft className="w-5 h-5 text-white" /> Back to Games
+                  <ArrowLeft className="w-5 h-5" /> Back to Games
                 </button>
                 {(form.userId || form.serverId) && (
                   <button
                     onClick={clearSavedInfo}
-                    className="text-white hover:text-gray-300 transition-colors text-sm flex items-center gap-2 bg-green-600 px-4 py-2 rounded-lg"
+                    className="text-white hover:text-gray-200 transition-colors text-sm flex items-center gap-2 bg-red-600 px-5 py-3 rounded-lg shadow-md hover:bg-red-700"
                   >
-                    <XCircle className="w-5 h-5 text-white" /> Clear Saved Info
+                    <XCircle className="w-5 h-5" /> Clear Saved Info
                   </button>
                 )}
               </div>
             </div>
 
-            <div className="p-6 rounded-lg">
+            <div className="p-6 rounded-xl">
               <div className="inner-content">
                 <div className="section-header">
                   <div className="section-number">01</div>
-                  <h3 className="text-base font-semibold text-white khmer-font">បញ្ចូលព័ត៌មានរបស់អ្នក</h3>
+                  <h3 className="text-xl font-semibold text-white khmer-font">បញ្ចូលព័ត៌មានរបស់អ្នក</h3>
                 </div>
-                <form className="space-y-4">
-                  <div className="flex justify-center gap-4">
+                <form className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <input
                         type="text"
                         name="userId"
                         className="input-field"
-                        placeholder="User ID"
+                        placeholder="Enter User ID"
                         value={form.userId}
                         onChange={(e) => {
                           const value = e.target.value.trim().replace(/[^0-9]/g, "")
@@ -794,7 +813,7 @@ const App = () => {
                           setFormErrors((prev) => ({ ...prev, userId: undefined }))
                         }}
                       />
-                      {formErrors.userId && <p className="text-green-400 text-xs mt-1">{formErrors.userId}</p>}
+                      {formErrors.userId && <p className="text-red-300 text-xs mt-2">{formErrors.userId}</p>}
                     </div>
                     {form.game === "mlbb" && (
                       <div>
@@ -802,7 +821,7 @@ const App = () => {
                           type="text"
                           name="zoneId"
                           className="input-field"
-                          placeholder="Zone ID"
+                          placeholder="Enter Zone ID"
                           value={form.serverId}
                           onChange={(e) => {
                             const value = e.target.value.trim().replace(/[^0-9]/g, "")
@@ -811,20 +830,20 @@ const App = () => {
                             setFormErrors((prev) => ({ ...prev, serverId: undefined }))
                           }}
                         />
-                        {formErrors.serverId && <p className="text-green-400 text-xs mt-1">{formErrors.serverId}</p>}
+                        {formErrors.serverId && <p className="text-red-300 text-xs mt-2">{formErrors.serverId}</p>}
                       </div>
                     )}
                   </div>
-                  <div className="flex justify-center items-center gap-2">
+                  <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
                     <button
                       type="button"
                       onClick={validateAccount}
                       disabled={validating || !form.userId || (form.game === "mlbb" && !form.serverId)}
-                      className="check-id-button"
+                      className="check-id-button w-full sm:w-auto"
                     >
                       {validating ? (
                         <>
-                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                          <Loader2 className="w-5 h-5 animate-spin mr-2" />
                           <span className="check-id-text">Checking...</span>
                         </>
                       ) : (
@@ -832,34 +851,34 @@ const App = () => {
                       )}
                     </button>
                     {(validationResult?.success || validationResult?.status) && (
-                      <div className="flex items-center gap-2 text-green-400 text-sm">
-                        <CheckCircle2 className="w-4 h-4" />
+                      <div className="flex items-center gap-2 text-green-300 text-sm">
+                        <CheckCircle2 className="w-5 h-5" />
                         <span>Account found: {form.nickname}</span>
                       </div>
                     )}
                   </div>
-                  <div className="mt-4 text-white text-xs khmer-font">
-                    ដើម្បីឃើញ UserID សូមចូលទៅក្នុងហ្គេម ហើយចុចរូបភាព Avatar នៅខាងឆ្វេងអេក្រង់កញ្ចក់ ហើយចុចទៅកាន់ "Check ID" ពេលនោះ User
+                  <div className="mt-4 text-white text-sm khmer-font leading-relaxed">
+                    ដើម្បីឃើញ User ID សូមចូលទៅក្នុងហ្គេម ហើយចុចរូបភាព Avatar នៅខាងឆ្វេងអេក្រង់កញ្ចក់ ហើយចុចទៅកាន់ "Check ID" ពេលនោះ User
                     ID នឹងបង្ហាញឲ្យឃើញ បន្ទាប់មកសូមយក User ID នោះមកបំពេញ។ ឧទាហរណ៍: User ID: 123456789, Zone ID: 1234។
                   </div>
                 </form>
               </div>
             </div>
 
-            <div className="p-6 rounded-lg">
+            <div className="p-6 rounded-xl">
               <div className="inner-content products-section">
                 <div className="section-header">
                   <div className="section-number">02</div>
-                  <h3 className="text-lg font-semibold text-white khmer-font">ផលិតផល Diamond</h3>
+                  <h3 className="text-xl font-semibold text-white khmer-font">ផលិតផល Diamond</h3>
                 </div>
                 {loading ? (
-                  <div className="flex justify-center items-center py-8 loading-container">
+                  <div className="flex justify-center items-center py-10 loading-container">
                     <Loader2 className="w-12 h-12 animate-spin text-white" />
-                    <span className="ml-2 text-white">Loading products...</span>
+                    <span className="ml-3 text-white text-lg">Loading products...</span>
                   </div>
                 ) : products.length === 0 ? (
-                  <div className="text-white text-center py-8">
-                    No products available for this game. Please try again later.
+                  <div className="text-white text-center py-10">
+                    No products available for this game. Please check your productslist.txt file or try again later.
                   </div>
                 ) : (
                   <ProductList
@@ -872,11 +891,11 @@ const App = () => {
               </div>
             </div>
 
-            <div className="p-6 rounded-lg">
+            <div className="p-6 rounded-xl">
               <div className="inner-content payment-section">
                 <div className="section-header">
                   <div className="section-number">03</div>
-                  <h3 className="text-base font-semibold text-white khmer-font">វិធីបង់ប្រាក់</h3>
+                  <h3 className="text-xl font-semibold text-white khmer-font">វិធីបង់ប្រាក់</h3>
                 </div>
                 <div
                   className={`payment-box ${selectedPayment === "khqr" ? "selected" : ""}`}
@@ -894,18 +913,18 @@ const App = () => {
                     </div>
                   </div>
                 </div>
-                {formErrors.paymentMethod && <p className="text-green-400 text-xs mt-1">{formErrors.paymentMethod}</p>}
-                <div className="flex items-center gap-2">
+                {formErrors.paymentMethod && <p className="text-red-300 text-xs mt-2">{formErrors.paymentMethod}</p>}
+                <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     id="accept"
-                    className="w-5 h-5 text-white border-white rounded focus:ring-white"
+                    className="w-5 h-5 text-green-500 border-white rounded focus:ring-green-500"
                     checked
                     disabled
                   />
                   <label htmlFor="accept" className="text-white text-sm khmer-font">
                     ខ្ញុំយល់ព្រមតាម{" "}
-                    <a href="/term-and-policy" className="text-white hover:underline">
+                    <a href="/term-and-policy" className="text-green-300 hover:underline">
                       លក្ខខណ្ឌ
                     </a>
                   </label>
@@ -938,7 +957,7 @@ const App = () => {
                             <path d="m12.calendar_month 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.1-.01z"></path>
                             <path
                               d="M5 6.5a.5.5 0 1 1 .5-.5H16a1 1 0 1 0 0-2H5.5A2.5 2.5 0 0 0 3 6.5V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5.5a.5.5 0 0 1-.5-.5M15.5 15a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3"
-                              fill="#0a86aa"
+                              fill="#16a34a"
                             ></path>
                           </g>
                         </svg>
@@ -951,57 +970,57 @@ const App = () => {
             </div>
           </main>
         ) : (
-          <main className="container mx-auto px-4 py-6">
+          <main className="container mx-auto px-4 py-8">
             {/* Popular Section */}
-            <div className="popular-section mb-8">
-              <div className="flex items-center gap-3 mb-6">
-                <svg width="35" height="33" viewBox="0 0 24 24" className="text-white">
+            <div className="popular-section mb-10">
+              <div className="flex items-center gap-4 mb-6">
+                <svg width="40" height="38" viewBox="0 0 24 24" className="text-white">
                   <path
                     d="M17.66 11.2c-.23-.3-.51-.56-.77-.82c-.67-.6-1.43-1.03-2.07-1.66C13.33 7.26 13 4.85 13.95 3c-.95.23-1.78.75-2.49 1.32c-2.59 2.08-3.61 5.75-2.39 8.9c.04.1.08.2.08.33c0 .22-.15.42-.35.5c-.23.1-.47.04-.66-.12a.6.6 0 0 1-.14-.17c-1.13-1.43-1.31-3.48-.55-5.12C5.78 10 4.87 12.3 5 14.47c.06.5.12 1 .29 1.5c.14.6.41 1.2.71 1.73c1.08 1.73 2.95 2.97 4.96 3.22c2.14.27 4.43-.12 6.07-1.6c1.83-1.66 2.47-4.32 1.53-6.6l-.13-.26c-.21-.46-.77-1.26-.77-1.26m-3.16 6.3c-.28.24-.74.5-1.1.6c-1.12.4-2.24-.16-2.9-.82c1.19-.28 1.9-1.16 2.11-2.05c.17-.8-.15-1.46-.28-2.23c-.12-.74-.1-1.37.17-2.06c.19.38.39.76.63 1.06c.77 1 1.98 1.44 2.24 2.8c.04.14.06.28.06.43c.03.82-.33 1.72-.93 2.27"
                     fill="currentColor"
                   />
                 </svg>
-                <h1 className="text-2xl font-bold text-white">Popular Games</h1>
+                <h1 className="text-3xl font-bold text-white">Popular Games</h1>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 <div className="popular-card text-center">
                   <img
                     src="https://downloadr2.apkmirror.com/wp-content/uploads/2024/05/42/6632d219632fb_com.mobile.legends.png"
                     alt="Mobile Legends"
-                    className="w-16 h-16 mx-auto mb-2 rounded-lg"
+                    className="w-20 h-20 mx-auto mb-3 rounded-lg"
                   />
-                  <h3 className="text-white font-semibold">Mobile Legends</h3>
-                  <p className="text-green-200 text-sm">Instant</p>
+                  <h3 className="text-white font-semibold text-lg">Mobile Legends</h3>
+                  <p className="text-green-200 text-sm">Instant Top-up</p>
                 </div>
 
                 <div className="popular-card text-center">
                   <img
                     src="https://play-lh.googleusercontent.com/nIV146CRuDyVKmYaXWtFR0BK7iZFqq4UyQPfY_iZOqolvk-USWmG9YupzKWDsN59fm6K=w240-h480-rw"
                     alt="Free Fire"
-                    className="w-16 h-16 mx-auto mb-2 rounded-lg"
+                    className="w-20 h-20 mx-auto mb-3 rounded-lg"
                   />
-                  <h3 className="text-white font-semibold">Free Fire</h3>
-                  <p className="text-green-200 text-sm">Instant</p>
+                  <h3 className="text-white font-semibold text-lg">Free Fire</h3>
+                  <p className="text-green-200 text-sm">Instant Top-up</p>
                 </div>
 
-                <div className="popular-card text-center opacity-60">
+                <div className="popular-card text-center opacity-70">
                   <img
                     src="https://upload.wikimedia.org/wikipedia/en/thumb/4/44/PlayerUnknown%27s_Battlegrounds_Mobile.webp/180px-PlayerUnknown%27s_Battlegrounds_Mobile.webp.png"
                     alt="PUBG Mobile"
-                    className="w-16 h-16 mx-auto mb-2 rounded-lg"
+                    className="w-20 h-20 mx-auto mb-3 rounded-lg"
                   />
-                  <h3 className="text-white font-semibold">PUBG Mobile</h3>
+                  <h3 className="text-white font-semibold text-lg">PUBG Mobile</h3>
                   <p className="text-green-200 text-sm">Coming Soon</p>
                 </div>
 
-                <div className="popular-card text-center opacity-60">
+                <div className="popular-card text-center opacity-70">
                   <img
                     src="https://i.pinimg.com/736x/34/66/03/346603fe9ff5b071463b03e550dac76a.jpg"
                     alt="HOK"
-                    className="w-16 h-16 mx-auto mb-2 rounded-lg"
+                    className="w-20 h-20 mx-auto mb-3 rounded-lg"
                   />
-                  <h3 className="text-white font-semibold">HOK</h3>
+                  <h3 className="text-white font-semibold text-lg">HOK</h3>
                   <p className="text-green-200 text-sm">Coming Soon</p>
                 </div>
               </div>
@@ -1023,8 +1042,8 @@ const App = () => {
                     alt="Mobile Legends"
                     className="game-image"
                   />
-                  <h3 className="text-sm font-semibold text-white text-center truncate mt-2">Mobile Legends</h3>
-                  <p className="text-green-200 text-xs text-center">Instant Top-up</p>
+                  <h3 className="text-base font-semibold text-white text-center truncate mt-3">Mobile Legends</h3>
+                  <p className="text-green-200 text-sm text-center">Instant Top-up</p>
                 </div>
 
                 <div
@@ -1040,8 +1059,8 @@ const App = () => {
                     alt="Free Fire"
                     className="game-image"
                   />
-                  <h3 className="text-sm font-semibold text-white text-center truncate mt-2">Free Fire</h3>
-                  <p className="text-green-200 text-xs text-center">Instant Top-up</p>
+                  <h3 className="text-base font-semibold text-white text-center truncate mt-3">Free Fire</h3>
+                  <p className="text-green-200 text-sm text-center">Instant Top-up</p>
                 </div>
 
                 <div className="game-card disabled" title="Coming Soon">
@@ -1053,7 +1072,7 @@ const App = () => {
                     />
                     <span className="coming-soon">Coming Soon</span>
                   </div>
-                  <h3 className="text-sm font-semibold text-white text-center truncate mt-2">PUBG Mobile</h3>
+                  <h3 className="text-base font-semibold text-white text-center truncate mt-3">PUBG Mobile</h3>
                 </div>
 
                 <div className="game-card disabled" title="Coming Soon">
@@ -1065,21 +1084,21 @@ const App = () => {
                     />
                     <span className="coming-soon">Coming Soon</span>
                   </div>
-                  <h3 className="text-sm font-semibold text-white text-center truncate mt-2">HOK</h3>
+                  <h3 className="text-base font-semibold text-white text-center truncate mt-3">HOK</h3>
                 </div>
               </div>
             </div>
           </main>
         )}
 
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="fixed bottom-8 right-8 z-50">
           <button
             onClick={() => window.open("https://t.me/sambathjj", "_blank")}
-            className="flex items-center gap-2 bg-white text-black px-4 py-3 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
+            className="flex items-center gap-3 bg-white text-gray-800 px-5 py-3 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:bg-green-100"
           >
             <div className="relative">
-              <div className="absolute inset-0 bg-gray-300/30 rounded-full animate-ping opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="text-black">
+              <div className="absolute inset-0 bg-green-300/30 rounded-full animate-ping opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="text-gray-800">
                 <path fill="none" d="M0 0h24v24H0z" />
                 <path
                   fill="currentColor"
@@ -1091,18 +1110,18 @@ const App = () => {
           </button>
         </div>
 
-        <footer className="bg-green-600 text-white py-4 w-full">
+        <footer className="bg-green-600 text-white py-6 w-full">
           <div className="container mx-auto px-4 text-center">
-            <div className="mb-2">
-              <p className="font-bold text-white">Contact Us:</p>
-              <div className="flex justify-center gap-4">
+            <div className="mb-4">
+              <p className="font-bold text-white text-lg">Contact Us:</p>
+              <div className="flex justify-center gap-6 mt-2">
                 <a
                   href="https://www.facebook.com/share/1CVHbXejqR/?mibextid=wwXIfr"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white hover:text-gray-300"
+                  className="text-white hover:text-green-200 transition-colors"
                 >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2.04c-5.5 0-10 4.49-10 10.02 0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89 1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7a10 10 0 0 0 8.44-9.9c0-5.53-4.5-10.02-10-10.02" />
                   </svg>
                 </a>
@@ -1110,27 +1129,27 @@ const App = () => {
                   href="https://t.me/kakronabns"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white hover:text-gray-300"
+                  className="text-white hover:text-green-200 transition-colors"
                 >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2C6.48 2 2 6.48 2 12s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6m4.5 5.4c-.6.1-1.2.3-1.8.5v6.2c0 2.5-2 4.5-4.5 4.5S6 16.6 6 14.1s2-4.5 4.5-4.5c.3 0 .6 0 .9.1v-2.2c-.3 0-.6-.1-.9-.1-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6V8.9c.6-.4 1.2-.7 1.8-.9v-1.6z" />
                   </svg>
                 </a>
               </div>
             </div>
-            <div className="mb-2">
-              <p className="font-bold text-white">Accept Payment:</p>
-              <div className="flex justify-center">
+            <div className="mb-4">
+              <p className="font-bold text-white text-lg">Accept Payment:</p>
+              <div className="flex justify-center mt-2">
                 <img
                   alt="khqr"
                   src="https://www.daddytopup.com/_next/image?url=%2Fassets%2Fmain%2Fkhqr.webp&w=828&q=75"
-                  className="w-[70px] h-auto"
+                  className="w-[80px] h-auto"
                 />
               </div>
             </div>
             <div>
-              <p className="text-xs">
-                <a href="/term-and-policy" className="text-white">
+              <p className="text-sm">
+                <a href="/term-and-policy" className="text-white hover:text-green-200">
                   <span className="font-bold underline" style={{ textUnderlineOffset: "5px" }}>
                     PRIVACY POLICY
                   </span>{" "}
@@ -1140,7 +1159,7 @@ const App = () => {
                   </span>
                 </a>
               </p>
-              <p className="text-xs text-white">COPYRIGHT © LUFFY TOPUP. ALL RIGHTS RESERVED.</p>
+              <p className="text-sm text-white mt-2">COPYRIGHT © LUFFY TOPUP. ALL RIGHTS RESERVED.</p>
             </div>
           </div>
         </footer>
