@@ -1,1401 +1,857 @@
-"use client"
+import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { Search, Loader2, ArrowLeft, XCircle, CheckCircle2 } from 'lucide-react';
+import axios from 'axios';
+import { GameSelector } from './components/GameSelector';
+import { ProductList } from './components/ProductList';
+import { PaymentModal } from './components/PaymentModal';
+import { TopUpForm, GameProduct } from './types';
+import { supabase } from './lib/supabase';
+import storeConfig from './lib/config';
+import { BannerSlider } from './components/BannerSlider';
+import { PopupBanner } from './components/PopupBanner';
+import { PromoCodeInput } from './components/PromoCodeInput';
 
-import { useState, useEffect, useMemo } from "react"
-import { Loader2, XCircle, ArrowLeft, Search, Facebook, MessageCircle, CheckCircle2, ShoppingCart, Star, Sparkles, Flame, Crown } from "lucide-react"
-import axios from "axios"
+const AdminPage = lazy(() => import('./pages/AdminPage').then(module => ({ default: module.AdminPage })));
+const ResellerPage = lazy(() => import('./pages/ResellerPage').then(module => ({ default: module.ResellerPage })));
 
-const App = () => {
-  const [form, setForm] = useState(() => {
-    const savedForm = localStorage.getItem("customerInfo")
-    return savedForm
-      ? JSON.parse(savedForm)
-      : {
-          userId: "",
-          serverId: "",
-          product: null,
-          game: "mlbb",
-          nickname: undefined,
-        }
-  })
+function App() {
+  const [form, setForm] = useState<TopUpForm>(() => {
+    const savedForm = localStorage.getItem('customerInfo');
+    return savedForm ? JSON.parse(savedForm) : {
+      userId: '',
+      serverId: '',
+      product: null,
+      game: 'mlbb',
+      nickname: undefined
+    };
+  });
+  const [showTopUp, setShowTopUp] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [orderFormat, setOrderFormat] = useState('');
+  const [formErrors, setFormErrors] = useState<{userId?: string; serverId?: string; paymentMethod?: string}>({});
+  const [products, setProducts] = useState<GameProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isAdminRoute, setIsAdminRoute] = useState(false);
+  const [isResellerRoute, setIsResellerRoute] = useState(false);
+  const [isResellerLoggedIn, setIsResellerLoggedIn] = useState(false);
+  const [showPopupBanner, setShowPopupBanner] = useState(true);
+  const [paymentCooldown, setPaymentCooldown] = useState(0);
+  const [cooldownInterval, setCooldownInterval] = useState<NodeJS.Timeout | null>(null);
+  const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
+  const [validating, setValidating] = useState(false);
+  const [validationResult, setValidationResult] = useState<any>(null);
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'successful' | 'failed'>('idle');
 
-  const [showTopUp, setShowTopUp] = useState(false)
-  const [showCheckout, setShowCheckout] = useState(false)
-  const [orderFormat, setOrderFormat] = useState("")
-  const [formErrors, setFormErrors] = useState({ userId: "", serverId: "", paymentMethod: "" })
-  const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [paymentCooldown, setPaymentCooldown] = useState(0)
-  const [cooldownInterval, setCooldownInterval] = useState(null)
-  const [selectedPayment, setSelectedPayment] = useState(null)
-  const [validating, setValidating] = useState(false)
-  const [validationResult, setValidationResult] = useState(null)
-  const [isThinking, setIsThinking] = useState(false)
-  const [showSocialDropdown, setShowSocialDropdown] = useState(false)
-
+  // Diamond combination mapping
   const diamondCombinations = {
-    "86": { total: "86", breakdown: "86+0bonus" },
-    "172": { total: "172", breakdown: "172+0bonus" },
-    "257": { total: "257", breakdown: "257+0bonus" },
-    "343": { total: "343", breakdown: "257+86bonus" },
-    "429": { total: "429", breakdown: "257+172bonus" },
-    "514": { total: "514", breakdown: "514+0bonus" },
-    "600": { total: "600", breakdown: "514+86bonus" },
-    "706": { total: "706", breakdown: "706+0bonus" },
-    "792": { total: "792", breakdown: "706+86bonus" },
-    "878": { total: "878", breakdown: "706+172bonus" },
-    "963": { total: "963", breakdown: "706+257bonus" },
-    "1049": { total: "1049", breakdown: "963+86bonus" },
-    "1135": { total: "1135", breakdown: "963+172bonus" },
-    "1220": { total: "1220", breakdown: "963+257bonus" },
-    "1412": { total: "1412", breakdown: "1412+0bonus" },
-    "1584": { total: "1584", breakdown: "1412+172bonus" },
-    "1756": { total: "1756", breakdown: "1412+344bonus" },
-    "1926": { total: "1926", breakdown: "1412+514bonus" },
-    "2195": { total: "2195", breakdown: "2195+0bonus" },
-    "2384": { total: "2384", breakdown: "2195+189bonus" },
-    "2637": { total: "2637", breakdown: "2195+442bonus" },
-    "2810": { total: "2810", breakdown: "2195+615bonus" },
-  }
+    '86': { total: '86', breakdown: '86+0bonus' },
+    '172': { total: '172', breakdown: '172+0bonus' },
+    '257': { total: '257', breakdown: '257+0bonus' },
+    '343': { total: '343', breakdown: '257+86bonus' },
+    '429': { total: '429', breakdown: '257+172bonus' },
+    '514': { total: '514', breakdown: '514+0bonus' },
+    '600': { total: '600', breakdown: '514+86bonus' },
+    '706': { total: '706', breakdown: '706+0bonus' },
+    '792': { total: '792', breakdown: '706+86bonus' },
+    '878': { total: '878', breakdown: '706+172bonus' },
+    '963': { total: '963', breakdown: '706+257bonus' },
+    '1049': { total: '1049', breakdown: '963+86bonus' },
+    '1135': { total: '1135', breakdown: '963+172bonus' },
+    '1220': { total: '1220', breakdown: '963+257bonus' },
+    '1412': { total: '1412', breakdown: '1412+0bonus' },
+    '1584': { total: '1584', breakdown: '1412+172bonus' },
+    '1756': { total: '1756', breakdown: '1412+344bonus' },
+    '1926': { total: '1926', breakdown: '1412+514bonus' },
+    '2195': { total: '2195', breakdown: '2195+0bonus' },
+    '2384': { total: '2384', breakdown: '2195+189bonus' },
+    '2637': { total: '2637', breakdown: '2195+442bonus' },
+    '2810': { total: '2810', breakdown: '2195+615bonus' }
+  };
 
-  const formatItemDisplay = (product) => {
-    if (!product) return "None"
-    const identifier = product.diamonds || product.name
-    const combo = diamondCombinations[identifier]
-    if (!combo) return identifier
-    return combo.breakdown.endsWith("+0bonus") ? combo.total : `${combo.total} (${combo.breakdown})`
-  }
-
-  useEffect(() => {
-    const savedForm = localStorage.getItem("customerInfo")
-    if (savedForm) {
-      const parsedForm = JSON.parse(savedForm)
-      if (parsedForm.game === "mlbb_ph") {
-        parsedForm.game = "mlbb"
-        localStorage.setItem("customerInfo", JSON.stringify(parsedForm))
-        setForm(parsedForm)
-      } else {
-        setForm(parsedForm)
-      }
-    }
-  }, [])
+  // Format item display based on diamond combinations
+  const formatItemDisplay = (product: GameProduct | null) => {
+    if (!product) return 'None';
+    const identifier = product.diamonds || product.name;
+    const combo = diamondCombinations[identifier];
+    if (!combo) return identifier;
+    return combo.breakdown.endsWith('+0bonus') ? combo.total : `${combo.total} (${combo.breakdown})`;
+  };
 
   useEffect(() => {
-    if (form.game !== "none") {
-      console.log("Fetching products for game:", form.game)
-      fetchProducts(form.game)
+    const checkRoute = () => {
+      const path = window.location.pathname;
+      setIsAdminRoute(path === '/adminlogintopup');
+      setIsResellerRoute(path === '/reseller');
+      const resellerAuth = localStorage.getItem('jackstore_reseller_auth');
+      setIsResellerLoggedIn(resellerAuth === 'true');
+    };
+    checkRoute();
+    window.addEventListener('popstate', checkRoute);
+    return () => window.removeEventListener('popstate', checkRoute);
+  }, []);
+
+  useEffect(() => {
+    if (!isAdminRoute && !isResellerRoute) {
+      fetchProducts(form.game);
     }
-  }, [form.game])
+  }, [form.game, isAdminRoute, isResellerRoute]);
 
   useEffect(() => {
     return () => {
-      if (cooldownInterval) clearInterval(cooldownInterval)
-    }
-  }, [cooldownInterval])
+      if (cooldownInterval) clearInterval(cooldownInterval);
+    };
+  }, [cooldownInterval]);
 
   useEffect(() => {
     if (form.userId || form.serverId || form.nickname) {
-      localStorage.setItem(
-        "customerInfo",
-        JSON.stringify({
-          userId: form.userId,
-          serverId: form.serverId,
-          game: form.game,
-          product: null,
-          nickname: form.nickname,
-        }),
-      )
+      localStorage.setItem('customerInfo', JSON.stringify({
+        userId: form.userId,
+        serverId: form.serverId,
+        game: form.game,
+        product: null,
+        nickname: form.nickname
+      }));
     }
-  }, [form.userId, form.serverId, form.game, form.nickname])
+  }, [form.userId, form.serverId, form.game, form.nickname]);
 
   const startPaymentCooldown = () => {
-    setPaymentCooldown(7)
-    if (cooldownInterval) clearInterval(cooldownInterval)
+    setPaymentCooldown(3);
+    if (cooldownInterval) clearInterval(cooldownInterval);
     const interval = setInterval(() => {
-      setPaymentCooldown((prev) => {
+      setPaymentCooldown(prev => {
         if (prev <= 1) {
-          clearInterval(interval)
-          return 0
+          clearInterval(interval);
+          return 0;
         }
-        return prev - 1
-      })
-    }, 1000)
-    setCooldownInterval(interval)
-  }
+        return prev - 1;
+      });
+    }, 1000);
+    setCooldownInterval(interval);
+  };
 
-  const fetchProducts = async (game) => {
-    setLoading(true)
-    setIsThinking(true)
+  const fetchProducts = async (game: 'mlbb' | 'freefire') => {
+    setLoading(true);
     try {
-      const response = await fetch('/productslist.txt')
-      if (!response.ok) throw new Error(`Failed to fetch products: ${response.status} ${response.statusText}`)
-      const text = await response.text()
-      if (!text.trim()) throw new Error('productslist.txt is empty')
-      
-      let productsData
-      try {
-        productsData = JSON.parse(text)
-      } catch (e) {
-        throw new Error('Invalid JSON format in productslist.txt')
-      }
-      
-      if (!Array.isArray(productsData)) {
-        throw new Error('productslist.txt must contain an array of products')
-      }
+      const table = game === 'mlbb' ? 'mlbb_products' : game === 'freefire' ? 'freefire_products' : 'gameshow_products';
+      const { data: products, error } = await supabase
+        .from(table)
+        .select('*')
+        .order('id', { ascending: true });
 
-      const filteredProducts = productsData
-        .filter(product => product.game === game && product.name && product.price && product.type)
-        .map(product => ({
-          id: product.id.toString(),
-          name: product.name,
-          game: product.game,
-          type: product.type,
-          price: parseFloat(product.price),
-          diamonds: product.diamonds ? String(product.diamonds) : undefined,
-          image: product.image || undefined,
-          tagname: product.tagname || undefined,
-          originalPrice: product.originalPrice ? parseFloat(product.originalPrice) : undefined,
-          resellerPrice: product.resellerPrice ? parseFloat(product.resellerPrice) : undefined,
-          discountApplied: product.discountApplied ? parseInt(product.discountApplied) : undefined,
-        }))
+      if (error) throw error;
 
-      if (filteredProducts.length === 0) {
-        console.warn(`No valid products found for game: ${game}`)
+      let transformedProducts: GameProduct[] = products.map(product => ({
+        id: product.id,
+        name: product.name,
+        diamonds: product.diamonds || undefined,
+        price: product.price,
+        currency: product.currency,
+        type: product.type as 'diamonds' | 'subscription' | 'special',
+        game,
+        image: product.image || undefined,
+        code: product.code || undefined
+      }));
+
+      const isReseller = localStorage.getItem('jackstore_reseller_auth') === 'true';
+      if (isReseller) {
+        const { data: resellerPrices, error: resellerError } = await supabase
+          .from('reseller_prices')
+          .select('*')
+          .eq('game', game);
+        if (!resellerError && resellerPrices) {
+          transformedProducts = transformedProducts.map(product => {
+            const resellerPrice = resellerPrices.find(
+              rp => rp.product_id === product.id && rp.game === product.game
+            );
+            return resellerPrice ? { ...product, price: resellerPrice.price, resellerPrice: resellerPrice.price } : product;
+          });
+        }
       }
-
-      setProducts(filteredProducts)
-      setLoading(false)
-      setIsThinking(false)
+      setProducts(transformedProducts);
     } catch (error) {
-      console.error(`Error fetching products for ${game}:`, error.message)
-      setProducts([])
-      setLoading(false)
-      setIsThinking(false)
-      alert(`Failed to load products: ${error.message}. Please check productslist.txt and try again.`)
+      console.error(`Error fetching products for ${game}:`, error);
+      setProducts([]);
+      alert('Failed to load products. Please try again.');
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   const validateAccount = async () => {
-    if (!form.userId || (form.game === "mlbb" && !form.serverId)) return
+    if (!form.userId) return;
 
-    setValidating(true)
-    setValidationResult(null)
+    setValidating(true);
+    setValidationResult(null);
 
     try {
-      let response
-      if (form.game === "mlbb") {
+      let response;
+      if (form.game === 'mlbb') {
+        if (!form.serverId) {
+          setValidating(false);
+          return;
+        }
         response = await axios.get(
-          `https://api.isan.eu.org/nickname/ml?id=${encodeURIComponent(form.userId)}&zone=${encodeURIComponent(form.serverId)}`,
-        )
-      } else if (form.game === "freefire") {
+          `https://api.isan.eu.org/nickname/ml?id=${form.userId}&zone=${form.serverId}`
+        );
+      } else {
         response = await axios.get(
-          `https://rapidasiagame.com/api/v1/idff.php?UserId=${encodeURIComponent(form.userId)}`,
-        )
+          `https://rapidasiagame.com/api/v1/idff.php?UserID=${form.userId}`
+        );
       }
 
-      if (form.game === "mlbb" && response.data.success) {
-        setValidationResult(response.data)
-        setForm((prev) => ({ ...prev, nickname: response.data.name }))
-      } else if (form.game === "freefire" && response.data.status === "success") {
-        setValidationResult(response.data)
-        setForm((prev) => ({ ...prev, nickname: response.data.username }))
+      if (form.game === 'mlbb' && response.data.success) {
+        setValidationResult(response.data);
+        setForm(prev => ({ ...prev, nickname: response.data.name }));
+      } else if (form.game === 'freefire' && response.data.status === 'success') {
+        setValidationResult(response.data);
+        setForm(prev => ({ ...prev, nickname: response.data.username }));
       } else {
-        setValidationResult(null)
-        alert("Account not found. Please check your User ID and Zone ID.")
+        setValidationResult(null);
       }
     } catch (error) {
-      console.error("Failed to validate account:", error.message)
-      setValidationResult(null)
-      alert("Failed to validate account. Please try again.")
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+      console.error('Failed to validate account:', errorMessage);
+      setValidationResult(null);
     } finally {
-      setValidating(false)
+      setValidating(false);
     }
-  }
+  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (paymentCooldown > 0) return
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (paymentCooldown > 0) {
+      console.log('Payment blocked due to cooldown:', paymentCooldown);
+      return;
+    }
 
-    const errors = {}
-    if (!form.userId) errors.userId = "User ID is required"
-    if (form.game === "mlbb" && !form.serverId) errors.serverId = "Zone ID is required"
+    const errors: {userId?: string; serverId?: string; paymentMethod?: string} = {};
+    if (!form.userId) errors.userId = 'User ID is required';
+    if (form.game === 'mlbb' && !form.serverId) errors.serverId = 'Zone ID is required';
     if (!form.product) {
-      alert("Please select a product")
-      return
+      alert('Please select a product');
+      return;
     }
-    if (!selectedPayment) errors.paymentMethod = "Please select a payment method"
-    if (
-      (form.game === "mlbb" && !validationResult?.success) ||
-      (form.game === "freefire" && !validationResult?.status)
-    ) {
-      alert(`Please check your ${form.game === "mlbb" ? "Mobile Legends" : "Free Fire"} account first`)
-      return
+    if (!selectedPayment) errors.paymentMethod = 'Please select a payment method';
+    if (!validationResult?.success && !validationResult?.status) {
+      alert(`Please check your ${form.game === 'mlbb' ? 'Mobile Legends' : 'Free Fire'} account first`);
+      return;
     }
 
-    setFormErrors(errors)
-    if (Object.keys(errors).length > 0) return
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      console.log('Form errors:', errors);
+      return;
+    }
 
-    const productIdentifier = form.product.code || form.product.diamonds || form.product.name
-    const format =
-      form.game === "mlbb"
-        ? `${form.userId} ${form.serverId} ${productIdentifier}`
-        : `${form.userId} 0 ${productIdentifier}`
-    setOrderFormat(format)
-    setShowCheckout(true)
-  }
+    setPaymentStatus('idle');
+    const productIdentifier = form.product.code || form.product.diamonds || form.product.name;
+    const format = form.game === 'mlbb'
+      ? `${form.userId} ${form.serverId} ${productIdentifier}`
+      : `${form.userId} 0 ${productIdentifier}`;
+    setOrderFormat(format);
+    setShowCheckout(true);
+    console.log('Payment modal opened with order:', format);
+  };
 
   const clearSavedInfo = () => {
-    localStorage.removeItem("customerInfo")
-    setForm({ userId: "", serverId: "", product: null, game: form.game, nickname: undefined })
-    setValidationResult(null)
-  }
+    localStorage.removeItem('customerInfo');
+    setForm({ userId: '', serverId: '', product: null, game: form.game, nickname: undefined });
+    setValidationResult(null);
+    setPaymentStatus('idle');
+  };
 
-  const handlePaymentClick = () => {
-    setSelectedPayment((prev) => (prev === "khqr" ? null : "khqr"))
-  }
+  const handleClosePayment = () => {
+    setShowCheckout(false);
+    setPaymentStatus('idle');
+    startPaymentCooldown();
+  };
 
-  const ProductList = ({ products, selectedProduct, onSelect, game }) => {
-    const isReseller = localStorage.getItem('jackstore_reseller_auth') === 'true'
-
-    const groupedProducts = useMemo(() => {
-      const groups = products.reduce((acc, product) => {
-        const type = product.type || 'other'
-        if (!acc[type]) {
-          acc[type] = []
-        }
-        acc[type].push(product)
-        return acc
-      }, {} as Record<string, any[]>)
-
-      if (groups.diamonds) {
-        const diamondSubgroups = groups.diamonds.reduce((acc, product) => {
-          let subgroup: string
-          const nameLower = product.name.toLowerCase()
-
-          if (nameLower.includes('pass') || nameLower.includes('weekly')) {
-            subgroup = 'passes'
-          } else if (/^\d+\s*diamonds?$/.test(nameLower)) {
-            subgroup = 'rawdiamonds'
-          } else {
-            subgroup = 'other'
-          }
-
-          if (!acc[subgroup]) {
-            acc[subgroup] = []
-          }
-          acc[subgroup].push(product)
-          return acc
-        }, {} as Record<string, any[]>)
-
-        Object.keys(diamondSubgroups).forEach((subgroup) => {
-          if (subgroup === 'rawdiamonds') {
-            diamondSubgroups[subgroup].sort((a, b) => (a.diamonds || 0) - (b.diamonds || 0))
-          } else {
-            diamondSubgroups[subgroup].sort((a, b) => a.price - b.price)
-          }
-        })
-
-        groups.diamonds = diamondSubgroups
-      }
-
-      return groups
-    }, [products])
-
-    const getTagIcon = (tagname: string) => {
-      const lowercaseTag = tagname?.toLowerCase() || ''
-      if (lowercaseTag.includes('hot')) return <Flame className="w-3 h-3" />
-      if (lowercaseTag.includes('best')) return <Star className="w-3 h-3" />
-      if (lowercaseTag.includes('new')) return <Sparkles className="w-3 h-3" />
-      if (lowercaseTag.includes('premium')) return <Crown className="w-3 h-3" />
-      return null
-    }
-
-    const renderProductCard = (product) => {
-      const isSelected = selectedProduct?.id === product.id
-      
-      return (
-        <div
-          key={product.id}
-          onClick={() => onSelect(product)}
-          className={`relative group overflow-visible rounded-lg transition-colors cursor-pointer border-2 ${
-            isSelected
-              ? 'border-green-400 bg-green-50'
-              : 'border-gray-200 hover:bg-gray-100'
-          } bg-white px-3 py-3 flex items-center gap-2 text-sm shadow-sm font-poppins min-w-0`}
-        >
-          {isSelected && (
-            <div className="absolute top-[-2px] right-[-2px] w-0 h-10 border-t-[40px] border-t-green-400 border-l-[40px] border-l-transparent">
-              <svg
-                className="absolute top-[-40px] right-[4px] w-5 h-5 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5 11.917L9.724 16.5L19 7.5"
-                />
-              </svg>
-            </div>
-          )}
-
-          {product.tagname && (
-            <div className="absolute -top-2 left-0 right-0 z-20 flex justify-center">
-              <div className="bg-gradient-to-r from-[#e10a0a] to-[#e10a0a] text-white px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap text-xs font-bold shadow-lg shadow-[#e10a0a]/30">
-                {getTagIcon(product.tagname)}
-                <span>{product.tagname.toUpperCase()}</span>
-              </div>
-            </div>
-          )}
-
-          <div className={`flex flex-row items-center gap-2 min-w-0 ${product.tagname ? 'pt-4' : ''}`}>
-            <div className="relative flex-shrink-0">
-              <img
-                src={product.image || 'https://via.placeholder.com/40'}
-                alt={product.name}
-                className="w-10 h-10 rounded-md object-cover shadow-sm flex-shrink-0"
-                loading="lazy"
-              />
-            </div>
-
-            <div className="flex-1 text-left space-y-0.5 min-w-0 overflow-hidden">
-              <h3 className={`font-semibold text-sm leading-tight line-clamp-2 ${
-                isSelected ? 'text-green-500' : 'text-gray-800'
-              }`}>
-                {product.diamonds ? formatItemDisplay(product) : product.name}
-              </h3>
-              {product.diamonds && (
-                <div className="flex items-center gap-1">
-                  {/* Optional: Add diamond icon or text if needed */}
-                </div>
-              )}
-
-              <div className="space-y-0.5">
-                {product.originalPrice && product.discountApplied && product.discountApplied > 0 ? (
-                  <p className="text-xs text-gray-500 line-through">
-                    ${product.originalPrice.toFixed(2)}
-                  </p>
-                ) : null}
-                <p className="text-sm font-bold text-gray-800">
-                  ${product.price.toFixed(2)}
-                  {product.originalPrice && product.discountApplied && product.discountApplied > 0 && (
-                    <span className="text-xs text-green-500 ml-1">
-                      (-{product.discountApplied}%)
-                    </span>
-                  )}
-                </p>
-                {isReseller && product.resellerPrice && (
-                  <p className="text-xs font-medium text-gray-800">
-                    Reseller: ${product.resellerPrice.toFixed(2)}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    }
-
+  if (isAdminRoute) {
     return (
-      <div className="space-y-6 font-poppins">
-        {groupedProducts.special && (
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-              <div className="p-1.5 bg-green-500/10 rounded-lg shadow-sm">
-                <Sparkles className="w-5 h-5 text-green-400" />
-              </div>
-              Best Seller
-            </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
-              {groupedProducts.special.map(renderProductCard)}
-            </div>
-          </div>
-        )}
-
-        {groupedProducts.diamonds && (
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-1 flex items-center gap-2">
-              <div className="p-1.5 bg-blue-500/10 rounded-lg shadow-sm"></div>
-              Saving Packages
-            </h3>
-            <div className="space-y-2">
-              {groupedProducts.diamonds.passes && (
-                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[auto-fit_minmax(120px,1fr)] xl:grid-cols-[auto-fit_minmax(120px,1fr)] gap-2">
-                  {groupedProducts.diamonds.passes.map(renderProductCard)}
-                </div>
-              )}
-              {groupedProducts.diamonds.rawdiamonds && (
-                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[auto-fit_minmax(120px,1fr)] xl:grid-cols-[auto-fit_minmax(120px,1fr)] gap-2">
-                  {groupedProducts.diamonds.rawdiamonds.map(renderProductCard)}
-                </div>
-              )}
-              {groupedProducts.diamonds.other && (
-                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[auto-fit_minmax(120px,1fr)] xl:grid-cols-[auto-fit_minmax(120px,1fr)] gap-2">
-                  {groupedProducts.diamonds.other.map(renderProductCard)}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {groupedProducts.subscription && (
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-              <div className="p-1.5 bg-purple-500/10 rounded-lg shadow-sm">
-                <Crown className="w-5 h-5 text-purple-400" />
-              </div>
-              Subscription Packages
-            </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
-              {groupedProducts.subscription.map(renderProductCard)}
-            </div>
-          </div>
-        )}
-
-        {products.length === 0 && (
-          <div className="text-center py-10">
-            <div className="bg-white/5 rounded-xl p-6 border border-gray-200 shadow-lg">
-              <Sparkles className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-              <p className="text-lg font-medium text-gray-800">
-                No products available for {
-                  game === 'mlbb' ? 'Mobile Legends' :
-                  game === 'mlbb_ph' ? 'Mobile Legends PH' :
-                  game === 'freefire' ? 'Free Fire' :
-                  'Free Fire TH'
-                }.
-              </p>
-              <p className="text-sm text-gray-400 mt-1">
-                Please check back later for new products.
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-    )
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-10 h-10 animate-spin" /> Loading...</div>}>
+        <AdminPage />
+      </Suspense>
+    );
   }
 
-  const PaymentModal = ({ form, orderFormat, onClose, discountPercent }) => {
+  if (isResellerRoute) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 animate-fadeIn">
-        <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl transform transition-all duration-300">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-gray-800">Payment Details</h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
-              <XCircle className="w-6 h-6" />
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold text-gray-700">Order Summary</h3>
-              <p className="text-sm text-gray-600">Game: {form.game === "mlbb" ? "Mobile Legends" : "Free Fire"}</p>
-              <p className="text-sm text-gray-600">User ID: {form.userId}</p>
-              {form.game === "mlbb" && <p className="text-sm text-gray-600">Zone ID: {form.serverId}</p>}
-              <p className="text-sm text-gray-600">Item: {formatItemDisplay(form.product)}</p>
-              <p className="text-lg font-bold text-green-600">Total: ${form.product?.price.toFixed(2)}</p>
-            </div>
-
-            <div className="border-t pt-4">
-              <h3 className="font-semibold text-gray-700 mb-2">Payment Method</h3>
-              <div className="flex items-center gap-2 p-3 border rounded-lg bg-gray-50">
-                <img
-                  src="https://www.daddytopup.com/_next/image?url=%2Fassets%2Fmain%2Fkhqr.webp&w=1920&q=75"
-                  alt="KHQR"
-                  className="w-8 h-8"
-                />
-                <span className="font-medium">ABA KHQR</span>
-              </div>
-            </div>
-
-            <div className="border-t pt-4">
-              <p className="text-xs text-gray-500 mb-4">Order Format: {orderFormat}</p>
-              <button
-                onClick={onClose}
-                className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors duration-300"
-              >
-                Proceed to Payment
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-10 h-10 animate-spin" /> Loading...</div>}>
+        <ResellerPage onLogin={() => { setIsResellerLoggedIn(true); window.location.href = '/'; }} />
+      </Suspense>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-green-500 flex flex-col relative">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@100;200;300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap');
-        body {
-          background-color: #22c55e !important;
-        }
-        .khmer-font {
-          font-family: 'Noto Sans Khmer', sans-serif;
-        }
-        .font-poppins {
-          font-family: 'Poppins', sans-serif;
-        }
-        .bg-green-theme {
-          background-color: #22c55e;
-        }
-        .price-box {
-          background-color: #fef08a;
-          padding: 6px 12px;
-          border-radius: 6px;
-          display: inline-block;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .logo-container {
-          width: 80px;
-          height: 80px;
-          transition: transform 0.3s ease;
-        }
-        .logo-container:hover {
-          transform: scale(1.1);
-        }
-        .logo-image {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
-        .section-header {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 20px;
-        }
-        .section-number {
-          width: 40px;
-          height: 40px;
-          background-color: #ffffff;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 1.5rem;
-          font-weight: bold;
-          color: #16a34a;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .inner-content,
-        .inner-content.payment-section {
-          background-color: #16a34a !important;
-          padding: 20px;
-          border-radius: 12px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          transition: transform 0.3s ease;
-        }
-        .inner-content:hover {
-          transform: translateY(-4px);
-        }
-        .inner-content.products-section {
-          background-color: #22c55e !important;
-          padding: 0;
-          border-radius: 0;
-          box-shadow: none;
-        }
-        .payment-box {
-          background-color: #ffffff;
-          border: 2px solid #16a34a;
-          border-radius: 8px;
-          padding: 12px 16px;
-          margin-bottom: 16px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          position: relative;
-          transition: all 0.3s ease;
-          cursor: pointer;
-        }
-        .payment-box.selected {
-          border-color: #22c55e;
-          background-color: #f0fdf4;
-        }
-        .payment-box.selected::after {
-          content: '✓';
-          position: absolute;
-          right: 12px;
-          top: 50%;
-          transform: translateY(-50%);
-          width: 24px;
-          height: 24px;
-          background-color: #16a34a;
-          color: white;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 14px;
-        }
-        .payment-box:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .payment-content {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          flex: 1;
-        }
-        .payment-image {
-          width: 40px;
-          height: 40px;
-          object-fit: contain;
-          border-radius: 6px;
-        }
-        .payment-text p:first-child {
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: #1f2937;
-        }
-        .payment-text p:last-child {
-          font-size: 0.9rem;
-          color: #4b5563;
-        }
-        .input-field {
-          background-color: #ffffff;
-          color: #1f2937;
-          border: 2px solid #16a34a;
-          padding: 10px;
-          border-radius: 6px;
-          width: 100%;
-          text-align: center;
-          transition: border-color 0.3s ease;
-        }
-        .input-field:focus {
-          border-color: #22c55e;
-          outline: none;
-          box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
-        }
-        .mlbb-form4 {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          background-color: #16a34a;
-          padding: 12px;
-          border-radius: 12px;
-          width: 100%;
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          z-index: 1000;
-          box-shadow: 0 -4px 12px rgba(0, 0,0,0.2);
-        }
-        .mlbb-container43 {
-          display: flex;
-          flex-direction: column;
-          color: #fff;
-        }
-        .mlbb-text30, .mlbb-text33 {
-          font-size: 15px;
-          margin-bottom: 6px;
-          color: #fff;
-        }
-        .mlbb-text32, .mlbb-text35 {
-          font-weight: bold;
-          margin-left: 6px;
-          color: #fef08a;
-        }
-        .mlbb-container44 {
-          display: flex;
-          justify-content: flex-end;
-        }
-        .mlbb-button2, .check-id-button {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background-color: #fef08a;
-          color: #1f2937;
-          padding: 12px 28px;
-          border-radius: 8px;
-          border: 2px solid #16a34a;
-          cursor: pointer;
-          font-size: 16px;
-          font-weight: 700;
-          transition: all 0.3s ease;
-          min-width: 160px;
-          height: 50px;
-        }
-        .mlbb-button2:hover, .check-id-button:hover {
-          background-color: #16a34a;
-          color: #fff;
-          border-color: #fef08a;
-        }
-        .mlbb-button2:disabled, .check-id-button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-        .mlbb-button2:disabled:hover, .check-id-button:disabled:hover {
-          background-color: #fef08a;
-          color: #1f2937;
-          border-color: #16a34a;
-        }
-        .mlbb-icon64 {
-          margin-right: 8px;
-        }
-        .mlbb-text36, .check-id-text {
-          text-transform: uppercase;
-          color: #1f2937;
-        }
-        .mlbb-button2:hover .mlbb-text36, .check-id-button:hover .check-id-text {
-          color: #fff;
-        }
-        .game-card {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          background: linear-gradient(135deg, #16a34a, #22c55e);
-          border-radius: 16px;
-          padding: 20px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-          position: relative;
-          overflow: hidden;
-        }
-        .game-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-        .game-card.disabled {
-          cursor: not-allowed;
-          opacity: 0.7;
-        }
-        .game-card.disabled:hover {
-          transform: none;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-        .game-image {
-          width: 100%;
-          max-width: 220px;
-          min-width: 180px;
-          aspect-ratio: 1 / 1;
-          object-fit: contain;
-          border-radius: 12px;
-          transition: transform 0.3s ease;
-        }
-        .game-card:hover .game-image {
-          transform: scale(1.05);
-        }
-        .game-container {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-          gap: 1.5rem;
-          justify-content: center;
-          width: 100%;
-          max-width: 1200px;
-          padding-bottom: 2rem;
-        }
-        .coming-soon {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          background-color: rgba(0, 0, 0, 0.85);
-          color: #fef08a;
-          padding: 10px 20px;
-          border-radius: 6px;
-          font-size: 1.1rem;
-          font-weight: bold;
-          text-align: center;
-          text-transform: uppercase;
-        }
-        .banner-slider {
-          background: linear-gradient(135deg, #16a34a, #22c55e);
-          border-radius: 16px;
-          overflow: hidden;
-          margin-bottom: 2.5rem;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-        .popular-section {
-          background: linear-gradient(135deg, #16a34a, #22c55e);
-          border-radius: 16px;
-          padding: 24px;
-          margin-bottom: 2.5rem;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-        .popular-card {
-          background: rgba(255, 255, 255, 0.15);
-          border-radius: 12px;
-          padding: 16px;
-          margin: 8px;
-          backdrop-filter: blur(12px);
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          transition: transform 0.3s ease;
-        }
-        .popular-card:hover {
-          transform: translateY(-4px);
-        }
-        @media (max-width: 480px) {
-          .game-container {
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 1rem;
+    <div className="min-h-screen bg-cover bg-center flex flex-col" style={{ backgroundImage: `url("${storeConfig.backgroundImageUrl}")` }}>
+      <style>
+        {`
+          @keyframes glow {
+            0% { box-shadow: 0 0 10px rgba(231, 42, 245, 0.5), 0 0 20px rgba(231, 42, 245, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(231, 42, 245, 0.8), 0 0 30px rgba(231, 42, 245, 0.5); }
+            100% { box-shadow: 0 0 10px rgba(231, 42, 245, 0.5), 0 0 20px rgba(231, 42, 245, 0.3); }
           }
-          .game-image {
-            max-width: 140px;
-            min-width: 140px;
+          .glow-effect {
+            animation: glow 2s infinite;
           }
-          .game-card h3 {
-            font-size: 0.9rem;
-            color: #ffffff;
+          .mlbb-form4 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #5aff4a;
+            padding: 10px;
+            border-radius: 8px;
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
           }
-        }
-        @media (min-width: 481px) and (max-width: 768px) {
-          .game-container {
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 1.25rem;
+          .mlbb-container43 {
+            display: flex;
+            flex-direction: column;
+            color: #fff;
           }
-          .game-image {
-            max-width: 160px;
-            min-width: 160px;
+          .mlbb-text30, .mlbb-text33 {
+            font-size: 14px;
+            margin-bottom: 5px;
           }
-          .game-card h3 {
-            font-size: 0.95rem;
-            color: #ffffff;
+          .mlbb-text32, .mlbb-text35 {
+            font-weight: bold;
+            margin-left: 5px;
           }
-        }
-        @media (min-width: 769px) {
-          .game-container {
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1.5rem;
+          .mlbb-container44 {
+            display: flex;
+            justify-content: flex-end;
           }
-          .game-image {
-            max-width: 220px;
-            min-width: 180px;
+          .mlbb-button2 {
+            display: flex;
+            align-items: center;
+            background-color: #fff;
+            color: #5aff4a;
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: 2px solid #5aff4a;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.3s, color 0.3s;
           }
-          .game-card h3 {
-            font-size: 1rem;
-            color: #ffffff;
+          .mlbb-button2:hover {
+            background-color: #ff1493;
+            color: #fff;
           }
-        }
-        .social-dropdown {
-          position: relative;
-        }
-        .social-menu {
-          position: absolute;
-          top: 100%;
-          right: 0;
-          background-color: #ffffff;
-          border-radius: 8px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-          display: flex;
-          flex-direction: column;
-          padding: 12px;
-          z-index: 1000;
-          transform: translateY(4px);
-          transition: all 0.3s ease;
-        }
-        .social-menu a {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          padding: 10px;
-          color: #1f2937;
-          text-decoration: none;
-          transition: all 0.2s ease;
-          border-radius: 6px;
-        }
-        .social-menu a:hover {
-          background-color: #f0f0f0;
-          color: #16a34a;
-        }
-        .products-section, .products-section * {
-          background-color: #22c55e !important;
-        }
-        .loading-container {
-          background-color: #22c55e !important;
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-in-out;
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+          .mlbb-button2:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+          .mlbb-icon64 {
+            margin-right: 8px;
+          }
+          .mlbb-text36 {
+            text-transform: uppercase;
+          }
+          .payment-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #5aff4a;
+            padding: 10px;
+            border-radius: 8px;
+            width: 100%;
+            height: 60px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+          }
+          .payment-option.selected {
+            background-color: #ff1493;
+          }
+          .payment-option-content {
+            display: flex;
+            align-items: center;
+            color: #fff;
+          }
+          .payment-option img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+          }
+          .payment-option-text {
+            font-size: 16px;
+            font-weight: bold;
+          }
+          .payment-option-subtext {
+            font-size: 12px;
+          }
+          .selection-circle {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+          }
+          .selection-circle.selected {
+            background-color: #fff;
+          }
+          .main-top {
+            display: flex;
+            align-items: center;
+            background-color: #5aff4a;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+          }
+          .img-cover {
+            flex: 0 0 auto;
+            margin-right: 10px;
+          }
+          .img-cover img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            border-radius: 8px;
+          }
+          .content-bloc {
+            flex: 1;
+            color: #fff;
+          }
+          .title {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0;
+            color: #fff;
+          }
+          .list {
+            list-style: none;
+            padding: 0;
+            margin: 5px 0 0 0;
+          }
+          .sub {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+          }
+          .text {
+            color: #fff;
+          }
+          .p-content {
+            font-size: 14px;
+            color: #fff;
+            margin: 10px 0;
+          }
+          .kh-font {
+            font-family: 'Khmer', sans-serif;
+            font-size: 10px;
+            color: #fff;
+          }
+          .banner-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-bottom: 16px;
+          }
+        `}
+      </style>
 
-      <nav className="bg-green-600 text-white p-4 shadow-xl sticky top-0 z-50 flex items-center justify-between">
-        <a href="/" className="flex items-center">
-          <div className="logo-container">
-            <img
-              src="https://i.pinimg.com/736x/3d/ba/c9/3dbac9cb5059676aa310b165e8ed6804.jpg"
-              alt="Logo"
-              className="logo-image"
-            />
+      <nav className="bg-gradient-to-r from-purple-600 to-green-500 text-white p-4 sticky top-0 z-50">
+        <div className="container mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <img src={storeConfig.logoUrl} alt="Zado Store" className="w-10 h-10 rounded-full" />
+            <span className="text-xl font-bold">Zado STORE</span>
           </div>
-        </a>
-        <div className="flex items-center w-1/2 max-w-md">
-          <div className="relative w-full">
-            <input
-              type="text"
-              placeholder="Search games or products..."
-              className="w-full pl-12 pr-4 py-2 rounded-full bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
-            />
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
-          </div>
-        </div>
-        <div className="social-dropdown">
-          <button
-            onClick={() => setShowSocialDropdown(!showSocialDropdown)}
-            className="text-white hover:text-gray-200 transition-colors flex items-center gap-2 bg-green-700 px-4 py-2 rounded-lg"
-          >
-            <MessageCircle className="w-6 h-6" />
-            <span>Contact Us</span>
-          </button>
-          {showSocialDropdown && (
-            <div className="social-menu">
-              <a
-                href="https://www.facebook.com/share/1CVHbXejqR/?mibextid=wwXIfr"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Facebook className="w-5 h-5" />
-                Facebook
-              </a>
-              <a href="https://t.me/kakrona_168" target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="w-5 h-5" />
-                Telegram
-              </a>
+          <div className="flex-1 max-w-md mx-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search"
+                className="w-full pl-10 pr-4 py-2 rounded-lg bg-white text-black"
+              />
             </div>
-          )}
+          </div>
+          <div className="flex items-center gap-3">
+            <button className="flex flex-col justify-between h-6 w-8">
+              <span className="bg-white h-1 w-full rounded"></span>
+              <span className="bg-white h-1 w-full rounded"></span>
+              <span className="bg-white h-1 w-full rounded"></span>
+            </button>
+            <button className="bg-white text-black px-4 py-2 rounded-lg">Login</button>
+          </div>
         </div>
       </nav>
 
-      {isThinking && (
-        <div className="flex items-center justify-center py-3 bg-green-700 text-white">
-          <Loader2 className="w-6 h-6 animate-spin text-white" />
-          <span className="ml-2 text-sm font-medium">Loading...</span>
-        </div>
-      )}
-
       <div className="flex-grow">
-        {/* Banner Slider */}
-        <div className="container mx-auto px-4 py-8">
-          <div className="banner-slider">
-            <div className="relative h-56 md:h-72 lg:h-80 overflow-hidden">
-              <img src="https://i.imgur.com/mWkJX0f.png" alt="Banner" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                <div className="text-center text-white">
-                  <h2 className="text-3xl md:text-5xl font-bold mb-3 animate-fadeIn">LUFFY TOPUP</h2>
-                  <p className="text-base md:text-xl">Your trusted platform for instant gaming top-ups</p>
-                </div>
+        {!showTopUp ? (
+          <main className="px-4 py-4">
+            <div className="flex flex-col items-center">
+              {/* Banner Image Added Here */}
+              <div className="w-full max-w-4xl mb-8">
+                <img
+                  src="https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-05-29_00-33-21.jpg"
+                  alt="Banner"
+                  className="banner-image"
+                />
               </div>
-            </div>
-          </div>
-        </div>
-
-        {showTopUp ? (
-          <main className="container mx-auto px-4 py-10">
-            <div className="max-w-5xl mx-auto space-y-8">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <button
-                  onClick={() => {
-                    setShowTopUp(false)
-                    setShowCheckout(false)
-                    setValidationResult(null)
-                    setForm((prev) => ({ ...prev, nickname: undefined }))
-                  }}
-                  className="text-white hover:text-gray-200 transition-colors text-sm flex items-center gap-2 bg-green-600 px-5 py-3 rounded-lg shadow-md hover:bg-green-700"
-                >
-                  <ArrowLeft className="w-5 h-5" /> Back to Games
-                </button>
-                {(form.userId || form.serverId) && (
-                  <button
-                    onClick={clearSavedInfo}
-                    className="text-white hover:text-gray-200 transition-colors text-sm flex items-center gap-2 bg-red-600 px-5 py-3 rounded-lg shadow-md hover:bg-red-700"
+              <div className="w-full max-w-4xl mb-8">
+                <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                  🔥 Popular!
+                  <span className="text-sm font-normal text-gray-600">The most popular products today.</span>
+                </h2>
+                <div className="flex flex-row gap-4 overflow-x-auto pb-4">
+                  <div
+                    onClick={() => {
+                      setForm(prev => ({ ...prev, game: 'mlbb' }));
+                      setShowTopUp(true);
+                    }}
+                    className="w-[240px] h-[100px] bg-gray-200 rounded-lg shadow-lg flex items-center cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-gray-400"
                   >
-                    <XCircle className="w-5 h-5" /> Clear Saved Info
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="p-6 rounded-xl">
-              <div className="inner-content">
-                <div className="section-header">
-                  <div className="section-number">01</div>
-                  <h3 className="text-xl font-semibold text-white khmer-font">បញ្ចូលព័ត៌មានរបស់អ្នក</h3>
-                </div>
-                <form className="space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <input
-                        type="text"
-                        name="userId"
-                        className="input-field"
-                        placeholder="Enter User ID"
-                        value={form.userId}
-                        onChange={(e) => {
-                          const value = e.target.value.trim().replace(/[^0-9]/g, "")
-                          setForm((prev) => ({ ...prev, userId: value, nickname: undefined }))
-                          setValidationResult(null)
-                          setFormErrors((prev) => ({ ...prev, userId: undefined }))
-                        }}
-                      />
-                      {formErrors.userId && <p className="text-red-300 text-xs mt-2">{formErrors.userId}</p>}
-                    </div>
-                    {form.game === "mlbb" && (
-                      <div>
-                        <input
-                          type="text"
-                          name="zoneId"
-                          className="input-field"
-                          placeholder="Enter Zone ID"
-                          value={form.serverId}
-                          onChange={(e) => {
-                            const value = e.target.value.trim().replace(/[^0-9]/g, "")
-                            setForm((prev) => ({ ...prev, serverId: value, nickname: undefined }))
-                            setValidationResult(null)
-                            setFormErrors((prev) => ({ ...prev, serverId: undefined }))
-                          }}
-                        />
-                        {formErrors.serverId && <p className="text-red-300 text-xs mt-2">{formErrors.serverId}</p>}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-                    <button
-                      type="button"
-                      onClick={validateAccount}
-                      disabled={validating || !form.userId || (form.game === "mlbb" && !form.serverId)}
-                      className="check-id-button w-full sm:w-auto"
-                    >
-                      {validating ? (
-                        <>
-                          <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                          <span className="check-id-text">Checking...</span>
-                        </>
-                      ) : (
-                        <span className="check-id-text">Check ID</span>
-                      )}
-                    </button>
-                    {(validationResult?.success || validationResult?.status) && (
-                      <div className="flex items-center gap-2 text-green-300 text-sm">
-                        <CheckCircle2 className="w-5 h-5" />
-                        <span>Account found: {form.nickname}</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="mt-4 text-white text-sm khmer-font leading-relaxed">
-                    ដើម្បីឃើញ User ID សូមចូលទៅក្នុងហ្គេម ហើយចុចរូបភាព Avatar នៅខាងឆ្វេងអេក្រង់កញ្ចក់ ហើយចុចទៅកាន់ "Check ID" ពេលនោះ User
-                    ID នឹងបង្ហាញឲ្យឃើញ បន្ទាប់មកសូមយក User ID នោះមកបំពេញ។ ឧទាហរណ៍: User ID: 123456789, Zone ID: 1234។
-                  </div>
-                </form>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-xl">
-              <div className="inner-content products-section">
-                <div className="section-header">
-                  <div className="section-number">02</div>
-                  <h3 className="text-xl font-semibold text-white khmer-font">ផលិតផល Diamond</h3>
-                </div>
-                {loading ? (
-                  <div className="flex justify-center items-center py-10 loading-container">
-                    <Loader2 className="w-12 h-12 animate-spin text-white" />
-                    <span className="ml-3 text-white text-lg">Loading products...</span>
-                  </div>
-                ) : (
-                  <ProductList
-                    products={products}
-                    selectedProduct={form.product}
-                    onSelect={(product) => setForm((prev) => ({ ...prev, product }))}
-                    game={form.game}
-                  />
-                )}
-              </div>
-            </div>
-
-            <div className="p-6 rounded-xl">
-              <div className="inner-content payment-section">
-                <div className="section-header">
-                  <div className="section-number">03</div>
-                  <h3 className="text-xl font-semibold text-white khmer-font">វិធីបង់ប្រាក់</h3>
-                </div>
-                <div
-                  className={`payment-box ${selectedPayment === "khqr" ? "selected" : ""}`}
-                  onClick={handlePaymentClick}
-                >
-                  <div className="payment-content">
                     <img
-                      src="https://www.daddytopup.com/_next/image?url=%2Fassets%2Fmain%2Fkhqr.webp&w=1920&q=75"
-                      alt="KHQR"
-                      className="payment-image"
+                      src="https://play-lh.googleusercontent.com/M9_okpLdBz0unRHHeX7FcZxEPLZDIQNCGEBoql7MxgSitDL4wUy4iYGQxfvqYogexQ"
+                      alt="Mobile Legends"
+                      className="w-16 h-16 ml-4 rounded-lg object-contain"
                     />
-                    <div className="payment-text">
-                      <p>ABA KHQR</p>
-                      <p className="khmer-font">ស្កែនដើម្បីបង់ប្រាក់ជាមួយកម្មវិធីធនាគារណាមួយ</p>
+                    <div className="ml-4 flex-1 pr-4">
+                      <h3 className="text-sm font-semibold text-black break-words leading-tight">
+                        Mobile Legends
+                      </h3>
+                      <p className="text-xs text-gray-600 break-words">Moonton</p>
+                    </div>
+                  </div>
+
+                  <div
+                    onClick={() => {
+                      setForm(prev => ({ ...prev, game: 'freefire' }));
+                      setShowTopUp(true);
+                    }}
+                    className="w-[240px] h-[100px] bg-gray-200 rounded-lg shadow-lg flex items-center cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-gray-400"
+                  >
+                    <img
+                      src="https://play-lh.googleusercontent.com/WWcssdzTZvx7Fc84lfMpVuyMXg83_PwrfpgSBd0IID_IuupsYVYJ34S9R2_5x57gHQ"
+                      alt="Free Fire"
+                      className="w-16 h-16 ml-4 rounded-lg object-contain"
+                    />
+                    <div className="ml-4 flex-1 pr-4">
+                      <h3 className="text-sm font-semibold text-black break-words leading-tight">
+                        Free Fire
+                      </h3>
+                      <p className="text-xs text-gray-600 break-words">Garena</p>
                     </div>
                   </div>
                 </div>
-                {formErrors.paymentMethod && <p className="text-red-300 text-xs mt-2">{formErrors.paymentMethod}</p>}
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="accept"
-                    className="w-5 h-5 text-green-500 border-white rounded focus:ring-green-500"
-                    checked
-                    disabled
-                  />
-                  <label htmlFor="accept" className="text-white text-sm khmer-font">
-                    ខ្ញុំយល់ព្រមតាម{" "}
-                    <a href="/term-and-policy" className="text-green-300 hover:underline">
-                      លក្ខខណ្ឌ
-                    </a>
-                  </label>
+              </div>
+              <div className="w-full max-w-4xl">
+                <h2 className="text-2xl font-bold text-white mb-6 drop-shadow-[0_0_10px_rgba(255,105,180,0.8)]">
+                  📱 ផលិតផលដែលមាន 🔥
+                </h2>
+                <div className="flex flex-row gap-4 overflow-x-auto pb-4 md:flex-wrap md:justify-center md:overflow-x-hidden">
+                  <div
+                    onClick={() => {
+                      setForm(prev => ({ ...prev, game: 'mlbb' }));
+                      setShowTopUp(true);
+                    }}
+                    className="flex flex-col items-center cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-green-400"
+                  >
+                    <div className="relative w-32 h-32 flex items-center justify-center">
+                      <div className="absolute inset-0 w-32 h-32 bg-white border-2 border-gray-300 rounded-full shadow-lg z-0"></div>
+                      <img
+                        src={storeConfig.games.mlbb.logoUrl}
+                        alt="Mobile Legends"
+                        className="w-24 h-24 rounded-md object-contain border-4 border-white shadow-md relative z-10"
+                      />
+                    </div>
+                    <div className="w-32 mt-2">
+                      <h3 className="text-sm font-semibold text-black text-center break-words">
+                        Mobile Legends
+                      </h3>
+                    </div>
+                  </div>
+                  <div
+                    onClick={() => {
+                      setForm(prev => ({ ...prev, game: 'freefire' }));
+                      setShowTopUp(true);
+                    }}
+                    className="flex flex-col items-center cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-green-400"
+                  >
+                    <div className="relative w-32 h-32 flex items-center justify-center">
+                      <div className="absolute inset-0 w-32 h-32 bg-white border-2 border-gray-300 rounded-full shadow-lg z-0"></div>
+                      <img
+                        src={storeConfig.games.freefire.logoUrl}
+                        alt="Free Fire"
+                        className="w-24 h-24 rounded-md object-contain border-4 border-white shadow-md relative z-10"
+                      />
+                    </div>
+                    <div className="w-32 mt-2">
+                      <h3 className="text-sm font-semibold text-black text-center break-words">
+                        Free Fire
+                      </h3>
+                    </div>
+                  </div>
                 </div>
-                {form.product && (
-                  <form className="mlbb-form4" onSubmit={handleSubmit}>
-                    <div className="mlbb-container43">
-                      <span id="price-show" className="mlbb-text30">
-                        <span>Total:</span>
-                        <span className="mlbb-text32">${form.product ? form.product.price.toFixed(2) : "0.00"}</span>
-                      </span>
-                      <span id="item-show" className="mlbb-text33">
-                        <span>Item:</span>
-                        <span className="mlbb-text35">{formatItemDisplay(form.product)}</span>
-                      </span>
-                    </div>
-                    <div className="mlbb-container44">
-                      <button
-                        type="submit"
-                        disabled={
-                          (!validationResult?.success && !validationResult?.status) ||
-                          !form.product ||
-                          paymentCooldown > 0 ||
-                          !selectedPayment
-                        }
-                        className="mlbb-button2 button"
-                      >
-                        <svg width="24" height="24" viewBox="0 0 24 24" className="mlbb-icon64">
-                          <g fill="none" fillRule="evenodd">
-                            <path d="m12.calendar_month 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.1-.01z"></path>
-                            <path
-                              d="M5 6.5a.5.5 0 1 1 .5-.5H16a1 1 0 1 0 0-2H5.5A2.5 2.5 0 0 0 3 6.5V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5.5a.5.5 0 0 1-.5-.5M15.5 15a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3"
-                              fill="#16a34a"
-                            ></path>
-                          </g>
-                        </svg>
-                        <span className="mlbb-text36">Pay Now</span>
-                      </button>
-                    </div>
-                  </form>
-                )}
               </div>
             </div>
           </main>
         ) : (
           <main className="container mx-auto px-4 py-8">
-            {/* Popular Section */}
-            <div className="popular-section mb-10">
-              <div className="flex items-center gap-4 mb-6">
-                <svg width="40" height="38" viewBox="0 0 24 24" className="text-white">
-                  <path
-                    d="M17.66 11.2c-.23-.3-.51-.56-.77-.82c-.67-.6-1.43-1.03-2.07-1.66C13.33 7.26 13 4.85 13.95 3c-.95.23-1.78.75-2.49 1.32c-2.59 2.08-3.61 5.75-2.39 8.9c.04.1.08.2.08.33c0 .22-.15.42-.35.5c-.23.1-.47.04-.66-.12a.6.6 0 0 1-.14-.17c-1.13-1.43-1.31-3.48-.55-5.12C5.78 10 4.87 12.3 5 14.47c.06.5.12 1 .29 1.5c.14.6.41 1.2.71 1.73c1.08 1.73 2.95 2.97 4.96 3.22c2.14.27 4.43-.12 6.07-1.6c1.83-1.66 2.47-4.32 1.53-6.6l-.13-.26c-.21-.46-.77-1.26-.77-1.26m-3.16 6.3c-.28.24-.74.5-1.1.6c-1.12.4-2.24-.16-2.9-.82c1.19-.28 1.9-1.16 2.11-2.05c.17-.8-.15-1.46-.28-2.23c-.12-.74-.1-1.37.17-2.06c.19.38.39.76.63 1.06c.77 1 1.98 1.44 2.24 2.8c.04.14.06.28.06.43c.03.82-.33 1.72-.93 2.27"
-                    fill="currentColor"
-                  />
-                </svg>
-                <h1 className="text-3xl font-bold text-white">Popular Games</h1>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                <div className="popular-card text-center">
-                  <img
-                    src="https://downloadr2.apkmirror.com/wp-content/uploads/2024/05/42/6632d219632fb_com.mobile.legends.png"
-                    alt="Mobile Legends"
-                    className="w-20 h-20 mx-auto mb-3 rounded-lg"
-                  />
-                  <h3 className="text-white font-semibold text-lg">Mobile Legends</h3>
-                  <p className="text-green-200 text-sm">Instant Top-up</p>
-                </div>
-
-                <div className="popular-card text-center">
-                  <img
-                    src="https://play-lh.googleusercontent.com/nIV146CRuDyVKmYaXWtFR0BK7iZFqq4UyQPfY_iZOqolvk-USWmG9YupzKWDsN59fm6K=w240-h480-rw"
-                    alt="Free Fire"
-                    className="w-20 h-20 mx-auto mb-3 rounded-lg"
-                  />
-                  <h3 className="text-white font-semibold text-lg">Free Fire</h3>
-                  <p className="text-green-200 text-sm">Instant Top-up</p>
-                </div>
-
-                <div className="popular-card text-center opacity-70">
-                  <img
-                    src="https://upload.wikimedia.org/wikipedia/en/thumb/4/44/PlayerUnknown%27s_Battlegrounds_Mobile.webp/180px-PlayerUnknown%27s_Battlegrounds_Mobile.webp.png"
-                    alt="PUBG Mobile"
-                    className="w-20 h-20 mx-auto mb-3 rounded-lg"
-                  />
-                  <h3 className="text-white font-semibold text-lg">PUBG Mobile</h3>
-                  <p className="text-green-200 text-sm">Coming Soon</p>
-                </div>
-
-                <div className="popular-card text-center opacity-70">
-                  <img
-                    src="https://i.pinimg.com/736x/34/66/03/346603fe9ff5b071463b03e550dac76a.jpg"
-                    alt="HOK"
-                    className="w-20 h-20 mx-auto mb-3 rounded-lg"
-                  />
-                  <h3 className="text-white font-semibold text-lg">HOK</h3>
-                  <p className="text-green-200 text-sm">Coming Soon</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Games Grid */}
-            <div className="flex flex-col items-center">
-              <div className="game-container">
-                <div
-                  className="game-card"
-                  onClick={() => {
-                    console.log("Setting game to mlbb")
-                    setForm((prev) => ({ ...prev, game: "mlbb" }))
-                    setShowTopUp(true)
+            <div className="max-w-4xl mx-auto space-y-6">
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => { 
+                    setShowTopUp(false); 
+                    setShowCheckout(false); 
+                    setValidationResult(null);
+                    setForm(prev => ({ ...prev, nickname: undefined }));
+                    setPaymentStatus('idle');
                   }}
+                  className="text-white bg-white/10 px-3 py-1.5 rounded-lg flex items-center gap-2"
                 >
-                  <img
-                    src="https://downloadr2.apkmirror.com/wp-content/uploads/2024/05/42/6632d219632fb_com.mobile.legends.png"
-                    alt="Mobile Legends"
-                    className="game-image"
-                  />
-                  <h3 className="text-base font-semibold text-white text-center truncate mt-3">Mobile Legends</h3>
-                  <p className="text-green-200 text-sm text-center">Instant Top-up</p>
-                </div>
-
-                <div
-                  className="game-card"
-                  onClick={() => {
-                    console.log("Setting game to freefire")
-                    setForm((prev) => ({ ...prev, game: "freefire" }))
-                    setShowTopUp(true)
-                  }}
-                >
-                  <img
-                    src="https://play-lh.googleusercontent.com/nIV146CRuDyVKmYaXWtFR0BK7iZFqq4UyQPfY_iZOqolvk-USWmG9YupzKWDsN59fm6K=w240-h480-rw"
-                    alt="Free Fire"
-                    className="game-image"
-                  />
-                  <h3 className="text-base font-semibold text-white text-center truncate mt-3">Free Fire</h3>
-                  <p className="text-green-200 text-sm text-center">Instant Top-up</p>
-                </div>
-
-                <div className="game-card disabled" title="Coming Soon">
-                  <div className="relative">
-                    <img
-                      src="https://upload.wikimedia.org/wikipedia/en/thumb/4/44/PlayerUnknown%27s_Battlegrounds_Mobile.webp/180px-PlayerUnknown%27s_Battlegrounds_Mobile.webp.png"
-                      alt="PUBG Mobile"
-                      className="game-image"
-                    />
-                    <span className="coming-soon">Coming Soon</span>
-                  </div>
-                  <h3 className="text-base font-semibold text-white text-center truncate mt-3">PUBG Mobile</h3>
-                </div>
-
-                <div className="game-card disabled" title="Coming Soon">
-                  <div className="relative">
-                    <img
-                      src="https://i.pinimg.com/736x/34/66/03/346603fe9ff5b071463b03e550dac76a.jpg"
-                      alt="HOK"
-                      className="game-image"
-                    />
-                    <span className="coming-soon">Coming Soon</span>
-                  </div>
-                  <h3 className="text-base font-semibold text-white text-center truncate mt-3">HOK</h3>
-                </div>
+                  <ArrowLeft className="w-4 h-4" /> Back
+                </button>
+                {(form.userId || form.serverId) && (
+                  <button
+                    onClick={clearSavedInfo}
+                    className="text-red-300 bg-red-500/10 px-3 py-1.5 rounded-lg flex items-center gap-2"
+                  >
+                    <XCircle className="w-4 h-4" /> Clear
+                  </button>
+                )}
               </div>
+              <div className="bg-[#85ff79] border-4 border-[#85ff79] rounded-xl p-6 text-white">
+                <div className="main-top">
+                  <div className="img-cover">
+                    <img
+                      src="https://angel-cms.minttopup.xyz/uploads/mlbb_logo_16b189b25f.webp"
+                      alt="mlbb-logo"
+                      loading="lazy"
+                      width="50"
+                      height="50"
+                      className="img"
+                    />
+                  </div>
+                  <div className="content-bloc">
+                    <h1 className="title">Mobile Legend</h1>
+                    <ul className="list">
+                      <li className="sub"><span className="text">សុវត្តិភាព</span></li>
+                      <li className="sub"><span className="text">រហ័ស</span></li>
+                    </ul>
+                  </div>
+                </div>
+                <p>បញ្ចូលព័ត៌មាន</p>
+                <p className="p-content">
+                  ទិញពេជ្រ Mobile Legends: Bang Bang ក្នុងតម្លៃសមរម្យ! តាមរយះអាយឌី ID របស់អ្នក,
+                  ជ្រើសរើសកញ្ចប់ពេជ្យ ដែលអ្នកពេញចិត្តទិញ, ដោយបង់ប្រាក់តាមមធ្យោបាយដែលអ្នកមាន,
+                  ពេជ្រនឹងបញ្ជូនទៅក្នុងគណនេយ្យ MLBB របស់អ្នកក្នុងរយះពេលពីចន្លោះ 10នាទី ដល់ 3ម៉ោង។
+                </p>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-black mb-1">USER ID</label>
+                      <input
+                        type="text"
+                        value={form.userId}
+                        onChange={(e) => {
+                          const value = e.target.value.trim().replace(/[^0-9]/g, '');
+                          setForm(prev => ({ ...prev, userId: value, nickname: undefined }));
+                          setValidationResult(null);
+                          setFormErrors(prev => ({ ...prev, userId: undefined }));
+                        }}
+                        className="w-full rounded-lg bg-white border border-gray-300 px-3 py-2 text-black"
+                        placeholder="Enter your User ID"
+                      />
+                      {formErrors.userId && <p className="text-red-400 text-xs mt-1">{formErrors.userId}</p>}
+                    </div>
+                    {form.game === 'mlbb' && (
+                      <div>
+                        <label className="block text-sm font-medium text-black mb-1">ZONE ID</label>
+                        <input
+                          type="text"
+                          value={form.serverId}
+                          onChange={(e) => {
+                            const value = e.target.value.trim().replace(/[^0-9]/g, '');
+                            setForm(prev => ({ ...prev, serverId: value, nickname: undefined }));
+                            setValidationResult(null);
+                            setFormErrors(prev => ({ ...prev, serverId: undefined }));
+                          }}
+                          className="w-full rounded-lg bg-white border border-gray-300 px-3 py-2 text-black"
+                          placeholder="Enter your Zone ID"
+                        />
+                        {formErrors.serverId && <p className="text-red-400 text-xs mt-1">{formErrors.serverId}</p>}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={validateAccount}
+                      disabled={
+                        !form.userId ||
+                        (form.game === 'mlbb' && !form.serverId) ||
+                        validating
+                      }
+                      className="bg-[#5aff4a] text-white px-4 py-2 rounded-lg hover:bg-[#ff1493] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {validating ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Checking...
+                        </>
+                      ) : (
+                        <>
+                          <Search className="w-4 h-4" />
+                          Check ID
+                        </>
+                      )}
+                    </button>
+                    {(validationResult?.success || validationResult?.status) && (
+                      <div className="flex items-center gap-2 text-green-400 text-sm">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Account found: {form.nickname}</span>
+                      </div>
+                    )}
+                  </div>
+                  <p className="kh-font">
+                    ដើម្បីឃើញ UserID សូមចូលទៅក្នងហ្គេម ហើយចុចរូបភាព Avatar នៅខាងឆ្វេងអេក្រង់កញ្ចក់
+                    ហើយចុចទៅកាន់"Check ID" ពេលនោះ User ID នឹងបង្ហាញឲ្យឃើញ បន្ទាប់មកសូមយក User ID
+                    នោះមកបំពេញ�। ឧទាហរណ៍: User ID: 123456789, Zone ID: 1234។
+                  </p>
+                  <h3 className="text-lg font-semibold text-black">Select Package</h3>
+                  {loading ? (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="w-8 h-8 animate-spin text-black" />
+                    </div>
+                  ) : (
+                    <ProductList
+                      products={products}
+                      selectedProduct={form.product}
+                      onSelect={(product) => setForm(prev => ({ ...prev, product }))}
+                      game={form.game}
+                    />
+                  )}
+                  <h3 className="text-lg font-semibold text-black">Select Payment Method</h3>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div
+                      className={`payment-option ${selectedPayment === 'khqr' ? 'selected' : ''}`}
+                      onClick={() => setSelectedPayment(selectedPayment === 'khqr' ? null : 'khqr')}
+                    >
+                      <div className="payment-option-content">
+                        <img
+                          src="https://www.saktopup.com/_next/image?url=%2Fassets%2Fmain%2Fkhqr-lg.webp&w=1920&q=75"
+                          alt="KHQR"
+                          className="w-40px h-40px object-contain mr-4"
+                        />
+                        <div>
+                          <div className="payment-option-text">ABA KHQR</div>
+                          <div className="payment-option-subtext">Scan to pay with any banking app</div>
+                        </div>
+                      </div>
+                      <div
+                        className={`selection-circle ${selectedPayment === 'khqr' ? 'selected' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedPayment(selectedPayment === 'khqr' ? null : 'khqr');
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                  {formErrors.paymentMethod && <p className="text-red-400 text-xs mt-1">{formErrors.paymentMethod}</p>}
+                </form>
+              </div>
+              {form.product && (
+                <form className="mlbb-form4" onSubmit={handleSubmit}>
+                  <div className="mlbb-container43">
+                    <span id="price-show" className="mlbb-text30">
+                      <span>Total:</span>
+                      <span className="mlbb-text32">${form.product ? form.product.price.toFixed(2) : '0.00'}</span>
+                    </span>
+                    <span id="item-show" className="mlbb-text33">
+                      <span>Item:</span>
+                      <span className="mlbb-text35">{formatItemDisplay(form.product)}</span>
+                    </span>
+                  </div>
+                  <div className="mlbb-container44">
+                    <button
+                      type="submit"
+                      disabled={
+                        (!validationResult?.success && !validationResult?.status) ||
+                        !form.product || 
+                        paymentCooldown > 0 || 
+                        !selectedPayment
+                      }
+                      className="mlbb-button2 button"
+                    >
+                      <svg width="24" height="24" viewBox="0 0 24 24" className="mlbb-icon64">
+                        <g fill="none" fillRule="evenodd">
+                          <path d="m12.calendar_month 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l-.004-.011l.017-.43l-.003-.012l-.10-.01z"></path>
+                          <path d="M5 6.5a.5.5 0 1 1 .5-.5H16a1 1 0 1 0 0-2H5.5A2.5 2.5 0 0 0 3 6.5V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5.5a.5.5 0 0 1-.5-.5M15.5 15a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" fill="currentColor"></path>
+                        </g>
+                      </svg>
+                      <span className="mlbb-text36">Pay Now</span>
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
           </main>
         )}
-
-        <div className="fixed bottom-8 right-8 z-50">
-          <button
-            onClick={() => window.open("https://t.me/sambathjj", "_blank")}
-            className="flex items-center gap-3 bg-white text-gray-800 px-5 py-3 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:bg-green-100"
+        <div className="fixed bottom-6 right-6 z-50">
+          <button 
+            onClick={() => window.open(storeConfig.supportUrl, '_blank')}
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-3 rounded-full"
           >
-            <div className="relative">
-              <div className="absolute inset-0 bg-green-300/30 rounded-full animate-ping opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="text-gray-800">
-                <path fill="none" d="M0 0h24v24H0z" />
-                <path
-                  fill="currentColor"
-                  d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"
-                />
-              </svg>
-            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="text-white">
+              <path fill="none" d="M0 0h24v24H0z"></path>
+              <path fill="currentColor" d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"></path>
+            </svg>
             <span className="font-medium">Support</span>
           </button>
         </div>
-
-        <footer className="bg-green-600 text-white py-6 w-full">
+        <footer className="text-black py-6 bg-white">
           <div className="container mx-auto px-4 text-center">
-            <div className="mb-4">
-              <p className="font-bold text-white text-lg">Contact Us:</p>
-              <div className="flex justify-center gap-6 mt-2">
-                <a
-                  href="https://www.facebook.com/share/1CVHbXejqR/?mibextid=wwXIfr"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white hover:text-green-200 transition-colors"
-                >
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2.04c-5.5 0-10 4.49-10 10.02 0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89 1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7a10 10 0 0 0 8.44-9.9c0-5.53-4.5-10.02-10-10.02" />
-                  </svg>
-                </a>
-                <a
-                  href="https://t.me/kakronabns"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white hover:text-green-200 transition-colors"
-                >
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6m4.5 5.4c-.6.1-1.2.3-1.8.5v6.2c0 2.5-2 4.5-4.5 4.5S6 16.6 6 14.1s2-4.5 4.5-4.5c.3 0 .6 0 .9.1v-2.2c-.3 0-.6-.1-.9-.1-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6V8.9c.6-.4 1.2-.7 1.8-.9v-1.6z" />
-                  </svg>
-                </a>
-              </div>
+            <h4 className="text-lg font-semibold text-gray-800 mb-4">Contact Us</h4>
+            <div className="flex justify-center space-x-4 mb-6">
+              <a href={storeConfig.fb || "https://facebook.com"} target="_blank" rel="noopener noreferrer" className="text-black">
+                <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2.04c-5.5 0-10 4.49-10 10.02 0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89 1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7a10 10 0 0 0 8.44-9.9c0-5.53-4.5-10.02-10-10.02"></path>
+                </svg>
+              </a>
+              <a href={storeConfig.supportUrl} target="_blank" rel="noopener noreferrer" className="text-black">
+                <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 10 6.48 10 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.94-.65-.33-1.01.21-1.59.14-.15 2.71-2.48 2.76-2.69.01-.05.01-.10-.02-.14-.04-.05-.10-.03-.14-.02-.06.02-1.49.95-4.22 2.79-.40.27-.76.41-1.08.4-.36-.01-1.04-.20-1.55-.37-.63-.20-1.13-.31-1.09-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.12.27"></path>
+                </svg>
+              </a>
             </div>
-            <div className="mb-4">
-              <p className="font-bold text-white text-lg">Accept Payment:</p>
-              <div className="flex justify-center mt-2">
-                <img
-                  alt="khqr"
-                  src="https://www.daddytopup.com/_next/image?url=%2Fassets%2Fmain%2Fkhqr.webp&w=828&q=75"
-                  className="w-[80px] h-auto"
-                />
-              </div>
+            <p className="text-sm text-gray-600 mb-4">We accept payment</p>
+            <img src="https://via.placeholder.com/80x80.png?text=Payment" alt="Payment Method" className="w-16 h-16 rounded-lg mx-auto mb-6" />
+            <div className="flex justify-center space-x-2 mb-4">
+              <a href="#" className="text-green-500 text-sm">Privacy Policy</a>
+              <span className="text-gray-600">|</span>
+              <a href="#" className="text-green-500 text-sm">Terms and Condition</a>
             </div>
-            <div>
-              <p className="text-sm">
-                <a href="/term-and-policy" className="text-white hover:text-green-200">
-                  <span className="font-bold underline" style={{ textUnderlineOffset: "5px" }}>
-                    PRIVACY POLICY
-                  </span>{" "}
-                  |{" "}
-                  <span className="font-bold underline" style={{ textUnderlineOffset: "5px" }}>
-                    TERMS AND CONDITION
-                  </span>
-                </a>
-              </p>
-              <p className="text-sm text-white mt-2">COPYRIGHT © LUFFY TOPUP. ALL RIGHTS RESERVED.</p>
-            </div>
+            <p className="text-gray-600 text-sm">Copyright © The Zado Store. ALL Rights Reserved.</p>
           </div>
         </footer>
-
         {showCheckout && (
           <PaymentModal
             form={form}
             orderFormat={orderFormat}
-            onClose={() => {
-              setShowCheckout(false)
-              startPaymentCooldown()
-            }}
+            onClose={handleClosePayment}
             discountPercent={0}
+            setPaymentStatus={setPaymentStatus}
+          />
+        )}
+        {storeConfig.popupBanner.enabled && showPopupBanner && (
+          <PopupBanner
+            image={storeConfig.popupBanner.image}
+            onClose={() => setShowPopupBanner(false)}
           />
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
