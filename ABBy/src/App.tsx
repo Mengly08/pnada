@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Loader2, XCircle, ArrowLeft, Search, Facebook, MessageCircle, CheckCircle2 } from "lucide-react"
+import { useState, useEffect, useMemo } from "react"
+import { Loader2, XCircle, ArrowLeft, Search, Facebook, MessageCircle, CheckCircle2, ShoppingCart, Star, Sparkles, Flame, Crown } from "lucide-react"
 import axios from "axios"
 
 const App = () => {
@@ -127,15 +127,40 @@ const App = () => {
     setIsThinking(true)
     try {
       const response = await fetch('/productslist.txt')
-      if (!response.ok) throw new Error('Failed to fetch products')
+      if (!response.ok) throw new Error(`Failed to fetch products: ${response.status} ${response.statusText}`)
       const text = await response.text()
-      const productsData = JSON.parse(text)
+      if (!text.trim()) throw new Error('productslist.txt is empty')
       
-      const filteredProducts = productsData.filter(product => product.game === game).map(product => ({
-        ...product,
-        id: product.id.toString(),
-        price: parseFloat(product.price)
-      }))
+      let productsData
+      try {
+        productsData = JSON.parse(text)
+      } catch (e) {
+        throw new Error('Invalid JSON format in productslist.txt')
+      }
+      
+      if (!Array.isArray(productsData)) {
+        throw new Error('productslist.txt must contain an array of products')
+      }
+
+      const filteredProducts = productsData
+        .filter(product => product.game === game && product.name && product.price && product.type)
+        .map(product => ({
+          id: product.id.toString(),
+          name: product.name,
+          game: product.game,
+          type: product.type,
+          price: parseFloat(product.price),
+          diamonds: product.diamonds ? String(product.diamonds) : undefined,
+          image: product.image || undefined,
+          tagname: product.tagname || undefined,
+          originalPrice: product.originalPrice ? parseFloat(product.originalPrice) : undefined,
+          resellerPrice: product.resellerPrice ? parseFloat(product.resellerPrice) : undefined,
+          discountApplied: product.discountApplied ? parseInt(product.discountApplied) : undefined,
+        }))
+
+      if (filteredProducts.length === 0) {
+        console.warn(`No valid products found for game: ${game}`)
+      }
 
       setProducts(filteredProducts)
       setLoading(false)
@@ -145,7 +170,7 @@ const App = () => {
       setProducts([])
       setLoading(false)
       setIsThinking(false)
-      alert("Failed to load products. Please try again later.")
+      alert(`Failed to load products: ${error.message}. Please check productslist.txt and try again.`)
     }
   }
 
@@ -229,37 +254,231 @@ const App = () => {
   }
 
   const ProductList = ({ products, selectedProduct, onSelect, game }) => {
-    return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-4">
-        {products.map((product) => (
-          <div
-            key={product.id}
-            className={`
-              bg-white rounded-lg p-4 cursor-pointer transition-all duration-300 border-2
-              ${
-                selectedProduct?.id === product.id
-                  ? "border-green-500 bg-green-50 transform scale-105 shadow-lg"
-                  : "border-gray-200 hover:border-green-400 hover:shadow-lg hover:scale-102"
-              }
-            `}
-            onClick={() => onSelect(product)}
-          >
-            <div className="text-center">
-              <h3 className="font-semibold text-sm text-gray-800 mb-1">
+    const isReseller = localStorage.getItem('jackstore_reseller_auth') === 'true'
+
+    const groupedProducts = useMemo(() => {
+      const groups = products.reduce((acc, product) => {
+        const type = product.type || 'other'
+        if (!acc[type]) {
+          acc[type] = []
+        }
+        acc[type].push(product)
+        return acc
+      }, {} as Record<string, any[]>)
+
+      if (groups.diamonds) {
+        const diamondSubgroups = groups.diamonds.reduce((acc, product) => {
+          let subgroup: string
+          const nameLower = product.name.toLowerCase()
+
+          if (nameLower.includes('pass') || nameLower.includes('weekly')) {
+            subgroup = 'passes'
+          } else if (/^\d+\s*diamonds?$/.test(nameLower)) {
+            subgroup = 'rawdiamonds'
+          } else {
+            subgroup = 'other'
+          }
+
+          if (!acc[subgroup]) {
+            acc[subgroup] = []
+          }
+          acc[subgroup].push(product)
+          return acc
+        }, {} as Record<string, any[]>)
+
+        Object.keys(diamondSubgroups).forEach((subgroup) => {
+          if (subgroup === 'rawdiamonds') {
+            diamondSubgroups[subgroup].sort((a, b) => (a.diamonds || 0) - (b.diamonds || 0))
+          } else {
+            diamondSubgroups[subgroup].sort((a, b) => a.price - b.price)
+          }
+        })
+
+        groups.diamonds = diamondSubgroups
+      }
+
+      return groups
+    }, [products])
+
+    const getTagIcon = (tagname: string) => {
+      const lowercaseTag = tagname?.toLowerCase() || ''
+      if (lowercaseTag.includes('hot')) return <Flame className="w-3 h-3" />
+      if (lowercaseTag.includes('best')) return <Star className="w-3 h-3" />
+      if (lowercaseTag.includes('new')) return <Sparkles className="w-3 h-3" />
+      if (lowercaseTag.includes('premium')) return <Crown className="w-3 h-3" />
+      return null
+    }
+
+    const renderProductCard = (product) => {
+      const isSelected = selectedProduct?.id === product.id
+      
+      return (
+        <div
+          key={product.id}
+          onClick={() => onSelect(product)}
+          className={`relative group overflow-visible rounded-lg transition-colors cursor-pointer border-2 ${
+            isSelected
+              ? 'border-green-400 bg-green-50'
+              : 'border-gray-200 hover:bg-gray-100'
+          } bg-white px-3 py-3 flex items-center gap-2 text-sm shadow-sm font-poppins min-w-0`}
+        >
+          {isSelected && (
+            <div className="absolute top-[-2px] right-[-2px] w-0 h-10 border-t-[40px] border-t-green-400 border-l-[40px] border-l-transparent">
+              <svg
+                className="absolute top-[-40px] right-[4px] w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5 11.917L9.724 16.5L19 7.5"
+                />
+              </svg>
+            </div>
+          )}
+
+          {product.tagname && (
+            <div className="absolute -top-2 left-0 right-0 z-20 flex justify-center">
+              <div className="bg-gradient-to-r from-[#e10a0a] to-[#e10a0a] text-white px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap text-xs font-bold shadow-lg shadow-[#e10a0a]/30">
+                {getTagIcon(product.tagname)}
+                <span>{product.tagname.toUpperCase()}</span>
+              </div>
+            </div>
+          )}
+
+          <div className={`flex flex-row items-center gap-2 min-w-0 ${product.tagname ? 'pt-4' : ''}`}>
+            <div className="relative flex-shrink-0">
+              <img
+                src={product.image || 'https://via.placeholder.com/40'}
+                alt={product.name}
+                className="w-10 h-10 rounded-md object-cover shadow-sm flex-shrink-0"
+                loading="lazy"
+              />
+            </div>
+
+            <div className="flex-1 text-left space-y-0.5 min-w-0 overflow-hidden">
+              <h3 className={`font-semibold text-sm leading-tight line-clamp-2 ${
+                isSelected ? 'text-green-500' : 'text-gray-800'
+              }`}>
                 {product.diamonds ? formatItemDisplay(product) : product.name}
               </h3>
-              <p className="text-green-600 font-bold text-lg price-box">${product.price.toFixed(2)}</p>
-              {product.type && <p className="text-xs text-gray-500 mt-1 capitalize">{product.type}</p>}
+              {product.diamonds && (
+                <div className="flex items-center gap-1">
+                  {/* Optional: Add diamond icon or text if needed */}
+                </div>
+              )}
+
+              <div className="space-y-0.5">
+                {product.originalPrice && product.discountApplied && product.discountApplied > 0 ? (
+                  <p className="text-xs text-gray-500 line-through">
+                    ${product.originalPrice.toFixed(2)}
+                  </p>
+                ) : null}
+                <p className="text-sm font-bold text-gray-800">
+                  ${product.price.toFixed(2)}
+                  {product.originalPrice && product.discountApplied && product.discountApplied > 0 && (
+                    <span className="text-xs text-green-500 ml-1">
+                      (-{product.discountApplied}%)
+                    </span>
+                  )}
+                </p>
+                {isReseller && product.resellerPrice && (
+                  <p className="text-xs font-medium text-gray-800">
+                    Reseller: ${product.resellerPrice.toFixed(2)}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
-        ))}
+        </div>
+      )
+    }
+
+    return (
+      <div className="space-y-6 font-poppins">
+        {groupedProducts.special && (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+              <div className="p-1.5 bg-green-500/10 rounded-lg shadow-sm">
+                <Sparkles className="w-5 h-5 text-green-400" />
+              </div>
+              Best Seller
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
+              {groupedProducts.special.map(renderProductCard)}
+            </div>
+          </div>
+        )}
+
+        {groupedProducts.diamonds && (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-1 flex items-center gap-2">
+              <div className="p-1.5 bg-blue-500/10 rounded-lg shadow-sm"></div>
+              Saving Packages
+            </h3>
+            <div className="space-y-2">
+              {groupedProducts.diamonds.passes && (
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[auto-fit_minmax(120px,1fr)] xl:grid-cols-[auto-fit_minmax(120px,1fr)] gap-2">
+                  {groupedProducts.diamonds.passes.map(renderProductCard)}
+                </div>
+              )}
+              {groupedProducts.diamonds.rawdiamonds && (
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[auto-fit_minmax(120px,1fr)] xl:grid-cols-[auto-fit_minmax(120px,1fr)] gap-2">
+                  {groupedProducts.diamonds.rawdiamonds.map(renderProductCard)}
+                </div>
+              )}
+              {groupedProducts.diamonds.other && (
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[auto-fit_minmax(120px,1fr)] xl:grid-cols-[auto-fit_minmax(120px,1fr)] gap-2">
+                  {groupedProducts.diamonds.other.map(renderProductCard)}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {groupedProducts.subscription && (
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+              <div className="p-1.5 bg-purple-500/10 rounded-lg shadow-sm">
+                <Crown className="w-5 h-5 text-purple-400" />
+              </div>
+              Subscription Packages
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
+              {groupedProducts.subscription.map(renderProductCard)}
+            </div>
+          </div>
+        )}
+
+        {products.length === 0 && (
+          <div className="text-center py-10">
+            <div className="bg-white/5 rounded-xl p-6 border border-gray-200 shadow-lg">
+              <Sparkles className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+              <p className="text-lg font-medium text-gray-800">
+                No products available for {
+                  game === 'mlbb' ? 'Mobile Legends' :
+                  game === 'mlbb_ph' ? 'Mobile Legends PH' :
+                  game === 'freefire' ? 'Free Fire' :
+                  'Free Fire TH'
+                }.
+              </p>
+              <p className="text-sm text-gray-400 mt-1">
+                Please check back later for new products.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
 
   const PaymentModal = ({ form, orderFormat, onClose, discountPercent }) => {
     return (
-      <div className="こちらfixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 animate-fadeIn">
+      <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 animate-fadeIn">
         <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl transform transition-all duration-300">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-gray-800">Payment Details</h2>
@@ -308,12 +527,15 @@ const App = () => {
   return (
     <div className="min-h-screen bg-green-500 flex flex-col relative">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@100;200;300;400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@100;200;300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap');
         body {
           background-color: #22c55e !important;
         }
         .khmer-font {
           font-family: 'Noto Sans Khmer', sans-serif;
+        }
+        .font-poppins {
+          font-family: 'Poppins', sans-serif;
         }
         .bg-green-theme {
           background-color: #22c55e;
@@ -875,10 +1097,6 @@ const App = () => {
                   <div className="flex justify-center items-center py-10 loading-container">
                     <Loader2 className="w-12 h-12 animate-spin text-white" />
                     <span className="ml-3 text-white text-lg">Loading products...</span>
-                  </div>
-                ) : products.length === 0 ? (
-                  <div className="text-white text-center py-10">
-                    No products available for this game. Please check your productslist.txt file or try again later.
                   </div>
                 ) : (
                   <ProductList
