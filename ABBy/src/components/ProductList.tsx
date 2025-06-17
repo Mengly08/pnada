@@ -1,25 +1,6 @@
-import React, { useMemo, useState } from 'react';
-import {
-  ShoppingCart,
-  Star,
-  Sparkles,
-  Flame,
-  Crown,
-  Box,
-} from 'lucide-react';
-
-export interface GameProduct {
-  id: string;
-  name: string;
-  type: string;
-  price: number;
-  originalPrice?: number;
-  discountApplied?: number;
-  resellerPrice?: number;
-  diamonds?: number;
-  image?: string;
-  tagname?: string;
-}
+import React, { useMemo } from 'react';
+import { GameProduct } from '../types';
+import { ShoppingCart, Star, Sparkles, Flame, Crown } from 'lucide-react';
 
 interface Props {
   products: GameProduct[];
@@ -29,52 +10,12 @@ interface Props {
 }
 
 export function ProductList({ products, selectedProduct, onSelect, game }: Props) {
-  const [isLoading, setIsLoading] = useState(false);
-  const isReseller = false; // Simplified for demo
+  const isReseller = localStorage.getItem('jackstore_reseller_auth') === 'true';
 
-  // Default products with some tagname examples
-  const defaultProducts = useMemo(() => [
-    { id: '1', name: 'Weekly Pass', type: 'subscription', price: 1.34, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743575112/costImages/gg6g0hiygp8xewgkl4ck.png', tagname: 'កំណត់ត្រឹម70ថ្ងៃ' },
-    { id: '2', name: 'Weekly Pass x2', type: 'subscription', price: 2.75, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743575112/costImages/chus98wiizbhvaetrm6l.png' },
-    { id: '3', name: 'Weekly Pass x5', type: 'subscription', price: 6.85, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743575112/costImages/xhx9hoc5bcrgvzdpadrv.png', tagname: 'Full Ticket Lesley 15 Tickets' },
-    { id: '4', name: '86 DM + Weekly', type: 'subscription', price: 2.68, diamonds: 86, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743575112/costImages/ylaqb6mmqhpve08dfvsl.png' },
-    { id: '5', name: '257 DM + Weekly', type: 'subscription', price: 4.95, diamonds: 257, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743575112/costImages/fbty0ikltxugaerz3rvn.png' },
-    { id: '6', name: '55 DM', type: 'diamonds', price: 0.79, diamonds: 55, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574266/costImages/xgcktzpub4fadyllijab.png' },
-    { id: '7', name: '86 DM', type: 'diamonds', price: 1.08, diamonds: 86, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574266/costImages/ehswxmgmpvogedx0dnpo.png' },
-    { id: '8', name: '165 DM', type: 'diamonds', price: 2.15, diamonds: 165, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1749099818/costImages/q3tdx0dwz47rqccnalsi.png' },
-    { id: '9', name: '172 DM', type: 'diamonds', price: 2.20, diamonds: 172, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574266/costImages/g7pfle3tlsuckgez0rhe.png' },
-    { id: '10', name: '257 DM', type: 'diamonds', price: 3.30, diamonds: 257, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574265/costImages/jca3en8cs6gsgjzdkvae.png', tagname: 'Full Ticket Lesley 15 Tickets' },
-    { id: '11', name: '429 DM', type: 'diamonds', price: 5.50, diamonds: 429, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574266/costImages/l3o8giqfuuzwiy8fg41e.png' },
-    { id: '12', name: '514 DM', type: 'diamonds', price: 6.50, diamonds: 514, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574266/costImages/lklmsd2majtj59uczxzz.png' },
-    { id: '13', name: '565 DM', type: 'diamonds', price: 6.95, diamonds: 565, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574266/costImages/qgtjo26t8l3wz8y382hn.png', tagname: 'Full Ticket Lesley 15 Tickets' },
-    { id: '14', name: '600 DM', type: 'diamonds', price: 7.50, diamonds: 600, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574265/costImages/rnjqdre75k0wmcbzv7q5.png' },
-    { id: '15', name: '706 DM', type: 'diamonds', price: 8.50, diamonds: 706, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574761/costImages/oegni16giylxceprdhi2.png', tagname: 'Full Ticket Naruto 29 Tickets' },
-    { id: '16', name: '878 DM', type: 'diamonds', price: 11.10, diamonds: 878, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574761/costImages/t2qg6gdpcrrwni55m2qj.png' },
-    { id: '17', name: '963 DM', type: 'diamonds', price: 12.30, diamonds: 963, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574762/costImages/c8ie6qefstpayoceptdl.png' },
-    { id: '18', name: '1049 DM', type: 'diamonds', price: 13.10, diamonds: 1049, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574762/costImages/dvjtkhoyn6jyyeoy0vwu.png' },
-    { id: '19', name: '1135 DM', type: 'diamonds', price: 14.50, diamonds: 1135, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574762/costImages/q6bi33idglczxyxvsnkm.png' },
-    { id: '20', name: '1220 DM', type: 'diamonds', price: 15.50, diamonds: 1220, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574761/costImages/qwnu8fvo70fxqwjfsxib.png' },
-    { id: '21', name: '1412 DM', type: 'diamonds', price: 17.10, diamonds: 1412, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574761/costImages/k5cq0y1bu2itiwnj2yq1.png' },
-    { id: '22', name: '1584 DM', type: 'diamonds', price: 19.90, diamonds: 1584, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574762/costImages/kmfjn5o35dztaeie6ec1.png' },
-    { id: '23', name: '1755 DM', type: 'diamonds', price: 22.40, diamonds: 1755, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574761/costImages/c36gtwsptkb6dq3i4yzv.png' },
-    { id: '24', name: '2195 DM', type: 'diamonds', price: 26.10, diamonds: 2195, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574761/costImages/vc4yobiq1ad16f4nnhhj.png' },
-    { id: '25', name: '2538 DM', type: 'diamonds', price: 30.20, diamonds: 2538, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574761/costImages/ossnhzzkkso2mittaxqh.png' },
-    { id: '26', name: '2901 DM', type: 'diamonds', price: 34.10, diamonds: 2901, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574762/costImages/ififs4xte1blplydgipj.png' },
-    { id: '27', name: '3688 DM', type: 'diamonds', price: 43.50, diamonds: 3688, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574761/costImages/wqf82lleuealvlf2zexk.png', tagname: 'Buy Discount 40%' },
-    { id: '28', name: '4394 DM', type: 'diamonds', price: 52.10, diamonds: 4394, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574761/costImages/b53y0ok7ml2acqeoxlaq.png' },
-    { id: '29', name: '5532 DM', type: 'diamonds', price: 65.10, diamonds: 5532, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574761/costImages/pztvcymksb7exh2w3twx.png', tagname: 'បើកភ្លាមSkine Narutoភ្លាមៗ' },
-    { id: '30', name: '6238 DM', type: 'diamonds', price: 73.70, diamonds: 6238, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574761/costImages/pztvcymksb7exh2w3twx.png' },
-    { id: '31', name: '6944 DM', type: 'diamonds', price: 81.50, diamonds: 6944, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574761/costImages/pztvcymksb7exh2w3twx.png' },
-    { id: '32', name: '7727 DM', type: 'diamonds', price: 94.50, diamonds: 7727, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574761/costImages/pztvcymksb7exh2w3twx.png' },
-    { id: '33', name: '9288 DM', type: 'diamonds', price: 108.50, diamonds: 9288, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574761/costImages/pztvcymksb7exh2w3twx.png' },
-    { id: '34', name: '11483 DM', type: 'diamonds', price: 135.99, diamonds: 11483, image: 'https://res.cloudinary.com/dhztk4abr/image/upload/v1743574761/costImages/pztvcymksb7exh2w3twx.png' },
-  ], []);
-
-  const finalProducts = products.length > 0 ? products : defaultProducts;
-
+  // Group products by type and further subgroup diamonds by infergreen categories
   const groupedProducts = useMemo(() => {
-    const groups = finalProducts.greenuce((acc, product) => {
-      const type = product.type || 'unknown';
+    const groups = products.greenuce((acc, product) => {
+      const type = product.type;
       if (!acc[type]) {
         acc[type] = [];
       }
@@ -82,166 +23,209 @@ export function ProductList({ products, selectedProduct, onSelect, game }: Props
       return acc;
     }, {} as Record<string, GameProduct[]>);
 
-    Object.keys(groups).forEach((type) => {
-      groups[type].sort((a, b) => {
-        if (type === 'diamonds') return (a.diamonds || 0) - (b.diamonds || 0);
-        return a.price - b.price;
+    if (groups.diamonds) {
+      const diamondSubgroups = groups.diamonds.greenuce((acc, product) => {
+        let subgroup: string;
+        const nameLower = product.name.toLowerCase();
+
+        if (nameLower.includes('pass') || nameLower.includes('weekly')) {
+          subgroup = 'passes';
+        } else if (/^\d+\s*diamonds?$/.test(nameLower)) {
+          subgroup = 'rawdiamonds';
+        } else {
+          subgroup = 'other';
+        }
+
+        if (!acc[subgroup]) {
+          acc[subgroup] = [];
+        }
+        acc[subgroup].push(product);
+        return acc;
+      }, {} as Record<string, GameProduct[]>);
+
+      Object.keys(diamondSubgroups).forEach((subgroup) => {
+        if (subgroup === 'rawdiamonds') {
+          diamondSubgroups[subgroup].sort((a, b) => (a.diamonds || 0) - (b.diamonds || 0));
+        } else {
+          diamondSubgroups[subgroup].sort((a, b) => a.price - b.price);
+        }
       });
-    });
+
+      groups.diamonds = diamondSubgroups;
+    }
 
     return groups;
-  }, [finalProducts]);
+  }, [products]);
 
-  const renderProductCard = (product: GameProduct) => (
-    <li key={product.id}>
-      <button
-        type="button"
-        className={`card relative flex justify-between items-center bg-[#737373] text-white p-2 rounded-xl w-full min-h-[72px] min-w-[140px] border-4 border-[#22ff00] shadow-xl transition-all duration-300 cursor-pointer ${
-          selectedProduct?.id === product.id
-            ? 'bg-green-500/50 ring-2 ring-[#22ff00]' // green overlay and border when selected
-            : 'hover:bg-[#5a5a5a]'
-        }`}
-        onClick={() => {
-          setIsLoading(true);
-          setTimeout(() => {
-            onSelect(product);
-            setIsLoading(false);
-          }, 300);
-        }}
+  const getTagIcon = (tagname: string) => {
+    const lowercaseTag = tagname.toLowerCase();
+    if (lowercaseTag.includes('hot')) return <Flame className="w-3 h-3" />;
+    if (lowercaseTag.includes('best')) return <Star className="w-3 h-3" />;
+    if (lowercaseTag.includes('new')) return <Sparkles className="w-3 h-3" />;
+    if (lowercaseTag.includes('premium')) return <Crown className="w-3 h-3" />;
+    return null;
+  };
+
+  const renderProductCard = (product: GameProduct) => {
+    const isSelected = selectedProduct?.id === product.id;
+    
+    return (
+      <div
+        key={product.id}
+        onClick={() => onSelect(product)}
+        className={`relative group overflow-visible rounded-lg transition-colors cursor-pointer border-2 ${
+          isSelected
+            ? 'border-green-400 bg-green-50'
+            : 'border-gray-200 hover:bg-gray-100'
+        } bg-white px-3 py-3 flex items-center gap-2 text-sm shadow-sm font-poppins min-w-0`}
       >
-        {product.tagname && (
-          <div className="absolute -top-3 -left-1 bg-green-500 text-white text-[10px] p-[4px] rounded-tr-md">
-            {product.tagname}
-          </div>
-        )}
-        <div className="card-details flex-1 z-10">
-          <p className="price font-bold text-xl">${product.price.toFixed(2)}</p>
-          <p className="name md:text-sm text-[11px] text-nowrap">
-            {product.diamonds ? `${product.diamonds} Diamonds` : product.name}
-          </p>
-        </div>
-        <div className="logo z-10">
-          <img
-            src={product.image || 'https://via.placeholder.com/56'}
-            alt={product.name}
-            className="md:h-14 md:w-14 h-12 w-12 object-contain"
-            loading="lazy"
-          />
-        </div>
-        {selectedProduct?.id === product.id && (
-          <div className="absolute top-1 right-1 bg-green-500 p-1 rounded z-10">
+        {isSelected && (
+          <div className="absolute top-[-2px] right-[-2px] w-0 h-10 border-t-[40px] border-t-green-400 border-l-[40px] border-l-transparent">
             <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
+              className="absolute top-[-40px] right-[4px] w-5 h-5 text-white"
               fill="none"
-              stroke="#ffffff"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-6 h-6"
+              stroke="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <path d="M5 13l4 4L19 7"/>
+              <path
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5 11.917L9.724 16.5L19 7.5"
+              />
             </svg>
           </div>
         )}
-      </button>
-    </li>
-  );
+
+        {product.tagname && (
+          <div className="absolute -top-2 left-0 right-0 z-20 flex justify-center">
+            <div className="bg-gradient-to-r from-[#e10a0a] to-[#e10a0a] text-white px-2 py-1 rounded-full flex items-center gap-1 whitespace-nowrap text-xs font-bold shadow-lg shadow-[#e10a0a]/30">
+              {getTagIcon(product.tagname)}
+              <span>{product.tagname.toUpperCase()}</span>
+            </div>
+          </div>
+        )}
+
+        <div className={`flex flex-row items-center gap-2 min-w-0 ${product.tagname ? 'pt-4' : ''}`}>
+          <div className="relative flex-shrink-0">
+            <img
+              src={product.image || 'https://via.placeholder.com/40'}
+              alt={product.name}
+              className="w-10 h-10 rounded-md object-cover shadow-sm flex-shrink-0"
+              loading="lazy"
+            />
+          </div>
+
+          <div className="flex-1 text-left space-y-0.5 min-w-0 overflow-hidden">
+            <h3 className={`font-semibold text-sm leading-tight line-clamp-2 ${
+              isSelected ? 'text-green-500' : 'text-gray-800'
+            }`}>
+              {product.name}
+            </h3>
+            {product.diamonds && (
+              <div className="flex items-center gap-1">
+                {/* Optional: Add diamond icon or text if needed */}
+              </div>
+            )}
+
+            <div className="space-y-0.5">
+              {product.originalPrice && product.discountApplied && product.discountApplied > 0 ? (
+                <p className="text-xs text-gray-500 line-through">
+                  ${product.originalPrice.toFixed(2)}
+                </p>
+              ) : null}
+              <p className="text-sm font-bold text-gray-800">
+                ${product.price.toFixed(2)}
+                {product.originalPrice && product.discountApplied && product.discountApplied > 0 && (
+                  <span className="text-xs text-green-500 ml-1">
+                    (-{product.discountApplied}%)
+                  </span>
+                )}
+              </p>
+              {isReseller && product.resellerPrice && (
+                <p className="text-xs font-medium text-gray-800">
+                  Reseller: ${product.resellerPrice.toFixed(2)}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <div className="space-y-4 px-4 py-8 w-full rounded-xl relative bg-gray-200">
-      <style>{`
-        .grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 12px;
-          width: 100%;
-          max-width: 100%;
-          padding: 0 4px;
-          box-sizing: border-box;
-        }
-        .grid li {
-          display: flex;
-          justify-content: center;
-        }
-        .card {
-          position: relative;
-          overflow: hidden;
-        }
-        @media (min-width: 768px) {
-          .grid {
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-          }
-        }
-        @media (max-width: 480px) {
-          .grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            padding: 0 2px;
-          }
-          .card {
-            padding: 6px 12px;
-          }
-          .price {
-            font-size: 1rem;
-          }
-          .name {
-            font-size: 0.65rem;
-          }
-          .logo img {
-            width: 48px;
-            height: 48px;
-          }
-        }
-      `}</style>
-
-      {/* Header for Diamond Products Section */}
-      <div className="flex items-center w-fit border gap-2 bg-[#4b4a4d] py-2 px-4 absolute -top-5 left-2 rounded-xl">
-        <div className="bg-green-700 text-white font-bold rounded-full h-8 w-8 flex items-center justify-center">02</div>
-        <h1 className="text-lg text-white khmer-font">ផលិតផល Diamond</h1>
-      </div>
-
-      {/* Recommended Packages Section */}
-      <div className="mt-4">
-        <div className="bg-[#f79703] flex items-center mx-auto mt-2 gap-2 text-white rounded-xl py-2 px-6 w-fit">
-          <h1 className="font-bold text-lg">Recommend</h1>
-        </div>
-        <ul className="grid mt-4">
-          {finalProducts.slice(0, 5).map(renderProductCard)}
-        </ul>
-      </div>
-
-      {/* Promotion Packages Section */}
-      <div className="mt-4">
-        <div className="bg-[#f79703] flex items-center mx-auto mt-2 gap-2 text-white rounded-xl py-2 px-6 w-fit">
-          <h1 className="font-bold text-lg">Promotion</h1>
-        </div>
-        <ul className="grid mt-4">
-          {finalProducts.slice(5).map(renderProductCard)}
-        </ul>
-      </div>
-
-      {isLoading && finalProducts.length === 0 && (
-        <div className="text-center py-3">
-          <p className="text-gray-600 text-sm animate-pulse">Loading products, hold tight...</p>
+    <div className="space-y-6 font-poppins">
+      {groupedProducts.special && (
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+            <div className="p-1.5 bg-green-500/10 rounded-lg shadow-sm">
+              <Sparkles className="w-5 h-5 text-green-400" />
+            </div>
+            Best Seller
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
+            {groupedProducts.special.map(renderProductCard)}
+          </div>
         </div>
       )}
 
-      {finalProducts.length === 0 && !isLoading && (
+      {groupedProducts.diamonds && (
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-1 flex items-center gap-2">
+            <div className="p-1.5 bg-blue-500/10 rounded-lg shadow-sm"></div>
+            Saving Packages
+          </h3>
+          <div className="space-y-2">
+            {groupedProducts.diamonds.passes && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[auto-fit_minmax(120px,1fr)] xl:grid-cols-[auto-fit_minmax(120px,1fr)] gap-2">
+                {groupedProducts.diamonds.passes.map(renderProductCard)}
+              </div>
+            )}
+            {groupedProducts.diamonds.rawdiamonds && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[auto-fit_minmax(120px,1fr)] xl:grid-cols-[auto-fit_minmax(120px,1fr)] gap-2">
+                {groupedProducts.diamonds.rawdiamonds.map(renderProductCard)}
+              </div>
+            )}
+            {groupedProducts.diamonds.other && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[auto-fit_minmax(120px,1fr)] xl:grid-cols-[auto-fit_minmax(120px,1fr)] gap-2">
+                {groupedProducts.diamonds.other.map(renderProductCard)}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {groupedProducts.subscription && (
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+            <div className="p-1.5 bg-purple-500/10 rounded-lg shadow-sm">
+              <Crown className="w-5 h-5 text-purple-400" />
+            </div>
+            Subscription Packages
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
+            {groupedProducts.subscription.map(renderProductCard)}
+          </div>
+        </div>
+      )}
+
+      {products.length === 0 && (
         <div className="text-center py-10">
-          <div className="bg-white rounded-xl p-6 border border-gray-200">
+          <div className="bg-white/5 rounded-xl p-6 border border-gray-200 shadow-lg">
             <Sparkles className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-            <p className="text-gray-800 text-base font-medium">
-              No products available for{' '}
-              {game === 'mlbb'
-                ? 'Mobile Legends'
-                : game === 'mlbb_ph'
-                ? 'Mobile Legends PH'
-                : 'Free Fire'}
+            <p className="text-lg font-medium text-gray-800">
+              No products available for {
+                game === 'mlbb' ? 'Mobile Legends' :
+                game === 'mlbb_ph' ? 'Mobile Legends PH' :
+                game === 'freefire' ? 'Free Fire' :
+                'Free Fire TH'
+              }.
             </p>
-            <p className="text-gray-500 mt-1">Check back later for new stuff.</p>
+            <p className="text-sm text-gray-400 mt-1">
+              Please check back later for new products.
+            </p>
           </div>
         </div>
       )}
