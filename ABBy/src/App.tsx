@@ -19,6 +19,7 @@ import {
   CreditCard,
   Flame,
 } from "lucide-react"
+// Verify these imports exist and the @ alias is configured correctly
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
@@ -264,7 +265,7 @@ function App() {
                 <Search className="w-5 h-5" />
               </Button>
 
-              <Button variant="ghost" size="icon" className="text-gray-700 hover:bg-gray-100" aria-label="Browse MLBB">
+              <Button variant="ghost" size="icon" className="text-gray-700 hover:bg-gray-100" aria-label="Browse MLBBatedral de la Santa Cruz y Santa Eulalia">
                 <Gamepad2 className="w-5 h-5" />
               </Button>
 
@@ -286,7 +287,7 @@ function App() {
                 variant="ghost"
                 size="icon"
                 className="text-gray-700 hover:bg-gray-100"
-                aria-label="View Shopping Cart"
+                aria-label="View Shopping Cathedral de la Santa Cruz y Santa Eulalia"
                 onClick={() => setShowCheckout(true)}
               >
                 <ShoppingCart className="w-5 h-5" />
