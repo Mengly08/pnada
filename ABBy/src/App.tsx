@@ -526,6 +526,121 @@ const App = () => {
         .mlbb-button2:hover .mlbb-text36, .check-id-button:hover .check-id-text {
           color: #fff;
         }
+        .game-card {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          cursor: pointer;
+          transition: transform 0.2s;
+          background: linear-gradient(135deg, #16a34a, #22c55e);
+          border-radius: 12px;
+          padding: 16px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          position: relative;
+          overflow: hidden;
+        }
+        .game-card:hover {
+          transform: scale(1.05);
+        }
+        .game-card.disabled {
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+        .game-card.disabled:hover {
+          transform: none;
+        }
+        .game-image {
+          width: 100%;
+          max-width: 200px;
+          min-width: 200px;
+          aspect-ratio: 1 / 1;
+          object-fit: contain;
+          border-radius: 8px;
+        }
+        .game-container {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(140px, 200px));
+          gap: 1.5rem;
+          justify-content: center;
+          width: 100%;
+          max-width: 1200px;
+          padding-bottom: 1.5rem;
+        }
+        .coming-soon {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background-color: rgba(0, 0, 0, 0.8);
+          color: white;
+          padding: 8px 16px;
+          border-radius: 4px;
+          font-size: 1rem;
+          font-weight: bold;
+          text-align: center;
+        }
+        .banner-slider {
+          background: linear-gradient(135deg, #16a34a, #22c55e);
+          border-radius: 12px;
+          overflow: hidden;
+          margin-bottom: 2rem;
+        }
+        .popular-section {
+          background: linear-gradient(135deg, #16a34a, #22c55e);
+          border-radius: 12px;
+          padding: 20px;
+          margin-bottom: 2rem;
+        }
+        .popular-card {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
+          padding: 12px;
+          margin: 8px;
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        @media (max-width: 480px) {
+          .game-container {
+            grid-template-columns: repeat(2, minmax(140px, 160px));
+            gap: 1rem;
+          }
+          .game-image {
+            max-width: 140px;
+            min-width: 140px;
+          }
+          .game-card h3 {
+            font-size: 0.9rem;
+            color: #ffffff;
+          }
+        }
+        @media (min-width: 481px) and (max-width: 768px) {
+          .game-container {
+            grid-template-columns: repeat(2, minmax(160px, 180px));
+            gap: 1.25rem;
+          }
+          .game-image {
+            max-width: 160px;
+            min-width: 160px;
+          }
+          .game-card h3 {
+            font-size: 0.95rem;
+            color: #ffffff;
+          }
+        }
+        @media (min-width: 769px) {
+          .game-container {
+            grid-template-columns: repeat(2, minmax(180px, 200px));
+            gap: 1.5rem;
+          }
+          .game-image {
+            max-width: 200px;
+            min-width: 200px;
+          }
+          .game-card h3 {
+            font-size: 1rem;
+            color: #ffffff;
+          }
+        }
         .social-dropdown {
           position: relative;
         }
@@ -558,193 +673,6 @@ const App = () => {
         }
         .loading-container {
           background-color: #22c55e !important;
-        }
-        
-        /* Popular Section Styles */
-        .popular-section {
-          background: linear-gradient(135deg, #16a34a, #22c55e);
-          border-radius: 12px;
-          padding: 20px;
-          margin-bottom: 2rem;
-        }
-        .popular-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 20px;
-        }
-        .popular-title {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        .popular-nav {
-          display: flex;
-          gap: 8px;
-        }
-        .nav-button {
-          width: 36px;
-          height: 36px;
-          background-color: rgba(255, 255, 255, 0.2);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: background-color 0.2s;
-        }
-        .nav-button:hover {
-          background-color: rgba(255, 255, 255, 0.3);
-        }
-        .popular-scroll {
-          display: flex;
-          gap: 16px;
-          overflow-x: auto;
-          padding-bottom: 10px;
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-        }
-        .popular-scroll::-webkit-scrollbar {
-          display: none;
-        }
-        .popular-card {
-          min-width: 280px;
-          background: rgba(255, 255, 255, 0.95);
-          border-radius: 12px;
-          overflow: hidden;
-          cursor: pointer;
-          transition: transform 0.2s;
-          position: relative;
-        }
-        .popular-card:hover {
-          transform: translateY(-4px);
-        }
-        .popular-card.disabled {
-          opacity: 0.7;
-          cursor: not-allowed;
-        }
-        .popular-card.disabled:hover {
-          transform: none;
-        }
-        .popular-card-image {
-          width: 100%;
-          height: 120px;
-          object-fit: cover;
-        }
-        .popular-card-content {
-          padding: 16px;
-        }
-        .popular-card-title {
-          font-size: 16px;
-          font-weight: bold;
-          color: #000;
-          margin-bottom: 4px;
-        }
-        .popular-card-subtitle {
-          font-size: 12px;
-          color: #666;
-          margin-bottom: 8px;
-        }
-        .popular-card-description {
-          font-size: 12px;
-          color: #888;
-          margin-bottom: 8px;
-        }
-        .popular-card-action {
-          font-size: 14px;
-          font-weight: bold;
-          color: #16a34a;
-        }
-        .coming-soon-overlay {
-          position: absolute;
-          top: 8px;
-          right: 8px;
-          background-color: rgba(0, 0, 0, 0.8);
-          color: white;
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-size: 10px;
-          font-weight: bold;
-        }
-        
-        /* Games Shop Styles */
-        .games-shop-section {
-          background: linear-gradient(135deg, #16a34a, #22c55e);
-          border-radius: 12px;
-          padding: 20px;
-          margin-bottom: 2rem;
-        }
-        .games-shop-header {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 20px;
-        }
-        .games-shop-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          gap: 16px;
-        }
-        .game-shop-card {
-          background: rgba(255, 255, 255, 0.95);
-          border-radius: 12px;
-          padding: 16px;
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          cursor: pointer;
-          transition: transform 0.2s;
-          position: relative;
-        }
-        .game-shop-card:hover {
-          transform: translateY(-2px);
-        }
-        .game-shop-card.disabled {
-          opacity: 0.7;
-          cursor: not-allowed;
-        }
-        .game-shop-card.disabled:hover {
-          transform: none;
-        }
-        .game-shop-image {
-          width: 60px;
-          height: 60px;
-          border-radius: 8px;
-          object-fit: cover;
-        }
-        .game-shop-content {
-          flex: 1;
-        }
-        .game-shop-title {
-          font-size: 16px;
-          font-weight: bold;
-          color: #000;
-          margin-bottom: 4px;
-        }
-        .game-shop-subtitle {
-          font-size: 12px;
-          color: #666;
-          margin-bottom: 8px;
-        }
-        .game-shop-price {
-          font-size: 14px;
-          font-weight: bold;
-          color: #16a34a;
-        }
-        .game-shop-price.coming-soon {
-          color: #f59e0b;
-        }
-        
-        @media (max-width: 768px) {
-          .popular-scroll {
-            gap: 12px;
-          }
-          .popular-card {
-            min-width: 240px;
-          }
-          .games-shop-grid {
-            grid-template-columns: 1fr;
-          }
         }
       `}</style>
 
@@ -1025,70 +953,56 @@ const App = () => {
         ) : (
           <main className="container mx-auto px-4 py-6">
             {/* Popular Section */}
-            <div className="popular-section">
-              <div className="popular-header">
-                <div className="popular-title">
-                  <svg width="35" height="33" viewBox="0 0 24 24" className="text-white">
-                    <path
-                      d="M17.66 11.2c-.23-.3-.51-.56-.77-.82c-.67-.6-1.43-1.03-2.07-1.66C13.33 7.26 13 4.85 13.95 3c-.95.23-1.78.75-2.49 1.32c-2.59 2.08-3.61 5.75-2.39 8.9c.04.1.08.2.08.33c0 .22-.15.42-.35.5c-.23.1-.47.04-.66-.12a.6.6 0 0 1-.14-.17c-1.13-1.43-1.31-3.48-.55-5.12C5.78 10 4.87 12.3 5 14.47c.06.5.12 1 .29 1.5c.14.6.41 1.2.71 1.73c1.08 1.73 2.95 2.97 4.96 3.22c2.14.27 4.43-.12 6.07-1.6c1.83-1.66 2.47-4.32 1.53-6.6l-.13-.26c-.21-.46-.77-1.26-.77-1.26m-3.16 6.3c-.28.24-.74.5-1.1.6c-1.12.4-2.24-.16-2.9-.82c1.19-.28 1.9-1.16 2.11-2.05c.17-.8-.15-1.46-.28-2.23c-.12-.74-.1-1.37.17-2.06c.19.38.39.76.63 1.06c.77 1 1.98 1.44 2.24 2.8c.04.14.06.28.06.43c.03.82-.33 1.72-.93 2.27"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  <h1 className="text-2xl font-bold text-white">Popular</h1>
-                </div>
-                <div className="popular-nav">
-                  <div className="nav-button">
-                    <svg width="18" height="18" viewBox="0 0 20 20" className="text-white">
-                      <path d="m4 10l9 9l1.4-1.5L7 10l7.4-7.5L13 1z" fill="currentColor"></path>
-                    </svg>
-                  </div>
-                  <div className="nav-button">
-                    <svg width="18" height="18" viewBox="0 0 20 20" className="text-white">
-                      <path d="M7 1L5.6 2.5L13 10l-7.4 7.5L7 19l9-9z" fill="currentColor"></path>
-                    </svg>
-                  </div>
-                </div>
+            <div className="popular-section mb-8">
+              <div className="flex items-center gap-3 mb-6">
+                <svg width="35" height="33" viewBox="0 0 24 24" className="text-white">
+                  <path
+                    d="M17.66 11.2c-.23-.3-.51-.56-.77-.82c-.67-.6-1.43-1.03-2.07-1.66C13.33 7.26 13 4.85 13.95 3c-.95.23-1.78.75-2.49 1.32c-2.59 2.08-3.61 5.75-2.39 8.9c.04.1.08.2.08.33c0 .22-.15.42-.35.5c-.23.1-.47.04-.66-.12a.6.6 0 0 1-.14-.17c-1.13-1.43-1.31-3.48-.55-5.12C5.78 10 4.87 12.3 5 14.47c.06.5.12 1 .29 1.5c.14.6.41 1.2.71 1.73c1.08 1.73 2.95 2.97 4.96 3.22c2.14.27 4.43-.12 6.07-1.6c1.83-1.66 2.47-4.32 1.53-6.6l-.13-.26c-.21-.46-.77-1.26-.77-1.26m-3.16 6.3c-.28.24-.74.5-1.1.6c-1.12.4-2.24-.16-2.9-.82c1.19-.28 1.9-1.16 2.11-2.05c.17-.8-.15-1.46-.28-2.23c-.12-.74-.1-1.37.17-2.06c.19.38.39.76.63 1.06c.77 1 1.98 1.44 2.24 2.8c.04.14.06.28.06.43c.03.82-.33 1.72-.93 2.27"
+                    fill="currentColor"
+                  />
+                </svg>
+                <h1 className="text-2xl font-bold text-white">Popular Games</h1>
               </div>
 
-              <div className="popular-scroll">
-                <div
-                  className="popular-card"
-                  onClick={() => {
-                    setForm((prev) => ({ ...prev, game: "mlbb" }))
-                    setShowTopUp(true)
-                  }}
-                >
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="popular-card text-center">
                   <img
-                    src="https://i.imgur.com/xPSIO6Y.png"
+                    src="https://downloadr2.apkmirror.com/wp-content/uploads/2024/05/42/6632d219632fb_com.mobile.legends.png"
                     alt="Mobile Legends"
-                    className="popular-card-image"
+                    className="w-16 h-16 mx-auto mb-2 rounded-lg"
                   />
-                  <div className="popular-card-content">
-                    <div className="popular-card-title">Mobile Legends</div>
-                    <div className="popular-card-subtitle"></div>
-                    <div className="popular-card-description">Instant</div>
-                    <div className="popular-card-action">TOPUP</div>
-                  </div>
+                  <h3 className="text-white font-semibold">Mobile Legends</h3>
+                  <p className="text-green-200 text-sm">Instant</p>
                 </div>
 
-                <div
-                  className="popular-card"
-                  onClick={() => {
-                    setForm((prev) => ({ ...prev, game: "freefire" }))
-                    setShowTopUp(true)
-                  }}
-                >
+                <div className="popular-card text-center">
                   <img
                     src="https://play-lh.googleusercontent.com/nIV146CRuDyVKmYaXWtFR0BK7iZFqq4UyQPfY_iZOqolvk-USWmG9YupzKWDsN59fm6K=w240-h480-rw"
                     alt="Free Fire"
-                    className="popular-card-image"
+                    className="w-16 h-16 mx-auto mb-2 rounded-lg"
                   />
-                  <div className="popular-card-content">
-                    <div className="popular-card-title">Free Fire</div>
-                    <div className="popular-card-subtitle"></div>
-                    <div className="popular-card-description">Instant</div>
-                    <div className="popular-card-action">TOPUP</div>
-                  </div>
+                  <h3 className="text-white font-semibold">Free Fire</h3>
+                  <p className="text-green-200 text-sm">Instant</p>
+                </div>
+
+                <div className="popular-card text-center opacity-60">
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/en/thumb/4/44/PlayerUnknown%27s_Battlegrounds_Mobile.webp/180px-PlayerUnknown%27s_Battlegrounds_Mobile.webp.png"
+                    alt="PUBG Mobile"
+                    className="w-16 h-16 mx-auto mb-2 rounded-lg"
+                  />
+                  <h3 className="text-white font-semibold">PUBG Mobile</h3>
+                  <p className="text-green-200 text-sm">Coming Soon</p>
+                </div>
+
+                <div className="popular-card text-center opacity-60">
+                  <img
+                    src="https://i.pinimg.com/736x/34/66/03/346603fe9ff5b071463b03e550dac76a.jpg"
+                    alt="HOK"
+                    className="w-16 h-16 mx-auto mb-2 rounded-lg"
+                  />
+                  <h3 className="text-white font-semibold">HOK</h3>
+                  <p className="text-green-200 text-sm">Coming Soon</p>
                 </div>
               </div>
             </div>
