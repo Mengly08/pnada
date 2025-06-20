@@ -1,291 +1,357 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { Search, Loader2, ArrowLeft, XCircle, CheckCircle2 } from 'lucide-react';
-import axios from 'axios';
-import { GameSelector } from './components/GameSelector';
-import { ProductList } from './components/ProductList';
-import { PaymentModal } from './components/PaymentModal';
-import { TopUpForm, GameProduct } from './types';
-import { supabase } from './lib/supabase';
-import storeConfig from './lib/config';
-import { BannerSlider } from './components/BannerSlider';
-import { PopupBanner } from './components/PopupBanner';
-import { PromoCodeInput } from './components/PromoCodeInput';
+"use client"
 
-const AdminPage = lazy(() => import('./pages/AdminPage').then(module => ({ default: module.AdminPage })));
-const ResellerPage = lazy(() => import('./pages/ResellerPage').then(module => ({ default: module.ResellerPage })));
+import type React from "react"
+import { useState, useEffect, lazy, Suspense } from "react"
+import { Loader2, ArrowLeft, XCircle, ChevronLeft, ChevronRight } from "lucide-react"
+import axios from "axios"
+import type { TopUpForm, GameProduct } from "./types"
+import { supabase } from "./lib/supabase"
+
+const AdminPage = lazy(() => import("./pages/AdminPage").then((module) => ({ default: module.AdminPage })))
+const ResellerPage = lazy(() => import("./pages/ResellerPage").then((module) => ({ default: module.ResellerPage })))
 
 function App() {
   const [form, setForm] = useState<TopUpForm>(() => {
-    const savedForm = localStorage.getItem('customerInfo');
-    return savedForm ? JSON.parse(savedForm) : {
-      userId: '',
-      serverId: '',
-      product: null,
-      game: 'mlbb',
-      nickname: undefined
-    };
-  });
-  const [showTopUp, setShowTopUp] = useState(false);
-  const [showCheckout, setShowCheckout] = useState(false);
-  const [orderFormat, setOrderFormat] = useState('');
-  const [formErrors, setFormErrors] = useState<{userId?: string; serverId?: string; paymentMethod?: string}>({});
-  const [products, setProducts] = useState<GameProduct[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isAdminRoute, setIsAdminRoute] = useState(false);
-  const [isResellerRoute, setIsResellerRoute] = useState(false);
-  const [isResellerLoggedIn, setIsResellerLoggedIn] = useState(false);
-  const [showPopupBanner, setShowPopupBanner] = useState(true);
-  const [paymentCooldown, setPaymentCooldown] = useState(0);
-  const [cooldownInterval, setCooldownInterval] = useState<NodeJS.Timeout | null>(null);
-  const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
-  const [validating, setValidating] = useState(false);
-  const [validationResult, setValidationResult] = useState<any>(null);
-  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'successful' | 'failed'>('idle');
+    const savedForm = localStorage.getItem("customerInfo")
+    return savedForm
+      ? JSON.parse(savedForm)
+      : {
+          userId: "",
+          serverId: "",
+          product: null,
+          game: "mlbb",
+          nickname: undefined,
+        }
+  })
+  const [showTopUp, setShowTopUp] = useState(false)
+  const [showCheckout, setShowCheckout] = useState(false)
+  const [orderFormat, setOrderFormat] = useState("")
+  const [formErrors, setFormErrors] = useState<{ userId?: string; serverId?: string; paymentMethod?: string }>({})
+  const [products, setProducts] = useState<GameProduct[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isAdminRoute, setIsAdminRoute] = useState(false)
+  const [isResellerRoute, setIsResellerRoute] = useState(false)
+  const [isResellerLoggedIn, setIsResellerLoggedIn] = useState(false)
+  const [showPopupBanner, setShowPopupBanner] = useState(true)
+  const [paymentCooldown, setPaymentCooldown] = useState(0)
+  const [cooldownInterval, setCooldownInterval] = useState<NodeJS.Timeout | null>(null)
+  const [selectedPayment, setSelectedPayment] = useState<string | null>(null)
+  const [validating, setValidating] = useState(false)
+  const [validationResult, setValidationResult] = useState<any>(null)
+  const [paymentStatus, setPaymentStatus] = useState<"idle" | "processing" | "successful" | "failed">("idle")
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(1)
+  const [showTermsModal, setShowTermsModal] = useState(false)
+
+  // Banner images
+  const bannerImages = [
+    "https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-37.jpg",
+    "https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-37.jpg",
+    "https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-37.jpg",
+  ]
+
+  const specialOffers = [
+    "https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-15.jpg",
+    "https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-23.jpg",
+    "https://i.postimg.cc/rm2fjq52/Weekly-ff-kon-banner.jpg",
+  ]
 
   // Diamond combination mapping
   const diamondCombinations = {
-    '86': { total: '86', breakdown: '86+0bonus' },
-    '172': { total: '172', breakdown: '172+0bonus' },
-    '257': { total: '257', breakdown: '257+0bonus' },
-    '343': { total: '343', breakdown: '257+86bonus' },
-    '429': { total: '429', breakdown: '257+172bonus' },
-    '514': { total: '514', breakdown: '514+0bonus' },
-    '600': { total: '600', breakdown: '514+86bonus' },
-    '706': { total: '706', breakdown: '706+0bonus' },
-    '792': { total: '792', breakdown: '706+86bonus' },
-    '878': { total: '878', breakdown: '706+172bonus' },
-    '963': { total: '963', breakdown: '706+257bonus' },
-    '1049': { total: '1049', breakdown: '963+86bonus' },
-    '1135': { total: '1135', breakdown: '963+172bonus' },
-    '1220': { total: '1220', breakdown: '963+257bonus' },
-    '1412': { total: '1412', breakdown: '1412+0bonus' },
-    '1584': { total: '1584', breakdown: '1412+172bonus' },
-    '1756': { total: '1756', breakdown: '1412+344bonus' },
-    '1926': { total: '1926', breakdown: '1412+514bonus' },
-    '2195': { total: '2195', breakdown: '2195+0bonus' },
-    '2384': { total: '2384', breakdown: '2195+189bonus' },
-    '2637': { total: '2637', breakdown: '2195+442bonus' },
-    '2810': { total: '2810', breakdown: '2195+615bonus' }
-  };
+    "86": { total: "86", breakdown: "86+0bonus" },
+    "172": { total: "172", breakdown: "172+0bonus" },
+    "257": { total: "257", breakdown: "257+0bonus" },
+    "343": { total: "343", breakdown: "257+86bonus" },
+    "429": { total: "429", breakdown: "257+172bonus" },
+    "514": { total: "514", breakdown: "514+0bonus" },
+    "600": { total: "600", breakdown: "514+86bonus" },
+    "706": { total: "706", breakdown: "706+0bonus" },
+    "792": { total: "792", breakdown: "706+86bonus" },
+    "878": { total: "878", breakdown: "706+172bonus" },
+    "963": { total: "963", breakdown: "706+257bonus" },
+    "1049": { total: "1049", breakdown: "963+86bonus" },
+    "1135": { total: "1135", breakdown: "963+172bonus" },
+    "1220": { total: "1220", breakdown: "963+257bonus" },
+    "1412": { total: "1412", breakdown: "1412+0bonus" },
+    "1584": { total: "1584", breakdown: "1412+172bonus" },
+    "1756": { total: "1756", breakdown: "1412+344bonus" },
+    "1926": { total: "1926", breakdown: "1412+514bonus" },
+    "2195": { total: "2195", breakdown: "2195+0bonus" },
+    "2384": { total: "2384", breakdown: "2195+189bonus" },
+    "2637": { total: "2637", breakdown: "2195+442bonus" },
+    "2810": { total: "2810", breakdown: "2195+615bonus" },
+  }
 
   // Format item display based on diamond combinations
   const formatItemDisplay = (product: GameProduct | null) => {
-    if (!product) return 'None';
-    const identifier = product.diamonds || product.name;
-    const combo = diamondCombinations[identifier];
-    if (!combo) return identifier;
-    return combo.breakdown.endsWith('+0bonus') ? combo.total : `${combo.total} (${combo.breakdown})`;
-  };
+    if (!product) return "None"
+    const identifier = product.diamonds || product.name
+    const combo = diamondCombinations[identifier]
+    if (!combo) return identifier
+    return combo.breakdown.endsWith("+0bonus") ? combo.total : `${combo.total} (${combo.breakdown})`
+  }
 
   useEffect(() => {
     const checkRoute = () => {
-      const path = window.location.pathname;
-      setIsAdminRoute(path === '/adminlogintopup');
-      setIsResellerRoute(path === '/reseller');
-      const resellerAuth = localStorage.getItem('jackstore_reseller_auth');
-      setIsResellerLoggedIn(resellerAuth === 'true');
-    };
-    checkRoute();
-    window.addEventListener('popstate', checkRoute);
-    return () => window.removeEventListener('popstate', checkRoute);
-  }, []);
+      const path = window.location.pathname
+      setIsAdminRoute(path === "/adminlogintopup")
+      setIsResellerRoute(path === "/reseller")
+      const resellerAuth = localStorage.getItem("jackstore_reseller_auth")
+      setIsResellerLoggedIn(resellerAuth === "true")
+    }
+    checkRoute()
+    window.addEventListener("popstate", checkRoute)
+    return () => window.removeEventListener("popstate", checkRoute)
+  }, [])
 
   useEffect(() => {
-    if (!isAdminRoute && !isResellerRoute) {
-      fetchProducts(form.game);
+    if (!isAdminRoute && !isResellerRoute && showTopUp) {
+      fetchProducts(form.game)
     }
-  }, [form.game, isAdminRoute, isResellerRoute]);
+  }, [form.game, isAdminRoute, isResellerRoute, showTopUp])
 
   useEffect(() => {
     return () => {
-      if (cooldownInterval) clearInterval(cooldownInterval);
-    };
-  }, [cooldownInterval]);
+      if (cooldownInterval) clearInterval(cooldownInterval)
+    }
+  }, [cooldownInterval])
 
   useEffect(() => {
     if (form.userId || form.serverId || form.nickname) {
-      localStorage.setItem('customerInfo', JSON.stringify({
-        userId: form.userId,
-        serverId: form.serverId,
-        game: form.game,
-        product: null,
-        nickname: form.nickname
-      }));
+      localStorage.setItem(
+        "customerInfo",
+        JSON.stringify({
+          userId: form.userId,
+          serverId: form.serverId,
+          game: form.game,
+          product: null,
+          nickname: form.nickname,
+        }),
+      )
     }
-  }, [form.userId, form.serverId, form.game, form.nickname]);
+  }, [form.userId, form.serverId, form.game, form.nickname])
 
   const startPaymentCooldown = () => {
-    setPaymentCooldown(3);
-    if (cooldownInterval) clearInterval(cooldownInterval);
+    setPaymentCooldown(3)
+    if (cooldownInterval) clearInterval(cooldownInterval)
     const interval = setInterval(() => {
-      setPaymentCooldown(prev => {
+      setPaymentCooldown((prev) => {
         if (prev <= 1) {
-          clearInterval(interval);
-          return 0;
+          clearInterval(interval)
+          return 0
         }
-        return prev - 1;
-      });
-    }, 1000);
-    setCooldownInterval(interval);
-  };
+        return prev - 1
+      })
+    }, 1000)
+    setCooldownInterval(interval)
+  }
 
-  const fetchProducts = async (game: 'mlbb' | 'freefire') => {
-    setLoading(true);
+  const fetchProducts = async (game: "mlbb" | "freefire") => {
+    console.log("Fetching products for:", game)
+    setLoading(true)
     try {
-      const table = game === 'mlbb' ? 'mlbb_products' : game === 'freefire' ? 'freefire_products' : 'gameshow_products';
-      const { data: products, error } = await supabase
-        .from(table)
-        .select('*')
-        .order('id', { ascending: true });
+      const table = game === "mlbb" ? "mlbb_products" : game === "freefire" ? "freefire_products" : "gameshow_products"
+      console.log("Using table:", table)
+      const { data: products, error } = await supabase.from(table).select("*").order("id", { ascending: true })
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error)
+        throw error
+      }
 
-      let transformedProducts: GameProduct[] = products.map(product => ({
+      console.log("Products fetched:", products?.length || 0)
+
+      let transformedProducts: GameProduct[] = products.map((product) => ({
         id: product.id,
         name: product.name,
         diamonds: product.diamonds || undefined,
         price: product.price,
         currency: product.currency,
-        type: product.type as 'diamonds' | 'subscription' | 'special',
+        type: product.type as "diamonds" | "subscription" | "special",
         game,
         image: product.image || undefined,
-        code: product.code || undefined
-      }));
+        code: product.code || undefined,
+      }))
 
-      const isReseller = localStorage.getItem('jackstore_reseller_auth') === 'true';
+      const isReseller = localStorage.getItem("jackstore_reseller_auth") === "true"
       if (isReseller) {
         const { data: resellerPrices, error: resellerError } = await supabase
-          .from('reseller_prices')
-          .select('*')
-          .eq('game', game);
+          .from("reseller_prices")
+          .select("*")
+          .eq("game", game)
         if (!resellerError && resellerPrices) {
-          transformedProducts = transformedProducts.map(product => {
-            const resellerPrice = resellerPrices.find(
-              rp => rp.product_id === product.id && rp.game === product.game
-            );
-            return resellerPrice ? { ...product, price: resellerPrice.price, resellerPrice: resellerPrice.price } : product;
-          });
+          transformedProducts = transformedProducts.map((product) => {
+            const resellerPrice = resellerPrices.find((rp) => rp.product_id === product.id && rp.game === product.game)
+            return resellerPrice
+              ? { ...product, price: resellerPrice.price, resellerPrice: resellerPrice.price }
+              : product
+          })
         }
       }
-      setProducts(transformedProducts);
+      console.log("Transformed products:", transformedProducts.length)
+      setProducts(transformedProducts)
     } catch (error) {
-      console.error(`Error fetching products for ${game}:`, error);
-      setProducts([]);
-      alert('Failed to load products. Please try again.');
+      console.error(`Error fetching products for ${game}:`, error)
+      setProducts([])
+      alert("Failed to load products. Please try again.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const validateAccount = async () => {
-    if (!form.userId) return;
+    if (!form.userId) return
 
-    setValidating(true);
-    setValidationResult(null);
+    setValidating(true)
+    setValidationResult(null)
 
     try {
-      let response;
-      if (form.game === 'mlbb') {
+      let response
+      if (form.game === "mlbb") {
         if (!form.serverId) {
-          setValidating(false);
-          return;
+          setValidating(false)
+          return
         }
-        response = await axios.get(
-          `https://api.isan.eu.org/nickname/ml?id=${form.userId}&zone=${form.serverId}`
-        );
+        response = await axios.get(`https://api.isan.eu.org/nickname/ml?id=${form.userId}&zone=${form.serverId}`)
       } else {
-        response = await axios.get(
-          `https://rapidasiagame.com/api/v1/idff.php?UserID=${form.userId}`
-        );
+        response = await axios.get(`https://rapidasiagame.com/api/v1/idff.php?UserID=${form.userId}`)
       }
 
-      if (form.game === 'mlbb' && response.data.success) {
-        setValidationResult(response.data);
-        setForm(prev => ({ ...prev, nickname: response.data.name }));
-      } else if (form.game === 'freefire' && response.data.status === 'success') {
-        setValidationResult(response.data);
-        setForm(prev => ({ ...prev, nickname: response.data.username }));
+      if (form.game === "mlbb" && response.data.success) {
+        setValidationResult(response.data)
+        setForm((prev) => ({ ...prev, nickname: response.data.name }))
+      } else if (form.game === "freefire" && response.data.status === "success") {
+        setValidationResult(response.data)
+        setForm((prev) => ({ ...prev, nickname: response.data.username }))
       } else {
-        setValidationResult(null);
+        setValidationResult(null)
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred';
-      console.error('Failed to validate account:', errorMessage);
-      setValidationResult(null);
+      const errorMessage = error instanceof Error ? error.message : "An error occurred"
+      console.error("Failed to validate account:", errorMessage)
+      setValidationResult(null)
     } finally {
-      setValidating(false);
+      setValidating(false)
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (paymentCooldown > 0) {
-      console.log('Payment blocked due to cooldown:', paymentCooldown);
-      return;
+      console.log("Payment blocked due to cooldown:", paymentCooldown)
+      return
     }
 
-    const errors: {userId?: string; serverId?: string; paymentMethod?: string} = {};
-    if (!form.userId) errors.userId = 'User ID is required';
-    if (form.game === 'mlbb' && !form.serverId) errors.serverId = 'Zone ID is required';
+    const errors: { userId?: string; serverId?: string; paymentMethod?: string } = {}
+    if (!form.userId) errors.userId = "User ID is required"
+    if (form.game === "mlbb" && !form.serverId) errors.serverId = "Zone ID is required"
     if (!form.product) {
-      alert('Please select a product');
-      return;
+      alert("Please select a product")
+      return
     }
-    if (!selectedPayment) errors.paymentMethod = 'Please select a payment method';
+    if (!selectedPayment) errors.paymentMethod = "Please select a payment method"
     if (!validationResult?.success && !validationResult?.status) {
-      alert(`Please check your ${form.game === 'mlbb' ? 'Mobile Legends' : 'Free Fire'} account first`);
-      return;
+      alert(`Please check your ${form.game === "mlbb" ? "Mobile Legends" : "Free Fire"} account first`)
+      return
     }
 
-    setFormErrors(errors);
+    setFormErrors(errors)
     if (Object.keys(errors).length > 0) {
-      console.log('Form errors:', errors);
-      return;
+      console.log("Form errors:", errors)
+      return
     }
 
-    setPaymentStatus('idle');
-    const productIdentifier = form.product.code || form.product.diamonds || form.product.name;
-    const format = form.game === 'mlbb'
-      ? `${form.userId} ${form.serverId} ${productIdentifier}`
-      : `${form.userId} 0 ${productIdentifier}`;
-    setOrderFormat(format);
-    setShowCheckout(true);
-    console.log('Payment modal opened with order:', format);
-  };
+    setPaymentStatus("idle")
+    const productIdentifier = form.product.code || form.product.diamonds || form.product.name
+    const format =
+      form.game === "mlbb"
+        ? `${form.userId} ${form.serverId} ${productIdentifier}`
+        : `${form.userId} 0 ${productIdentifier}`
+    setOrderFormat(format)
+    setShowCheckout(true)
+    console.log("Payment modal opened with order:", format)
+  }
 
   const clearSavedInfo = () => {
-    localStorage.removeItem('customerInfo');
-    setForm({ userId: '', serverId: '', product: null, game: form.game, nickname: undefined });
-    setValidationResult(null);
-    setPaymentStatus('idle');
-  };
+    localStorage.removeItem("customerInfo")
+    setForm({ userId: "", serverId: "", product: null, game: form.game, nickname: undefined })
+    setValidationResult(null)
+    setPaymentStatus("idle")
+  }
 
   const handleClosePayment = () => {
-    setShowCheckout(false);
-    setPaymentStatus('idle');
-    startPaymentCooldown();
-  };
+    setShowCheckout(false)
+    setPaymentStatus("idle")
+    startPaymentCooldown()
+  }
+
+  const nextBanner = () => {
+    setCurrentBannerIndex((prev) => (prev + 1) % bannerImages.length)
+  }
+
+  const prevBanner = () => {
+    setCurrentBannerIndex((prev) => (prev - 1 + bannerImages.length) % bannerImages.length)
+  }
 
   if (isAdminRoute) {
     return (
-      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-10 h-10 animate-spin" /> Loading...</div>}>
+      <Suspense
+        fallback={
+          <div className="min-h-screen flex items-center justify-center">
+            <Loader2 className="w-10 h-10 animate-spin" /> Loading...
+          </div>
+        }
+      >
         <AdminPage />
       </Suspense>
-    );
+    )
   }
 
   if (isResellerRoute) {
     return (
-      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-10 h-10 animate-spin" /> Loading...</div>}>
-        <ResellerPage onLogin={() => { setIsResellerLoggedIn(true); window.location.href = '/'; }} />
+      <Suspense
+        fallback={
+          <div className="min-h-screen flex items-center justify-center">
+            <Loader2 className="w-10 h-10 animate-spin" /> Loading...
+          </div>
+        }
+      >
+        <ResellerPage
+          onLogin={() => {
+            setIsResellerLoggedIn(true)
+            window.location.href = "/"
+          }}
+        />
       </Suspense>
-    );
+    )
   }
 
   return (
-    <div className="min-h-screen bg-cover bg-center flex flex-col" style={{ backgroundImage: `url("${storeConfig.backgroundImageUrl}")` }}>
+    <div className="min-h-screen bg-fixed bg-cover bg-center flex flex-col" style={{ backgroundColor: "#1f2138" }}>
       <style>
         {`
+          @import url('https://fonts.googleapis.com/css2?family=Concert+One&family=Dangrek&display=swap');
+          
+          .concert-one-regular {
+            font-family: "Concert One", sans-serif;
+            font-weight: 400;
+            font-style: normal;
+          }
+          
+          .dangrek {
+            font-family: "Dangrek", serif;
+            font-weight: 400;
+            font-style: normal;
+          }
+          
+          .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+          
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+          }
+          
           @keyframes glow {
             0% { box-shadow: 0 0 10px rgba(231, 42, 245, 0.5), 0 0 20px rgba(231, 42, 245, 0.3); }
             50% { box-shadow: 0 0 20px rgba(231, 42, 245, 0.8), 0 0 30px rgba(231, 42, 245, 0.5); }
@@ -448,148 +514,453 @@ function App() {
             font-size: 10px;
             color: #fff;
           }
-          .banner-image {
-            width: 100%;
-            max-height: 300px;
-            object-fit: contain;
+          
+          /* Professional Game Card Styles - Updated to match exact dimensions */
+          .game-card {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: visible;
+            border: 1px solid white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 180px;
+            height: 188px;
+          }
+
+          .game-card:hover {
+            opacity: 0.8;
+            transform: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          }
+
+          .game-card-available {
+            border-color: white;
+          }
+
+          .game-card-coming-soon {
+            opacity: 0.7;
+            cursor: not-allowed;
+          }
+
+          .game-card-coming-soon:hover {
+            opacity: 0.7;
+            transform: none;
+          }
+
+          .status-badge {
+            display: none; /* Hide status badges to match the design */
+          }
+
+          .game-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 12px;
+            margin: 0 auto 8px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+            aspect-ratio: 1;
+          }
+
+          .game-card:hover .game-icon {
+            transform: none;
+          }
+
+          .game-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: #545454;
+            text-align: center;
+            margin-bottom: 12px;
+            line-height: 1.3;
+            width: 98.66px;
+            height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-stroke: 2px black;
+            -webkit-text-stroke: 2px black;
+          }
+
+          @media (min-width: 640px) {
+            .game-title {
+              font-size: 20px;
+            }
+          }
+
+          .game-subtitle {
+            display: none; /* Hide subtitle to match the design */
+          }
+
+          .game-button {
+            background-color: #545454;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            text-transform: none;
+            letter-spacing: normal;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translateY(20px);
+            width: 148px;
+            height: 32px;
+          }
+
+          @media (min-width: 768px) {
+            .game-button {
+              width: 148px;
+              height: 32px;
+            }
+          }
+
+          @media (min-width: 640px) {
+            .game-button {
+              font-size: 16px;
+            }
+          }
+
+          .button-available:hover {
+            background-color: #374151;
+          }
+
+          .button-coming-soon {
+            background-color: #9CA3AF;
+            color: #6B7280;
+            cursor: not-allowed;
+          }
+
+          /* Product List Styles - Updated for 150x72 dimensions with better spacing */
+          .product-card-150x72 {
+            width: 150px !important;
+            height: 72px !important;
+            background: white;
+            border: 2px solid #f0f0f0;
             border-radius: 8px;
-            margin-bottom: 16px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: visible;
+            box-sizing: border-box;
+            margin: 4px;
+          }
+
+          .product-card-150x72:hover {
+            border-color: #0016d0;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 22, 208, 0.2);
+          }
+
+          .product-card-150x72.selected {
+            border-color: #0016d0;
+            background: #FFFBF0;
+            box-shadow: 0 0 0 2px #0016d0;
+          }
+
+          .product-card-150x72 .product-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            object-fit: cover;
+            flex-shrink: 0;
+          }
+
+          .product-card-150x72 .product-content {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2px;
+          }
+
+          .product-card-150x72 .product-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #333;
+            line-height: 1.2;
+            margin: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+
+          .product-card-150x72 .product-price {
+            font-size: 12px;
+            font-weight: bold;
+            color: #0016d0;
+            margin: 0;
+          }
+
+          .product-card-150x72.selected .product-title {
+            color: #0016d0;
+          }
+
+          .product-card-150x72 .selected-indicator {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 0;
+            height: 0;
+            border-top: 20px solid #0016d0;
+            border-left: 20px solid transparent;
+          }
+
+          .product-card-150x72 .selected-indicator::after {
+            content: '✓';
+            position: absolute;
+            top: -18px;
+            right: 2px;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+          }
+
+          /* Product Grid Container */
+          .product-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            justify-items: center;
+            padding: 0 8px;
+          }
+
+          @media (min-width: 640px) {
+            .product-grid {
+              gap: 16px;
+              padding: 0 16px;
+            }
+          }
+
+          .line-clamp-1 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 1;
+          }
+
+          .line-clamp-2 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
           }
         `}
       </style>
 
-      <nav className="bg-gradient-to-r from-purple-600 to-green-500 text-white p-4 sticky top-0 z-50">
-        <div className="container mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src={storeConfig.logoUrl} alt="Zado Store" className="w-10 h-10 rounded-full" />
-            <span className="text-xl font-bold">Zado STORE</span>
-          </div>
-          <div className="flex-1 max-w-md mx-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search"
-                className="w-full pl-10 pr-4 py-2 rounded-lg bg-white text-black"
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <button className="flex flex-col justify-between h-6 w-8">
-              <span className="bg-white h-1 w-full rounded"></span>
-              <span className="bg-white h-1 w-full rounded"></span>
-              <span className="bg-white h-1 w-full rounded"></span>
-            </button>
-            <button className="bg-white text-black px-4 py-2 rounded-lg">Login</button>
+      {/* Animated Header */}
+      <nav
+        className="p-4 shadow-md flex items-center justify-between w-full top-0 z-50"
+        style={{
+          height: "100px",
+          backgroundImage: 'url("https://i.postimg.cc/tTsfbm77/New-Project1420-FEAE6-D1-ezgif-com-speed.gif")',
+          backgroundSize: "contain",
+          backgroundPosition: "center center",
+          backgroundRepeat: "no-repeat",
+          backgroundColor: "#0000FF",
+        }}
+      >
+        <div className="container mx-auto flex items-center justify-between w-full">
+          <div className="flex items-center space-x-4">
+            <p className="text-xs text-white/80 dangrek"></p>
           </div>
         </div>
       </nav>
 
       <div className="flex-grow">
         {!showTopUp ? (
-          <main className="px-4 py-4">
-            <div className="flex flex-col items-center">
-              {/* Banner Image Added Here */}
-              <div className="w-full max-w-4xl mb-8">
-                <img
-                  src="https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-17_23-29-27%20(2).jpg"
-                  alt="Banner"
-                  className="banner-image"
-                />
-              </div>
-              <div className="w-full max-w-4xl mb-8">
-                <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                  🔥 Popular!
-                  <span className="text-sm font-normal text-gray-600">The most popular products today.</span>
-                </h2>
-                <div className="flex flex-row gap-4 overflow-x-auto pb-4">
-                  <div
-                    onClick={() => {
-                      setForm(prev => ({ ...prev, game: 'mlbb' }));
-                      setShowTopUp(true);
-                    }}
-                    className="w-[240px] h-[100px] bg-gray-200 rounded-lg shadow-lg flex items-center cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-gray-400"
+          <main>
+            {/* Main Banner */}
+            <div className="w-full p-4 m-0 mt-[10px]">
+              <div className="rounded-lg overflow-hidden">
+                <div className="relative h-auto group">
+                  <img
+                    src={bannerImages[currentBannerIndex] || "/placeholder.svg"}
+                    alt={`Banner ${currentBannerIndex + 1}`}
+                    className="w-full object-cover transition-opacity duration-500"
+                    style={{ maxHeight: "500px", width: "100%", objectFit: "cover" }}
+                  />
+                  <button
+                    onClick={prevBanner}
+                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/30 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                   >
-                    <img
-                      src="https://play-lh.googleusercontent.com/M9_okpLdBz0unRHHeX7FcZxEPLZDIQNCGEBoql7MxgSitDL4wUy4iYGQxfvqYogexQ"
-                      alt="Mobile Legends"
-                      className="w-16 h-16 ml-4 rounded-lg object-contain"
-                    />
-                    <div className="ml-4 flex-1 pr-4">
-                      <h3 className="text-sm font-semibold text-black break-words leading-tight">
-                        Mobile Legends
-                      </h3>
-                      <p className="text-xs text-gray-600 break-words">Moonton</p>
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => {
-                      setForm(prev => ({ ...prev, game: 'freefire' }));
-                      setShowTopUp(true);
-                    }}
-                    className="w-[240px] h-[100px] bg-gray-200 rounded-lg shadow-lg flex items-center cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-gray-400"
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+                  <button
+                    onClick={nextBanner}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/30 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                   >
-                    <img
-                      src="https://play-lh.googleusercontent.com/WWcssdzTZvx7Fc84lfMpVuyMXg83_PwrfpgSBd0IID_IuupsYVYJ34S9R2_5x57gHQ"
-                      alt="Free Fire"
-                      className="w-16 h-16 ml-4 rounded-lg object-contain"
-                    />
-                    <div className="ml-4 flex-1 pr-4">
-                      <h3 className="text-sm font-semibold text-black break-words leading-tight">
-                        Free Fire
-                      </h3>
-                      <p className="text-xs text-gray-600 break-words">Garena</p>
-                    </div>
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+                    {bannerImages.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentBannerIndex(index)}
+                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                          index === currentBannerIndex ? "bg-white w-4" : "bg-white/50 hover:bg-white/80"
+                        }`}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
-              <div className="w-full max-w-4xl">
-                <h2 className="text-2xl font-bold text-white mb-6 drop-shadow-[0_0_10px_rgba(255,105,180,0.8)]">
-                  📱 ផលិតផលដែលមាន 🔥
-                </h2>
-                <div className="flex flex-row gap-4 overflow-x-auto pb-4 md:flex-wrap md:justify-center md:overflow-x-hidden">
-                  <div
-                    onClick={() => {
-                      setForm(prev => ({ ...prev, game: 'mlbb' }));
-                      setShowTopUp(true);
-                    }}
-                    className="flex flex-col items-center cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-green-400"
-                  >
-                    <div className="relative w-32 h-32 flex items-center justify-center">
-                      <div className="absolute inset-0 w-32 h-32 bg-white border-2 border-gray-300 rounded-full shadow-lg z-0"></div>
+            </div>
+
+            {/* Special Offers - Keep exactly the same */}
+            <div className="w-full p-4 sm:p-4 bg-[#1f2138]">
+              <div className="container mx-auto">
+                <div className="mb-2 sm:mb-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-white concert-one-regular">SPECIAL OFFERS</h3>
+                  <p className="text-xs sm:text-sm text-gray-300 dangrek">
+                    {"Don't miss out! Top up now and grab exclusive promotion!"}
+                  </p>
+                </div>
+                <div className="flex flex-row overflow-x-auto space-x-2 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4 sm:space-x-0 scrollbar-hide">
+                  {specialOffers.map((offer, index) => (
+                    <div
+                      key={index}
+                      className="flex-shrink-0 overflow-hidden cursor-pointer w-[160px] h-[80px] sm:w-full sm:h-[120px] md:h-[150px] lg:h-[180px]"
+                    >
                       <img
-                        src={storeConfig.games.mlbb.logoUrl}
-                        alt="Mobile Legends"
-                        className="w-24 h-24 rounded-md object-contain border-4 border-white shadow-md relative z-10"
+                        src={offer || "/placeholder.svg"}
+                        alt={`Child Banner ${index + 1}`}
+                        className="w-full h-full object-contain transition-opacity duration-300 hover:opacity-90"
                       />
                     </div>
-                    <div className="w-32 mt-2">
-                      <h3 className="text-sm font-semibold text-black text-center break-words">
-                        Mobile Legends
-                      </h3>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Games Section - Updated */}
+            <div className="max-w-7xl mx-auto px-4 py-8">
+              {/* Section Header */}
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 concert-one-regular">MOBILE GAMES</h2>
+                <div className="w-24 h-1 bg-gradient-to-r from-[#FFDE01] to-[#FFB800] mx-auto rounded-full"></div>
+              </div>
+
+              {/* Available Games */}
+              <div className="mb-16">
+                <h3 className="text-xl font-semibold text-white mb-8 concert-one-regular flex items-center">
+                  <div className="w-3 h-3 bg-[#5AFF4A] rounded-full mr-3"></div>
+                  Available Now
+                </h3>
+                <div className="flex justify-center gap-6">
+                  {/* Free Fire Card */}
+                  <a
+                    onClick={() => {
+                      setForm((prev) => ({ ...prev, game: "freefire" }))
+                      setShowTopUp(true)
+                    }}
+                    className="game-card game-card-available cursor-pointer"
+                  >
+                    <div>
+                      <img
+                        src="https://i.postimg.cc/d1R9p3KG/Brown-Mascot-Gamer-Logo-2.jpg"
+                        alt="Free Fire KH"
+                        className="game-icon"
+                      />
                     </div>
+                    <div className="game-title">Free Fire KH</div>
+                    <div className="flex items-center justify-center w-full">
+                      <button className="game-button button-available">Top - Up</button>
+                    </div>
+                  </a>
+
+                  {/* Mobile Legends Card */}
+                  <a
+                    onClick={() => {
+                      setForm((prev) => ({ ...prev, game: "mlbb" }))
+                      setShowTopUp(true)
+                    }}
+                    className="game-card game-card-available cursor-pointer"
+                  >
+                    <div>
+                      <img
+                        src="https://i.postimg.cc/05B6xx2S/Brown-Mascot-Gamer-Logo-6.jpg"
+                        alt="Mobile Legends KH"
+                        className="game-icon"
+                      />
+                    </div>
+                    <div className="game-title">Mobile Legends KH</div>
+                    <div className="flex items-center justify-center w-full">
+                      <button className="game-button button-available">Top - Up</button>
+                    </div>
+                  </a>
+                </div>
+              </div>
+
+              {/* Coming Soon Games */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-8 concert-one-regular flex items-center">
+                  <div className="w-3 h-3 bg-[#FF1493] rounded-full mr-3"></div>
+                  Coming Soon
+                </h3>
+                <div className="flex justify-center gap-6 mb-6">
+                  {/* BABA JI */}
+                  <div className="game-card game-card-coming-soon">
+                    <div className="status-badge status-coming-soon">Coming Soon</div>
+                    <img
+                      src="https://static.gameloop.com/syzs_cms/202411/0c1b802dbf58e04cf330d4631741e980.png?imageMogr2/thumbnail/172.8x172.8/format/webp"
+                      alt="BABA JI"
+                      className="game-icon"
+                    />
+                    <h3 className="game-title">BABA JI</h3>
+                    <button className="game-button button-coming-soon">Coming Soon</button>
                   </div>
-                  <div
-                    onClick={() => {
-                      setForm(prev => ({ ...prev, game: 'freefire' }));
-                      setShowTopUp(true);
-                    }}
-                    className="flex flex-col items-center cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-green-400"
-                  >
-                    <div className="relative w-32 h-32 flex items-center justify-center">
-                      <div className="absolute inset-0 w-32 h-32 bg-white border-2 border-gray-300 rounded-full shadow-lg z-0"></div>
-                      <img
-                        src={storeConfig.games.freefire.logoUrl}
-                        alt="Free Fire"
-                        className="w-24 h-24 rounded-md object-contain border-4 border-white shadow-md relative z-10"
-                      />
-                    </div>
-                    <div className="w-32 mt-2">
-                      <h3 className="text-sm font-semibold text-black text-center break-words">
-                        Free Fire
-                      </h3>
-                    </div>
+
+                  {/* Mobile Legends PH */}
+                  <div className="game-card game-card-coming-soon">
+                    <div className="status-badge status-coming-soon">Coming Soon</div>
+                    <img
+                      src="https://raw.githubusercontent.com/Cheagjihvg/feliex-assets/refs/heads/main/IMG_2707.PNG"
+                      alt="Mobile Legends PH"
+                      className="game-icon"
+                    />
+                    <h3 className="game-title">MLBB PH</h3>
+                    <button className="game-button button-coming-soon">Coming Soon</button>
+                  </div>
+                </div>
+                <div className="flex justify-center gap-6">
+                  {/* PUBG Mobile */}
+                  <div className="game-card game-card-coming-soon">
+                    <div className="status-badge status-coming-soon">Coming Soon</div>
+                    <img
+                      src="https://i.postimg.cc/QCLqYpZR/pubg-mobile-icon.png"
+                      alt="PUBG Mobile"
+                      className="game-icon"
+                    />
+                    <h3 className="game-title">PUBG Mobile</h3>
+                    <button className="game-button button-coming-soon">Coming Soon</button>
+                  </div>
+
+                  {/* Genshin Impact */}
+                  <div className="game-card game-card-coming-soon">
+                    <div className="status-badge status-coming-soon">Coming Soon</div>
+                    <img
+                      src="https://i.postimg.cc/9FLzYpKR/genshin-impact-icon.png"
+                      alt="Genshin Impact"
+                      className="game-icon"
+                    />
+                    <h3 className="game-title">Genshin Impact</h3>
+                    <button className="game-button button-coming-soon">Coming Soon</button>
                   </div>
                 </div>
               </div>
@@ -600,12 +971,12 @@ function App() {
             <div className="max-w-4xl mx-auto space-y-6">
               <div className="flex items-center justify-between">
                 <button
-                  onClick={() => { 
-                    setShowTopUp(false); 
-                    setShowCheckout(false); 
-                    setValidationResult(null);
-                    setForm(prev => ({ ...prev, nickname: undefined }));
-                    setPaymentStatus('idle');
+                  onClick={() => {
+                    setShowTopUp(false)
+                    setShowCheckout(false)
+                    setValidationResult(null)
+                    setForm((prev) => ({ ...prev, nickname: undefined }))
+                    setPaymentStatus("idle")
                   }}
                   className="text-white bg-white/10 px-3 py-1.5 rounded-lg flex items-center gap-2"
                 >
@@ -620,238 +991,723 @@ function App() {
                   </button>
                 )}
               </div>
-              <div className="bg-[#85ff79] border-4 border-[#85ff79] rounded-xl p-6 text-white">
-                <div className="main-top">
-                  <div className="img-cover">
-                    <img
-                      src="https://angel-cms.minttopup.xyz/uploads/mlbb_logo_16b189b25f.webp"
-                      alt="mlbb-logo"
-                      loading="lazy"
-                      width="50"
-                      height="50"
-                      className="img"
-                    />
-                  </div>
-                  <div className="content-bloc">
-                    <h1 className="title">Mobile Legend</h1>
-                    <ul className="list">
-                      <li className="sub"><span className="text">សុវត្តិភាព</span></li>
-                      <li className="sub"><span className="text">រហ័ស</span></li>
-                    </ul>
-                  </div>
-                </div>
-                <p>បញ្ចូលព័ត៌មាន</p>
-                <p className="p-content">
-                  ទិញពេជ្រ Mobile Legends: Bang Bang ក្នុងតម្លៃសមរម្យ! តាមរយះអាយឌី ID របស់អ្នក,
-                  ជ្រើសរើសកញ្ចប់ពេជ្យ ដែលអ្នកពេញចិត្តទិញ, ដោយបង់ប្រាក់តាមមធ្យោបាយដែលអ្នកមាន,
-                  ពេជ្រនឹងបញ្ជូនទៅក្នុងគណនេយ្យ MLBB របស់អ្នកក្នុងរយះពេលពីចន្លោះ 10នាទី ដល់ 3ម៉ោង។
-                </p>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-black mb-1">USER ID</label>
-                      <input
-                        type="text"
-                        value={form.userId}
-                        onChange={(e) => {
-                          const value = e.target.value.trim().replace(/[^0-9]/g, '');
-                          setForm(prev => ({ ...prev, userId: value, nickname: undefined }));
-                          setValidationResult(null);
-                          setFormErrors(prev => ({ ...prev, userId: undefined }));
-                        }}
-                        className="w-full rounded-lg bg-white border border-gray-300 px-3 py-2 text-black"
-                        placeholder="Enter your User ID"
-                      />
-                      {formErrors.userId && <p className="text-red-400 text-xs mt-1">{formErrors.userId}</p>}
+
+              <div className="right-panel rounded-xl p-6" style={{ backgroundColor: "#000636" }}>
+                <style jsx>{`
+    .right-panel {
+      font-family: inherit;
+    }
+    .section {
+      margin-bottom: 2rem;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .index {
+      background: #FFDE01;
+      color: black;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 1rem;
+    }
+    .title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: white;
+    }
+    .section-sub {
+      padding-left: 3rem;
+    }
+    .check-id {
+      margin-bottom: 2rem;
+    }
+    .game-part {
+      margin-bottom: 1rem;
+    }
+    .game-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .col input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    .game-checkid-btn {
+      margin-bottom: 1rem;
+    }
+    .game-checkid-btn-sub {
+      background-color: #FFDE01;
+      color: black;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .game-checkid-btn-sub:hover:not(:disabled) {
+      background-color: #FFB800;
+    }
+    .game-checkid-btn-sub:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .content {
+      font-size: 0.875rem;
+      color: white;
+      line-height: 1.5;
+    }
+    .promotion {
+      margin-bottom: 2rem;
+    }
+    .title-section {
+      margin-bottom: 1rem;
+    }
+    .title-cover {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: white;
+    }
+    .package-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .package-card {
+      background: white;
+      border: 2px solid #f0f0f0;
+      border-radius: 12px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .package-card:hover {
+      border-color: #FFDE01;
+      transform: translateY(-2px);
+    }
+    .package.active {
+      border-color: #FFDE01;
+      background: #FFFBF0;
+    }
+    .package {
+      width: 100%;
+    }
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .package-content {
+      flex: 1;
+    }
+    .package-price {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: #333;
+      margin: 0 0 0.25rem 0;
+    }
+    .package-title {
+      font-size: 0.875rem;
+      color: #666;
+      margin: 0;
+    }
+    .img {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+    }
+    .payment {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 2rem 0;
+    }
+    .select-bloc {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+    }
+    .select {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      border: 2px solid #f0f0f0;
+      border-radius: 12px;
+      transition: all 0.3s;
+    }
+    .select.active {
+      border-color: #FFDE01;
+      background: #FFFBF0;
+    }
+    .logo {
+      width: 60px;
+      height: 60px;
+      margin-right: 1rem;
+    }
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 10px;
+    }
+    .select-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex: 1;
+    }
+    .select-content .title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #333;
+      margin: 0 0 0.25rem 0;
+    }
+    .dsp {
+      font-size: 0.875rem;
+      color: #666;
+      margin: 0;
+    }
+    .term {
+      margin-bottom: 2rem;
+    }
+    .term .title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 1rem;
+    }
+    .checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .checkbox p {
+      color: white;
+    }
+    .custom-checkbox {
+      width: 18px;
+      height: 18px;
+    }
+    .link {
+      color: #FFDE01;
+      text-decoration: underline;
+    }
+    .total {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 12px;
+    }
+    .total .title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #333;
+    }
+    .btn-cover {
+      background: none;
+      border: none;
+      padding: 0;
+    }
+    .btn-submit {
+      background: #FFDE01;
+      color: black;
+      padding: 0.75rem 2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .btn-submit:hover {
+      background: #FFB800;
+    }
+    .btn-cover:disabled .btn-submit {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  `}</style>
+
+                <section className="section">
+                  <div className="section-title">
+                    <div className="index">
+                      <span>01</span>
                     </div>
-                    {form.game === 'mlbb' && (
-                      <div>
-                        <label className="block text-sm font-medium text-black mb-1">ZONE ID</label>
-                        <input
-                          type="text"
-                          value={form.serverId}
-                          onChange={(e) => {
-                            const value = e.target.value.trim().replace(/[^0-9]/g, '');
-                            setForm(prev => ({ ...prev, serverId: value, nickname: undefined }));
-                            setValidationResult(null);
-                            setFormErrors(prev => ({ ...prev, serverId: undefined }));
-                          }}
-                          className="w-full rounded-lg bg-white border border-gray-300 px-3 py-2 text-black"
-                          placeholder="Enter your Zone ID"
-                        />
-                        {formErrors.serverId && <p className="text-red-400 text-xs mt-1">{formErrors.serverId}</p>}
-                      </div>
-                    )}
+                    <div className="title">
+                      <p>បញ្ចូលព័ត៌មានរបស់អ្នក</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={validateAccount}
-                      disabled={
-                        !form.userId ||
-                        (form.game === 'mlbb' && !form.serverId) ||
-                        validating
-                      }
-                      className="bg-[#5aff4a] text-white px-4 py-2 rounded-lg hover:bg-[#ff1493] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                    >
-                      {validating ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          Checking...
-                        </>
-                      ) : (
-                        <>
-                          <Search className="w-4 h-4" />
-                          Check ID
-                        </>
-                      )}
-                    </button>
-                    {(validationResult?.success || validationResult?.status) && (
-                      <div className="flex items-center gap-2 text-green-400 text-sm">
-                        <CheckCircle2 className="w-4 h-4" />
-                        <span>Account found: {form.nickname}</span>
+                  <div className="section-sub">
+                    <div className="check-id">
+                      <form onSubmit={handleSubmit}>
+                        <div className="game-part">
+                          <div className="game-row">
+                            <div className="col">
+                              <input
+                                type="text"
+                                name="number"
+                                className="form-control"
+                                placeholder="User ID"
+                                required
+                                id="userId"
+                                value={form.userId}
+                                onChange={(e) => {
+                                  const value = e.target.value.trim().replace(/[^0-9]/g, "")
+                                  setForm((prev) => ({ ...prev, userId: value, nickname: undefined }))
+                                  setValidationResult(null)
+                                  setFormErrors((prev) => ({ ...prev, userId: undefined }))
+                                }}
+                              />
+                            </div>
+                            {form.game === "mlbb" && (
+                              <div className="col">
+                                <input
+                                  type="text"
+                                  name="number"
+                                  className="form-control"
+                                  placeholder="Zone ID"
+                                  required
+                                  id="zoneId"
+                                  value={form.serverId}
+                                  onChange={(e) => {
+                                    const value = e.target.value.trim().replace(/[^0-9]/g, "")
+                                    setForm((prev) => ({ ...prev, serverId: value, nickname: undefined }))
+                                    setValidationResult(null)
+                                    setFormErrors((prev) => ({ ...prev, serverId: undefined }))
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                          <div className="game-checkid-btn">
+                            <button
+                              type="button"
+                              className="game-checkid-btn-sub"
+                              disabled={!form.userId || (form.game === "mlbb" && !form.serverId) || validating}
+                              onClick={validateAccount}
+                            >
+                              {validating ? "Checking..." : "Check ID"}
+                            </button>
+                          </div>
+                        </div>
+                      </form>
+                      <div className="pt-2">
+                        <p className="content">
+                          ដើម្បីឃើញ UserID សូមចូលទៅក្នងហ្គេម ហើយចុចរូបភាព Avatar នៅខាងឆ្វេងអេក្រង់កញ្ចក់ ហើយចុចទៅកាន់"Check ID" ពេលនោះ
+                          User ID និងបង្ហាញឲ្យឃើញ បន្ទាប់មកសូមយក User ID នោះមកបំពេញ។ ឧទាហរណ៍: User ID: 123456789, Zone ID: 1234។
+                        </p>
                       </div>
-                    )}
+                    </div>
                   </div>
-                  <p className="kh-font">
-                    ដើម្បីឃើញ UserID សូមចូលទៅក្នងហ្គេម ហើយចុចរូបភាព Avatar នៅខាងឆ្វេងអេក្រង់កញ្ចក់
-                    ហើយចុចទៅកាន់"Check ID" ពេលនោះ User ID នឹងបង្ហាញឲ្យឃើញ បន្ទាប់មកសូមយក User ID
-                    នោះមកបំពេញ�। ឧទាហរណ៍: User ID: 123456789, Zone ID: 1234។
-                  </p>
-                  <h3 className="text-lg font-semibold text-black">Select Package</h3>
+                </section>
+
+                <section className="w-full max-w-4xl mx-auto px-4 py-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex-shrink-0 w-8 h-8 bg-[#0000FF] rounded-full flex items-center justify-center text-white dangrek">
+                      2
+                    </div>
+                    <p className="text-lg text-white dangrek">ជ្រើសរើសកញ្ជប់</p>
+                  </div>
+
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-white mb-2">ជ្រើសរើសកញ្ចប់ពេជ្យ</h2>
+                    <p className="text-white">Choose your preferred package</p>
+                  </div>
+
                   {loading ? (
                     <div className="flex justify-center py-8">
-                      <Loader2 className="w-8 h-8 animate-spin text-black" />
+                      <Loader2 className="w-8 h-8 animate-spin text-green-500" />
+                      <span className="ml-2 text-gray-600">Loading products...</span>
+                    </div>
+                  ) : products.length > 0 ? (
+                    <div className="space-y-6 font-poppins">
+                      {/* Best Seller Section */}
+                      {products.filter((p) => p.type === "special").length > 0 && (
+                        <div>
+                          <img
+                            src="https://sjc.microlink.io/fGUvt6iF919NvXcbsv3TXpIZOOtMr46-x63mqi6iZSxW1XK9WLX0Hr5eAFYFwCXs2UOovX5bhHwbTGCD29j88w.jpeg"
+                            alt="Promotion"
+                            className="mb-3 mx-auto block"
+                            style={{ width: "128.84px", height: "48px" }}
+                          />
+                          <div className="product-grid">
+                            {products
+                              .filter((p) => p.type === "special")
+                              .map((product) => (
+                                <div
+                                  key={product.id}
+                                  onClick={() => setForm((prev) => ({ ...prev, product }))}
+                                  className={`product-card-150x72 ${form.product?.id === product.id ? "selected" : ""}`}
+                                >
+                                  {form.product?.id === product.id && <div className="selected-indicator"></div>}
+                                  <img
+                                    src={product.image || "/placeholder.svg?height=40&width=40"}
+                                    alt={product.name}
+                                    className="product-image"
+                                    loading="lazy"
+                                  />
+                                  <div className="product-content">
+                                    <h3 className="product-title">{formatItemDisplay(product)}</h3>
+                                    <p className="product-price">${product.price.toFixed(2)}</p>
+                                  </div>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Saving Packages Section */}
+                      {products.filter((p) => p.type === "diamonds" || p.type === "subscription").length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                            <div className="p-1.5 bg-green-500/10 rounded-lg shadow-sm"></div>
+                            Saving Packages
+                          </h3>
+                          <div className="space-y-2">
+                            <div className="product-grid">
+                              {products
+                                .filter((p) => p.type === "diamonds" || p.type === "subscription")
+                                .map((product) => (
+                                  <div
+                                    key={product.id}
+                                    onClick={() => setForm((prev) => ({ ...prev, product }))}
+                                    className={`product-card-150x72 ${
+                                      form.product?.id === product.id ? "selected" : ""
+                                    }`}
+                                  >
+                                    {form.product?.id === product.id && <div className="selected-indicator"></div>}
+                                    <img
+                                      src={product.image || "/placeholder.svg?height=40&width=40"}
+                                      alt={product.name}
+                                      className="product-image"
+                                      loading="lazy"
+                                    />
+                                    <div className="product-content">
+                                      <h3 className="product-title">{formatItemDisplay(product)}</h3>
+                                      <p className="product-price">${product.price.toFixed(2)}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
-                    <ProductList
-                      products={products}
-                      selectedProduct={form.product}
-                      onSelect={(product) => setForm(prev => ({ ...prev, product }))}
-                      game={form.game}
-                    />
-                  )}
-                  <h3 className="text-lg font-semibold text-black">Select Payment Method</h3>
-                  <div className="grid grid-cols-1 gap-4">
-                    <div
-                      className={`payment-option ${selectedPayment === 'khqr' ? 'selected' : ''}`}
-                      onClick={() => setSelectedPayment(selectedPayment === 'khqr' ? null : 'khqr')}
-                    >
-                      <div className="payment-option-content">
-                        <img
-                          src="https://www.saktopup.com/_next/image?url=%2Fassets%2Fmain%2Fkhqr-lg.webp&w=1920&q=75"
-                          alt="KHQR"
-                          className="w-40px h-40px object-contain mr-4"
-                        />
-                        <div>
-                          <div className="payment-option-text">ABA KHQR</div>
-                          <div className="payment-option-subtext">Scan to pay with any banking app</div>
-                        </div>
+                    <div className="text-center py-10">
+                      <div className="bg-white/5 rounded-xl p-6 border border-gray-200 shadow-lg">
+                        <svg
+                          className="w-10 h-10 text-gray-400 mx-auto mb-3"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3l14 9-14 9V3z" />
+                        </svg>
+                        <p className="text-lg font-medium text-white">
+                          No products available for {form.game === "mlbb" ? "Mobile Legends" : "Free Fire"}".
+                        </p>
+                        <p className="text-sm text-white mt-1">Please check back later for new products.</p>
                       </div>
-                      <div
-                        className={`selection-circle ${selectedPayment === 'khqr' ? 'selected' : ''}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedPayment(selectedPayment === 'khqr' ? null : 'khqr');
-                        }}
-                      ></div>
+                    </div>
+                  )}
+                </section>
+
+                <section className="section">
+                  <div className="section-title">
+                    <div className="index">
+                      <span>03</span>
+                    </div>
+                    <div className="title">
+                      <p>បង់ប្រាក់</p>
                     </div>
                   </div>
-                  {formErrors.paymentMethod && <p className="text-red-400 text-xs mt-1">{formErrors.paymentMethod}</p>}
-                </form>
+                  <div className="section-sub">
+                    <ul className="payment">
+                      <li>
+                        <button
+                          type="button"
+                          className="select-bloc"
+                          onClick={() => setSelectedPayment(selectedPayment === "khqr" ? null : "khqr")}
+                        >
+                          <div className={`select ${selectedPayment === "khqr" ? "active" : ""}`}>
+                            <div className="logo">
+                              <img
+                                alt="ABA KHQR"
+                                width="512"
+                                height="461"
+                                src="https://www.saktopup.com/_next/image?url=%2Fassets%2Fmain%2Fkhqr-lg.webp&w=1920&q=75"
+                              />
+                            </div>
+                            <div className="select-content">
+                              <div className="content">
+                                <p className="title">ABA KHQR</p>
+                                <p className="dsp">Scan to pay with any banking app</p>
+                              </div>
+                              <div className="flex" style={{ alignItems: "center", paddingTop: "5px" }}>
+                                <div>
+                                  <div
+                                    style={{
+                                      padding: "5px",
+                                      border: "1px solid black",
+                                      borderRadius: "100px",
+                                      display: "flex",
+                                    }}
+                                  >
+                                    <div
+                                      style={{
+                                        width: "10px",
+                                        height: "10px",
+                                        backgroundColor: selectedPayment === "khqr" ? "black" : "transparent",
+                                        borderRadius: "100px",
+                                      }}
+                                    ></div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      </li>
+                    </ul>
+                    <div className="term">
+                      <h2 className="title">TERMS & CONDITION</h2>
+                      <div className="checkbox">
+                        <div>
+                          <input type="checkbox" id="accept" className="custom-checkbox" />
+                        </div>
+                        <p>
+                          ខ្ញុំយល់ព្រមតាម{" "}
+                          <a className="link" href="/term-and-policy">
+                            <span className="text">លក្ខខណ្ឌ</span>
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+                    <div className="total">
+                      <div className="title">
+                        <p>
+                          សរុប:{" "}
+                          <span style={{ color: "#FFDE01" }}>
+                            ${form.product ? form.product.price.toFixed(2) : "0.00"}
+                          </span>
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn-cover"
+                        disabled={
+                          (!validationResult?.success && !validationResult?.status) ||
+                          !form.product ||
+                          paymentCooldown > 0 ||
+                          !selectedPayment
+                        }
+                        onClick={handleSubmit}
+                      >
+                        <div className="btn-submit">
+                          <span>ទិញឥឡូវនេះ</span>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </section>
               </div>
-              {form.product && (
-                <form className="mlbb-form4" onSubmit={handleSubmit}>
-                  <div className="mlbb-container43">
-                    <span id="price-show" className="mlbb-text30">
-                      <span>Total:</span>
-                      <span className="mlbb-text32">${form.product ? form.product.price.toFixed(2) : '0.00'}</span>
-                    </span>
-                    <span id="item-show" className="mlbb-text33">
-                      <span>Item:</span>
-                      <span className="mlbb-text35">{formatItemDisplay(form.product)}</span>
-                    </span>
-                  </div>
-                  <div className="mlbb-container44">
-                    <button
-                      type="submit"
-                      disabled={
-                        (!validationResult?.success && !validationResult?.status) ||
-                        !form.product || 
-                        paymentCooldown > 0 || 
-                        !selectedPayment
-                      }
-                      className="mlbb-button2 button"
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" className="mlbb-icon64">
-                        <g fill="none" fillRule="evenodd">
-                          <path d="m12.calendar_month 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l-.004-.011l.017-.43l-.003-.012l-.10-.01z"></path>
-                          <path d="M5 6.5a.5.5 0 1 1 .5-.5H16a1 1 0 1 0 0-2H5.5A2.5 2.5 0 0 0 3 6.5V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5.5a.5.5 0 0 1-.5-.5M15.5 15a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" fill="currentColor"></path>
-                        </g>
-                      </svg>
-                      <span className="mlbb-text36">Pay Now</span>
-                    </button>
-                  </div>
-                </form>
-              )}
             </div>
           </main>
         )}
+
+        {/* Support Button */}
         <div className="fixed bottom-6 right-6 z-50">
-          <button 
-            onClick={() => window.open(storeConfig.supportUrl, '_blank')}
-            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-4 py-3 rounded-full"
+          <button
+            onClick={() => window.open("https://t.me/Jackstorechannel", "_blank")}
+            className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="text-white">
-              <path fill="none" d="M0 0h24v24H0z"></path>
-              <path fill="currentColor" d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"></path>
-            </svg>
-            <span className="font-medium">Support</span>
+            <div className="relative flex items-center justify-center">
+              <div className="absolute inset-0 bg-white/20 rounded-full animate-ping opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+              <img
+                src="https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-08.jpg"
+                alt="Support Icon"
+                className="w-16 h-16 rounded-full object-cover"
+              />
+            </div>
           </button>
         </div>
-        <footer className="text-black py-6 bg-white">
-          <div className="container mx-auto px-4 text-center">
-            <h4 className="text-lg font-semibold text-gray-800 mb-4">Contact Us</h4>
-            <div className="flex justify-center space-x-4 mb-6">
-              <a href={storeConfig.fb || "https://facebook.com"} target="_blank" rel="noopener noreferrer" className="text-black">
-                <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2.04c-5.5 0-10 4.49-10 10.02 0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89 1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7a10 10 0 0 0 8.44-9.9c0-5.53-4.5-10.02-10-10.02"></path>
-                </svg>
-              </a>
-              <a href={storeConfig.supportUrl} target="_blank" rel="noopener noreferrer" className="text-black">
-                <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 10 6.48 10 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.94-.65-.33-1.01.21-1.59.14-.15 2.71-2.48 2.76-2.69.01-.05.01-.10-.02-.14-.04-.05-.10-.03-.14-.02-.06.02-1.49.95-4.22 2.79-.40.27-.76.41-1.08.4-.36-.01-1.04-.20-1.55-.37-.63-.20-1.13-.31-1.09-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.12.27"></path>
-                </svg>
-              </a>
+
+        {/* Professional Footer */}
+        <footer className="relative bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white py-16 border-t-4 border-[#FFDE01] shadow-2xl overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute inset-0 bg-gradient-to-tr from-green-900/20 via-transparent to-purple-900/20"></div>
+            <div className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml,%3Csvg%20width=%2260%22%20height=%2260%22%20viewBox=%220%200%2060%2060%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg%20fill=%22none%22%20fillRule=%22evenodd%22%3E%3Cg%20fill=%22%23ffffff%22%20fillOpacity=%220.05%22%3E%3Ccircle%20cx=%2230%22%20cy=%2230%22%20r=%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
+          </div>
+
+          <div className="container mx-auto px-6 relative z-10">
+            {/* Main Footer Content */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-16">
+              {/* Left Side - Brand & Description */}
+              <div className="space-y-8">
+                <div className="group">
+                  <div className="flex items-center space-x-4 mb-6">
+                    <img
+                      alt="JACKSTORE Logo"
+                      src="https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-08.jpg"
+                      className="h-16 w-16 rounded-full transition-all duration-300 group-hover:scale-110 shadow-lg hover:shadow-xl hover:shadow-[#FFDE01]/20 object-cover border-2 border-[#FFDE01]/30"
+                    />
+                    <div>
+                      <h3 className="text-2xl font-bold text-[#FFDE01] concert-one-regular">JACKSTORE</h3>
+                      <p className="text-sm text-white-400 dangrek">Premium Gaming Top-Up Service</p>
+                    </div>
+                  </div>
+                  <p className="text-white-300 text-base leading-relaxed max-w-lg dangrek">
+                    Experience seamless online game top-up services with unbeatable deals on Mobile Legends, Free Fire,
+                    and more. Fast, secure, and reliable transactions every time with 24/7 customer support.
+                  </p>
+                </div>
+
+                {/* Why Choose Us */}
+                <div>
+                  <h4 className="text-xl font-bold mb-6 text-[#FFDE01] border-b border-[#FFDE01]/30 pb-2 concert-one-regular">
+                    Why Choose JACKSTORE?
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-2 h-2 bg-[#5AFF4A] rounded-full mt-2 flex-shrink-0"></div>
+                      <div>
+                        <p className="font-semibold text-white text-sm">Lowest Prices</p>
+                        <p className="text-xs text-white-400 dangrek">Best rates guaranteed</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <div className="w-2 h-2 bg-[#5AFF4A] rounded-full mt-2 flex-shrink-0"></div>
+                      <div>
+                        <p className="font-semibold text-white text-sm">Instant Delivery</p>
+                        <p className="text-xs text-white-400 dangrek">Within 5-10 minutes</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <div className="w-2 h-2 bg-[#5AFF4A] rounded-full mt-2 flex-shrink-0"></div>
+                      <div>
+                        <p className="font-semibold text-white text-sm">Secure Payment</p>
+                        <p className="text-xs text-white-400 dangrek">Multiple payment options</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start space-x-3">
+                      <div className="w-2 h-2 bg-[#5AFF4A] rounded-full mt-2 flex-shrink-0"></div>
+                      <div>
+                        <p className="font-semibold text-white text-sm">24/7 Support</p>
+                        <p className="text-xs text-white-400 dangrek">Always here to help</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Side - Contact & Social */}
+              <div className="space-y-8">
+                {/* Contact Information */}
+                <div>
+                  <h4 className="text-xl font-bold mb-6 text-[#FFDE01] border-b border-[#FFDE01]/30 pb-2 concert-one-regular">
+                    Get In Touch
+                  </h4>
+                  <div className="space-y-4">
+                    <p className="text-white-300 text-sm dangrek">
+                      Need help? Contact us via Telegram for instant support and assistance with your orders.
+                    </p>
+                    <a
+                      href="https://t.me/Jackstorechannel"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white px-6 py-3 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-green-500/25 group"
+                    >
+                      <svg
+                        className="w-5 h-5 group-hover:scale-110 transition-transform"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19c-.14.75-.42 1-.68 1.03c-.58.05-1.02-.38-1.58-.75c-.88-.58-1.38-.94-2.23-1.5c-.94-.65-.33-1.01.21-1.59c.14-.15 2.71-2.48 2.76-2.69c.01-.05.01-.10-.02-.14c-.04-.05-.10-.03-.14-.02c-.06.02-1.49.95-4.22 2.79c-.40.27-.76.41-1.08.40c-.36-.01-1.04-.20-1.55-.37c-.63-.20-1.13-.31-1.09-.66c.02-.18.27-.36.74-.55c2.92-1.27 4.86-2.11 5.83-2.51c2.78-1.16 3.35-1.36 3.73-1.36c.08 0 .27.02.39.12c.10.08.13.19.12.27"></path>
+                      </svg>
+                      <span className="font-semibold">Contact Support</span>
+                    </a>
+                  </div>
+                </div>
+
+                {/* Social Media */}
+                <div>
+                  <h4 className="text-xl font-bold mb-6 text-[#FFDE01] border-b border-[#FFDE01]/30 pb-2 concert-one-regular">
+                    Follow Us
+                  </h4>
+                  <div className="flex flex-wrap gap-4">
+                    <a
+                      href="https://www.facebook.com/share/1KSfDF4py9/?mibextid=wwXIfr"
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="flex items-center justify-center w-12 h-12 bg-green-600 hover:bg-green-700 text-white rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-green-600/40"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2.04c-5.5 0-10 4.49-10 10.02c0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89c1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7a10 10 0 0 0 8.44-9.9c0-5.53-4.5-10.02-10-10.02"></path>
+                      </svg>
+                    </a>
+                    <a
+                      href="https://www.instagram.com/"
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-pink-500/40"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                          d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25
+ 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1-1.25-1.25M12 8a4 4 0 0 1 4 4a4 4 0 0 1-4 4a4 4 0 0 1-4-4a4 4 0 0 1 4-4"
+                        ></path>
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              </div>
             </div>
-            <p className="text-sm text-gray-600 mb-4">We accept payment</p>
-            <img src="https://via.placeholder.com/80x80.png?text=Payment" alt="Payment Method" className="w-16 h-16 rounded-lg mx-auto mb-6" />
-            <div className="flex justify-center space-x-2 mb-4">
-              <a href="#" className="text-green-500 text-sm">Privacy Policy</a>
-              <span className="text-gray-600">|</span>
-              <a href="#" className="text-green-500 text-sm">Terms and Condition</a>
+
+            {/* Copyright & Credits */}
+            <div className="border-t border-gray-700 pt-8">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <p className="text-white-400 text-sm order-2 md:order-1 dangrek">
+                  &copy; {new Date().getFullYear()} JACKSTORE. All rights reserved.
+                </p>
+                <div className="order-1 md:order-2 flex items-center gap-4">
+                  <a
+                    href="/term-and-policy"
+                    className="text-white-400 hover:text-white text-sm transition-colors dangrek"
+                  >
+                    Terms of Service
+                  </a>
+                  <a
+                    href="/privacy-policy"
+                    className="text-white-400 hover:text-white text-sm transition-colors dangrek"
+                  >
+                    Privacy Policy
+                  </a>
+                </div>
+              </div>
             </div>
-            <p className="text-gray-600 text-sm">Copyright © The Zado Store. ALL Rights Reserved.</p>
           </div>
         </footer>
-        {showCheckout && (
-          <PaymentModal
-            form={form}
-            orderFormat={orderFormat}
-            onClose={handleClosePayment}
-            discountPercent={0}
-            setPaymentStatus={setPaymentStatus}
-          />
-        )}
-        {storeConfig.popupBanner.enabled && showPopupBanner && (
-          <PopupBanner
-            image={storeConfig.popupBanner.image}
-            onClose={() => setShowPopupBanner(false)}
-          />
-        )}
       </div>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
