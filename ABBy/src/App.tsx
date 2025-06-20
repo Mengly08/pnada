@@ -44,9 +44,9 @@ function App() {
 
   // Banner images
   const bannerImages = [
-    "https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-37.jpg",
-    "https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-37.jpg",
-    "https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-37.jpg",
+    "https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-17_23-29-27.jpg",
+    "https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-17_23-29-27.jpg",
+    "https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-17_23-29-27.jpg",
   ]
 
   const specialOffers = [
@@ -768,7 +768,7 @@ function App() {
         className="p-4 shadow-md flex items-center justify-between w-full top-0 z-50"
         style={{
           height: "100px",
-          backgroundImage: 'url("https://i.postimg.cc/tTsfbm77/New-Project1420-FEAE6-D1-ezgif-com-speed.gif")',
+          backgroundImage: 'url("https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-13_09-34-17%20(1).png")',
           backgroundSize: "contain",
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
@@ -1541,7 +1541,7 @@ function App() {
             <div className="relative flex items-center justify-center">
               <div className="absolute inset-0 bg-white/20 rounded-full animate-ping opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
               <img
-                src="https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-08.jpg"
+                src="https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-13_09-34-17%20(1).png"
                 alt="Support Icon"
                 className="w-16 h-16 rounded-full object-cover"
               />
@@ -1566,7 +1566,7 @@ function App() {
                   <div className="flex items-center space-x-4 mb-6">
                     <img
                       alt="PANDA Logo"
-                      src="https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-08.jpg"
+                      src="https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-13_09-34-17%20(1).png"
                       className="h-16 w-16 rounded-full transition-all duration-300 group-hover:scale-110 shadow-lg hover:shadow-xl hover:shadow-[#FFDE01]/20 object-cover border-2 border-[#FFDE01]/30"
                     />
                     <div>
