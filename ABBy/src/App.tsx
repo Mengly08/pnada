@@ -95,7 +95,7 @@ function App() {
       const path = window.location.pathname
       setIsAdminRoute(path === "/adminlogintopup")
       setIsResellerRoute(path === "/reseller")
-      const resellerAuth = localStorage.getItem("jackstore_reseller_auth")
+      const resellerAuth = localStorage.getItem("PANDA_reseller_auth")
       setIsResellerLoggedIn(resellerAuth === "true")
     }
     checkRoute()
@@ -172,7 +172,7 @@ function App() {
         code: product.code || undefined,
       }))
 
-      const isReseller = localStorage.getItem("jackstore_reseller_auth") === "true"
+      const isReseller = localStorage.getItem("PANDA_reseller_auth") === "true"
       if (isReseller) {
         const { data: resellerPrices, error: resellerError } = await supabase
           .from("reseller_prices")
@@ -1535,7 +1535,7 @@ function App() {
         {/* Support Button */}
         <div className="fixed bottom-6 right-6 z-50">
           <button
-            onClick={() => window.open("https://t.me/Jackstorechannel", "_blank")}
+            onClick={() => window.open("https://t.me/PANDAchannel", "_blank")}
             className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
           >
             <div className="relative flex items-center justify-center">
@@ -1565,12 +1565,12 @@ function App() {
                 <div className="group">
                   <div className="flex items-center space-x-4 mb-6">
                     <img
-                      alt="JACKSTORE Logo"
+                      alt="PANDA Logo"
                       src="https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-08.jpg"
                       className="h-16 w-16 rounded-full transition-all duration-300 group-hover:scale-110 shadow-lg hover:shadow-xl hover:shadow-[#FFDE01]/20 object-cover border-2 border-[#FFDE01]/30"
                     />
                     <div>
-                      <h3 className="text-2xl font-bold text-[#FFDE01] concert-one-regular">JACKSTORE</h3>
+                      <h3 className="text-2xl font-bold text-[#FFDE01] concert-one-regular">PANDA</h3>
                       <p className="text-sm text-white-400 dangrek">Premium Gaming Top-Up Service</p>
                     </div>
                   </div>
@@ -1583,7 +1583,7 @@ function App() {
                 {/* Why Choose Us */}
                 <div>
                   <h4 className="text-xl font-bold mb-6 text-[#FFDE01] border-b border-[#FFDE01]/30 pb-2 concert-one-regular">
-                    Why Choose JACKSTORE?
+                    Why Choose PANDA?
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex items-start space-x-3">
@@ -1630,7 +1630,7 @@ function App() {
                       Need help? Contact us via Telegram for instant support and assistance with your orders.
                     </p>
                     <a
-                      href="https://t.me/Jackstorechannel"
+                      href="https://t.me/PANDAchannel"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white px-6 py-3 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-green-500/25 group"
@@ -1685,7 +1685,7 @@ function App() {
             <div className="border-t border-gray-700 pt-8">
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 <p className="text-white-400 text-sm order-2 md:order-1 dangrek">
-                  &copy; {new Date().getFullYear()} JACKSTORE. All rights reserved.
+                  &copy; {new Date().getFullYear()} PANDA. All rights reserved.
                 </p>
                 <div className="order-1 md:order-2 flex items-center gap-4">
                   <a
