@@ -43,9 +43,9 @@ function App() {
 
   // Banner images
   const bannerImages = [
-    "https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-37.jpg",
-    "https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-37.jpg",
-    "https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-37.jpg",
+    "https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-17_23-29-27.jpg",
+    "https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-17_23-29-27.jpg",
+    "https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-17_23-29-27.jpg",
   ]
 
   const specialOffers = [
