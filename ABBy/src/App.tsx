@@ -49,9 +49,9 @@ function App() {
   ]
 
   const specialOffers = [
-    "https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-15.jpg",
-    "https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-23.jpg",
-    "https://i.postimg.cc/rm2fjq52/Weekly-ff-kon-banner.jpg",
+    "https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-25_07-05-23.jpg",
+    "https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-25_07-05-08.jpg",
+    "https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-25_07-05-37.jpg",
   ]
 
   // Diamond combination mapping
@@ -94,7 +94,7 @@ function App() {
       const path = window.location.pathname
       setIsAdminRoute(path === "/adminlogintopup")
       setIsResellerRoute(path === "/reseller")
-      const resellerAuth = localStorage.getItem("jackstore_reseller_auth")
+      const resellerAuth = localStorage.getItem("PANDA KH_reseller_auth")
       setIsResellerLoggedIn(resellerAuth === "true")
     }
     checkRoute()
@@ -171,7 +171,7 @@ function App() {
         code: product.code || undefined,
       }))
 
-      const isReseller = localStorage.getItem("jackstore_reseller_auth") === "true"
+      const isReseller = localStorage.getItem("PANDA KH_reseller_auth") === "true"
       if (isReseller) {
         const { data: resellerPrices, error: resellerError } = await supabase
           .from("reseller_prices")
@@ -800,7 +800,7 @@ function App() {
         className="p-4 shadow-md flex items-center justify-between w-full top-0 z-50"
         style={{
           height: "100px",
-          backgroundImage: 'url("https://i.postimg.cc/tTsfbm77/New-Project1420-FEAE6-D1-ezgif-com-speed.gif")',
+          backgroundImage: 'url("https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-13_09-34-17%20(1).png")',
           backgroundSize: "contain",
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
@@ -1565,13 +1565,13 @@ function App() {
         {/* Support Button */}
         <div className="fixed bottom-6 right-6 z-50">
           <button
-            onClick={() => window.open("https://t.me/Jackstorechannel", "_blank")}
+            onClick={() => window.open("https://t.me/PANDA KHchannel", "_blank")}
             className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
           >
             <div className="relative flex items-center justify-center">
               <div className="absolute inset-0 bg-white/20 rounded-full animate-ping opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
               <img
-                src="https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-08.jpg"
+                src="https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-13_09-34-17%20(1).png"
                 alt="Support Icon"
                 className="w-16 h-16 rounded-full object-cover"
               />
@@ -1595,12 +1595,12 @@ function App() {
                 <div className="group">
                   <div className="flex items-center space-x-4 mb-6">
                     <img
-                      alt="JACKSTORE Logo"
-                      src="https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-08.jpg"
+                      alt="PANDA KH Logo"
+                      src="https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-13_09-34-17%20(1).png"
                       className="h-16 w-16 rounded-full transition-all duration-300 group-hover:scale-110 shadow-lg hover:shadow-xl hover:shadow-[#FFDE01]/20 object-cover border-2 border-[#FFDE01]/30"
                     />
                     <div>
-                      <h3 className="text-2xl font-bold text-[#FFDE01] concert-one-regular">JACKSTORE</h3>
+                      <h3 className="text-2xl font-bold text-[#FFDE01] concert-one-regular">PANDA KH</h3>
                       <p className="text-sm text-white-400 dangrek">Premium Gaming Top-Up Service</p>
                     </div>
                   </div>
@@ -1613,7 +1613,7 @@ function App() {
                 {/* Why Choose Us */}
                 <div>
                   <h4 className="text-xl font-bold mb-6 text-[#FFDE01] border-b border-[#FFDE01]/30 pb-2 concert-one-regular">
-                    Why Choose JACKSTORE?
+                    Why Choose PANDA KH?
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex items-start space-x-3">
@@ -1660,7 +1660,7 @@ function App() {
                       Need help? Contact us via Telegram for instant support and assistance with your orders.
                     </p>
                     <a
-                      href="https://t.me/Jackstorechannel"
+                      href="https://t.me/PANDA KHchannel"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-6 py-3 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/25 group"
@@ -1712,7 +1712,7 @@ function App() {
             <div className="border-t border-gray-700 pt-8">
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 <p className="text-white-400 text-sm order-2 md:order-1 dangrek">
-                  © {new Date().getFullYear()} JACKSTORE. All rights reserved.
+                  © {new Date().getFullYear()} PANDA KH. All rights reserved.
                 </p>
                 <div className="order-1 md:order-2 flex items-center gap-4">
                   <a
