@@ -39,14 +39,13 @@ function App() {
   const [validating, setValidating] = useState(false)
   const [validationResult, setValidationResult] = useState<any>(null)
   const [paymentStatus, setPaymentStatus] = useState<"idle" | "processing" | "successful" | "failed">("idle")
-  const [currentBannerIndex, setCurrentBannerIndex] = useState(1)
-  const [showTermsModal, setShowTermsModal] = useState(false)
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0)
 
   // Banner images
   const bannerImages = [
-    "https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-17_23-29-27.jpg",
-    "https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-17_23-29-27.jpg",
-    "https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-17_23-29-27.jpg",
+    "https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-37.jpg",
+    "https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-37.jpg",
+    "https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-37.jpg",
   ]
 
   const specialOffers = [
@@ -95,7 +94,7 @@ function App() {
       const path = window.location.pathname
       setIsAdminRoute(path === "/adminlogintopup")
       setIsResellerRoute(path === "/reseller")
-      const resellerAuth = localStorage.getItem("PANDA_reseller_auth")
+      const resellerAuth = localStorage.getItem("jackstore_reseller_auth")
       setIsResellerLoggedIn(resellerAuth === "true")
     }
     checkRoute()
@@ -172,7 +171,7 @@ function App() {
         code: product.code || undefined,
       }))
 
-      const isReseller = localStorage.getItem("PANDA_reseller_auth") === "true"
+      const isReseller = localStorage.getItem("jackstore_reseller_auth") === "true"
       if (isReseller) {
         const { data: resellerPrices, error: resellerError } = await supabase
           .from("reseller_prices")
@@ -515,7 +514,7 @@ function App() {
             color: #fff;
           }
           
-          /* Professional Game Card Styles - Updated to match exact dimensions */
+          /* Professional Game Card Styles */
           .game-card {
             background: white;
             border-radius: 12px;
@@ -553,7 +552,7 @@ function App() {
           }
 
           .status-badge {
-            display: none; /* Hide status badges to match the design */
+            display: none;
           }
 
           .game-icon {
@@ -593,7 +592,7 @@ function App() {
           }
 
           .game-subtitle {
-            display: none; /* Hide subtitle to match the design */
+            display: none;
           }
 
           .game-button {
@@ -641,12 +640,25 @@ function App() {
             cursor: not-allowed;
           }
 
-          /* Product List Styles - Updated for 150x72 dimensions with better spacing */
+          /* Fixed Product List Styles */
+          .product-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 0 16px;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+          }
+
           .product-card-150x72 {
-            width: 150px !important;
-            height: 72px !important;
-            background: white;
-            border: 2px solid #f0f0f0;
+            width: 100% !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
+            height: 48px !important;
+            min-height: 48px !important;
+            max-height: 48px !important;
+            background: #ffffff;
             border-radius: 8px;
             padding: 8px;
             cursor: pointer;
@@ -655,26 +667,27 @@ function App() {
             align-items: center;
             gap: 8px;
             position: relative;
-            overflow: visible;
+            overflow: hidden;
             box-sizing: border-box;
-            margin: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 2px solid #2196F3;
           }
 
           .product-card-150x72:hover {
-            border-color: #0016d0;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 22, 208, 0.2);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+            border-color: #1976D2;
           }
 
           .product-card-150x72.selected {
-            border-color: #0016d0;
-            background: #FFFBF0;
-            box-shadow: 0 0 0 2px #0016d0;
+            background: #e3f2fd;
+            border-color: #1565C0;
+            box-shadow: 0 0 0 2px rgba(21, 101, 192, 0.2);
           }
 
           .product-card-150x72 .product-image {
-            width: 40px;
-            height: 40px;
+            width: 32px;
+            height: 32px;
             border-radius: 6px;
             object-fit: cover;
             flex-shrink: 0;
@@ -682,33 +695,31 @@ function App() {
 
           .product-card-150x72 .product-content {
             flex: 1;
-            min-width: 0;
             display: flex;
             flex-direction: column;
             justify-content: center;
             gap: 2px;
+            min-width: 0;
           }
 
           .product-card-150x72 .product-title {
             font-size: 11px;
             font-weight: 600;
-            color: #333;
+            color: #1a1a1a;
             line-height: 1.2;
-            margin: 0;
             overflow: hidden;
             text-overflow: ellipsis;
-            white-space: nowrap;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            word-break: break-word;
           }
 
           .product-card-150x72 .product-price {
             font-size: 12px;
-            font-weight: bold;
-            color: #0016d0;
-            margin: 0;
-          }
-
-          .product-card-150x72.selected .product-title {
-            color: #0016d0;
+            font-weight: 700;
+            color: #00bcd4;
+            white-space: nowrap;
           }
 
           .product-card-150x72 .selected-indicator {
@@ -717,34 +728,55 @@ function App() {
             right: -2px;
             width: 0;
             height: 0;
-            border-top: 20px solid #0016d0;
-            border-left: 20px solid transparent;
+            border-top: 16px solid #00bcd4;
+            border-left: 16px solid transparent;
+            border-radius: 0 8px 0 0;
           }
 
           .product-card-150x72 .selected-indicator::after {
             content: '✓';
             position: absolute;
-            top: -18px;
-            right: 2px;
+            top: -14px;
+            right: 1px;
             color: white;
             font-size: 10px;
             font-weight: bold;
           }
 
-          /* Product Grid Container */
-          .product-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            justify-items: center;
-            padding: 0 8px;
+          /* Responsive adjustments */
+          @media (max-width: 480px) {
+            .product-grid {
+              gap: 8px;
+              padding: 0 12px;
+              grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .product-card-150x72 {
+              width: 100% !important;
+              height: 48px !important;
+              padding: 6px;
+              gap: 6px;
+            }
+            
+            .product-card-150x72 .product-image {
+              width: 28px;
+              height: 28px;
+            }
+            
+            .product-card-150x72 .product-title {
+              font-size: 10px;
+            }
+            
+            .product-card-150x72 .product-price {
+              font-size: 11px;
+            }
           }
 
-          @media (min-width: 640px) {
-            .product-grid {
-              gap: 16px;
-              padding: 0 16px;
-            }
+          /* Ensure no white panels or dividers */
+          .right-panel {
+            background-color: #2a2c4a;
+            border-radius: 8px;
+            padding: 16px;
           }
 
           .line-clamp-1 {
@@ -768,7 +800,7 @@ function App() {
         className="p-4 shadow-md flex items-center justify-between w-full top-0 z-50"
         style={{
           height: "100px",
-          backgroundImage: 'url("https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-13_09-34-17%20(1).png")',
+          backgroundImage: 'url("https://i.postimg.cc/tTsfbm77/New-Project1420-FEAE6-D1-ezgif-com-speed.gif")',
           backgroundSize: "contain",
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
@@ -822,7 +854,7 @@ function App() {
               </div>
             </div>
 
-            {/* Special Offers - Keep exactly the same */}
+            {/* Special Offers */}
             <div className="w-full p-4 sm:p-4 bg-[#1f2138]">
               <div className="container mx-auto">
                 <div className="mb-2 sm:mb-4">
@@ -848,7 +880,7 @@ function App() {
               </div>
             </div>
 
-            {/* Games Section - Updated */}
+            {/* Games Section */}
             <div className="max-w-7xl mx-auto px-4 py-8">
               {/* Section Header */}
               <div className="text-center mb-12">
@@ -992,257 +1024,257 @@ function App() {
                 )}
               </div>
 
-              <div className="right-panel rounded-xl p-6" style={{ backgroundColor: "#000636" }}>
+              <div className="right-panel rounded-xl p-6" style={{ backgroundColor: "#2a2c4a" }}>
                 <style jsx>{`
-    .right-panel {
-      font-family: inherit;
-    }
-    .section {
-      margin-bottom: 2rem;
-    }
-    .section-title {
-      display: flex;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    .index {
-      background: #FFDE01;
-      color: black;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      margin-right: 1rem;
-    }
-    .title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: white;
-    }
-    .section-sub {
-      padding-left: 3rem;
-    }
-    .check-id {
-      margin-bottom: 2rem;
-    }
-    .game-part {
-      margin-bottom: 1rem;
-    }
-    .game-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-    .col input {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 1rem;
-    }
-    .game-checkid-btn {
-      margin-bottom: 1rem;
-    }
-    .game-checkid-btn-sub {
-      background-color: #FFDE01;
-      color: black;
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    .game-checkid-btn-sub:hover:not(:disabled) {
-      background-color: #FFB800;
-    }
-    .game-checkid-btn-sub:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .content {
-      font-size: 0.875rem;
-      color: white;
-      line-height: 1.5;
-    }
-    .promotion {
-      margin-bottom: 2rem;
-    }
-    .title-section {
-      margin-bottom: 1rem;
-    }
-    .title-cover {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: white;
-    }
-    .package-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 1rem;
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .package-card {
-      background: white;
-      border: 2px solid #f0f0f0;
-      border-radius: 12px;
-      padding: 1rem;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    .package-card:hover {
-      border-color: #FFDE01;
-      transform: translateY(-2px);
-    }
-    .package.active {
-      border-color: #FFDE01;
-      background: #FFFBF0;
-    }
-    .package {
-      width: 100%;
-    }
-    .top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .package-content {
-      flex: 1;
-    }
-    .package-price {
-      font-size: 1.25rem;
-      font-weight: bold;
-      color: #333;
-      margin: 0 0 0.25rem 0;
-    }
-    .package-title {
-      font-size: 0.875rem;
-      color: #666;
-      margin: 0;
-    }
-    .img {
-      width: 50px;
-      height: 50px;
-      border-radius: 8px;
-    }
-    .payment {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 2rem 0;
-    }
-    .select-bloc {
-      width: 100%;
-      background: none;
-      border: none;
-      padding: 0;
-      cursor: pointer;
-    }
-    .select {
-      display: flex;
-      align-items: center;
-      padding: 1rem;
-      border: 2px solid #f0f0f0;
-      border-radius: 12px;
-      transition: all 0.3s;
-    }
-    .select.active {
-      border-color: #FFDE01;
-      background: #FFFBF0;
-    }
-    .logo {
-      width: 60px;
-      height: 60px;
-      margin-right: 1rem;
-    }
-    .logo img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      border-radius: 10px;
-    }
-    .select-content {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex: 1;
-    }
-    .select-content .title {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: #333;
-      margin: 0 0 0.25rem 0;
-    }
-    .dsp {
-      font-size: 0.875rem;
-      color: #666;
-      margin: 0;
-    }
-    .term {
-      margin-bottom: 2rem;
-    }
-    .term .title {
-      font-size: 1rem;
-      font-weight: 600;
-      color: white;
-      margin-bottom: 1rem;
-    }
-    .checkbox {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .checkbox p {
-      color: white;
-    }
-    .custom-checkbox {
-      width: 18px;
-      height: 18px;
-    }
-    .link {
-      color: #FFDE01;
-      text-decoration: underline;
-    }
-    .total {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem;
-      background: #f8f9fa;
-      border-radius: 12px;
-    }
-    .total .title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #333;
-    }
-    .btn-cover {
-      background: none;
-      border: none;
-      padding: 0;
-    }
-    .btn-submit {
-      background: #FFDE01;
-      color: black;
-      padding: 0.75rem 2rem;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    .btn-submit:hover {
-      background: #FFB800;
-    }
-    .btn-cover:disabled .btn-submit {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  `}</style>
+                  .right-panel {
+                    font-family: inherit;
+                  }
+                  .section {
+                    margin-bottom: 2rem;
+                  }
+                  .section-title {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 1rem;
+                  }
+                  .index {
+                    background: #FFDE01;
+                    color: black;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                    margin-right: 1rem;
+                  }
+                  .title {
+                    font-size: 1.25rem;
+                    font-weight: 600;
+                    color: white;
+                  }
+                  .section-sub {
+                    padding-left: 3rem;
+                  }
+                  .check-id {
+                    margin-bottom: 2rem;
+                  }
+                  .game-part {
+                    margin-bottom: 1rem;
+                  }
+                  .game-row {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1rem;
+                    margin-bottom: 1rem;
+                  }
+                  .col input {
+                    width: 100%;
+                    padding: 0.75rem;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    font-size: 1rem;
+                  }
+                  .game-checkid-btn {
+                    margin-bottom: 1rem;
+                  }
+                  .game-checkid-btn-sub {
+                    background-color: #FFDE01;
+                    color: black;
+                    padding: 0.75rem 1.5rem;
+                    border: none;
+                    border-radius: 8px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: background-color 0.3s;
+                  }
+                  .game-checkid-btn-sub:hover:not(:disabled) {
+                    background-color: #FFB800;
+                  }
+                  .game-checkid-btn-sub:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                  }
+                  .content {
+                    font-size: 0.875rem;
+                    color: white;
+                    line-height: 1.5;
+                  }
+                  .promotion {
+                    margin-bottom: 2rem;
+                  }
+                  .title-section {
+                    margin-bottom: 1rem;
+                  }
+                  .title-cover {
+                    font-size: 1.125rem;
+                    font-weight: 600;
+                    color: white;
+                  }
+                  .package-list {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                    gap: 1rem;
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
+                  }
+                  .package-card {
+                    background: white;
+                    border: 2px solid #f0f0f0;
+                    border-radius: 12px;
+                    padding: 1rem;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                  }
+                  .package-card:hover {
+                    border-color: #FFDE01;
+                    transform: translateY(-2px);
+                  }
+                  .package.active {
+                    border-color: #FFDE01;
+                    background: #FFFBF0;
+                  }
+                  .package {
+                    width: 100%;
+                  }
+                  .top {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                  }
+                  .package-content {
+                    flex: 1;
+                  }
+                  .package-price {
+                    font-size: 1.25rem;
+                    font-weight: bold;
+                    color: #333;
+                    margin: 0 0 0.25rem 0;
+                  }
+                  .package-title {
+                    font-size: 0.875rem;
+                    color: #666;
+                    margin: 0;
+                  }
+                  .img {
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 8px;
+                  }
+                  .payment {
+                    list-style: none;
+                    padding: 0;
+                    margin: 0 0 2rem 0;
+                  }
+                  .select-bloc {
+                    width: 100%;
+                    background: none;
+                    border: none;
+                    padding: 0;
+                    cursor: pointer;
+                  }
+                  .select {
+                    display: flex;
+                    align-items: center;
+                    padding: 1rem;
+                    border: 2px solid #f0f0f0;
+                    border-radius: 12px;
+                    transition: all 0.3s;
+                  }
+                  .select.active {
+                    border-color: #FFDE01;
+                    background: #FFFBF0;
+                  }
+                  .logo {
+                    width: 60px;
+                    height: 60px;
+                    margin-right: 1rem;
+                  }
+                  .logo img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                    border-radius: 10px;
+                  }
+                  .select-content {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    flex: 1;
+                  }
+                  .select-content .title {
+                    font-size: 1.125rem;
+                    font-weight: 600;
+                    color: #333;
+                    margin: 0 0 0.25rem 0;
+                  }
+                  .dsp {
+                    font-size: 0.875rem;
+                    color: #666;
+                    margin: 0;
+                  }
+                  .term {
+                    margin-bottom: 2rem;
+                  }
+                  .term .title {
+                    font-size: 1rem;
+                    font-weight: 600;
+                    color: white;
+                    margin-bottom: 1rem;
+                  }
+                  .checkbox {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                  }
+                  .checkbox p {
+                    color: white;
+                  }
+                  .custom-checkbox {
+                    width: 18px;
+                    height: 18px;
+                  }
+                  .link {
+                    color: #FFDE01;
+                    text-decoration: underline;
+                  }
+                  .total {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 1rem;
+                    background: #f8f9fa;
+                    border-radius: 12px;
+                  }
+                  .total .title {
+                    font-size: 1.25rem;
+                    font-weight: 600;
+                    color: #333;
+                  }
+                  .btn-cover {
+                    background: none;
+                    border: none;
+                    padding: 0;
+                  }
+                  .btn-submit {
+                    background: #FFDE01;
+                    color: black;
+                    padding: 0.75rem 2rem;
+                    border-radius: 8px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: background-color 0.3s;
+                  }
+                  .btn-submit:hover {
+                    background: #FFB800;
+                  }
+                  .btn-cover:disabled .btn-submit {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                  }
+                `}</style>
 
                 <section className="section">
                   <div className="section-title">
@@ -1332,7 +1364,7 @@ function App() {
 
                   {loading ? (
                     <div className="flex justify-center py-8">
-                      <Loader2 className="w-8 h-8 animate-spin text-green-500" />
+                      <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
                       <span className="ml-2 text-gray-600">Loading products...</span>
                     </div>
                   ) : products.length > 0 ? (
@@ -1376,7 +1408,7 @@ function App() {
                       {products.filter((p) => p.type === "diamonds" || p.type === "subscription").length > 0 && (
                         <div>
                           <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                            <div className="p-1.5 bg-green-500/10 rounded-lg shadow-sm"></div>
+                            <div className="p-1.5 bg-blue-500/10 rounded-lg shadow-sm"></div>
                             Saving Packages
                           </h3>
                           <div className="space-y-2">
@@ -1387,9 +1419,7 @@ function App() {
                                   <div
                                     key={product.id}
                                     onClick={() => setForm((prev) => ({ ...prev, product }))}
-                                    className={`product-card-150x72 ${
-                                      form.product?.id === product.id ? "selected" : ""
-                                    }`}
+                                    className={`product-card-150x72 ${form.product?.id === product.id ? "selected" : ""}`}
                                   >
                                     {form.product?.id === product.id && <div className="selected-indicator"></div>}
                                     <img
@@ -1535,13 +1565,13 @@ function App() {
         {/* Support Button */}
         <div className="fixed bottom-6 right-6 z-50">
           <button
-            onClick={() => window.open("https://t.me/PANDAchannel", "_blank")}
-            className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
+            onClick={() => window.open("https://t.me/Jackstorechannel", "_blank")}
+            className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
           >
             <div className="relative flex items-center justify-center">
               <div className="absolute inset-0 bg-white/20 rounded-full animate-ping opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
               <img
-                src="https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-13_09-34-17%20(1).png"
+                src="https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-08.jpg"
                 alt="Support Icon"
                 className="w-16 h-16 rounded-full object-cover"
               />
@@ -1553,7 +1583,7 @@ function App() {
         <footer className="relative bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white py-16 border-t-4 border-[#FFDE01] shadow-2xl overflow-hidden">
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-5">
-            <div className="absolute inset-0 bg-gradient-to-tr from-green-900/20 via-transparent to-purple-900/20"></div>
+            <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/20 via-transparent to-purple-900/20"></div>
             <div className="absolute top-0 left-0 w-full h-full bg-[url('data:image/svg+xml,%3Csvg%20width=%2260%22%20height=%2260%22%20viewBox=%220%200%2060%2060%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg%20fill=%22none%22%20fillRule=%22evenodd%22%3E%3Cg%20fill=%22%23ffffff%22%20fillOpacity=%220.05%22%3E%3Ccircle%20cx=%2230%22%20cy=%2230%22%20r=%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
           </div>
 
@@ -1565,12 +1595,12 @@ function App() {
                 <div className="group">
                   <div className="flex items-center space-x-4 mb-6">
                     <img
-                      alt="PANDA Logo"
-                      src="https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-13_09-34-17%20(1).png"
+                      alt="JACKSTORE Logo"
+                      src="https://raw.githubusercontent.com/Mengly08/PICCCC/refs/heads/main/photo_2025-06-18_17-09-08.jpg"
                       className="h-16 w-16 rounded-full transition-all duration-300 group-hover:scale-110 shadow-lg hover:shadow-xl hover:shadow-[#FFDE01]/20 object-cover border-2 border-[#FFDE01]/30"
                     />
                     <div>
-                      <h3 className="text-2xl font-bold text-[#FFDE01] concert-one-regular">PANDA</h3>
+                      <h3 className="text-2xl font-bold text-[#FFDE01] concert-one-regular">JACKSTORE</h3>
                       <p className="text-sm text-white-400 dangrek">Premium Gaming Top-Up Service</p>
                     </div>
                   </div>
@@ -1583,7 +1613,7 @@ function App() {
                 {/* Why Choose Us */}
                 <div>
                   <h4 className="text-xl font-bold mb-6 text-[#FFDE01] border-b border-[#FFDE01]/30 pb-2 concert-one-regular">
-                    Why Choose PANDA?
+                    Why Choose JACKSTORE?
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex items-start space-x-3">
@@ -1630,10 +1660,10 @@ function App() {
                       Need help? Contact us via Telegram for instant support and assistance with your orders.
                     </p>
                     <a
-                      href="https://t.me/PANDAchannel"
+                      href="https://t.me/Jackstorechannel"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white px-6 py-3 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-green-500/25 group"
+                      className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-6 py-3 rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/25 group"
                     >
                       <svg
                         className="w-5 h-5 group-hover:scale-110 transition-transform"
@@ -1657,7 +1687,7 @@ function App() {
                       href="https://www.facebook.com/share/1KSfDF4py9/?mibextid=wwXIfr"
                       target="_blank"
                       rel="noreferrer noopener"
-                      className="flex items-center justify-center w-12 h-12 bg-green-600 hover:bg-green-700 text-white rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-green-600/40"
+                      className="flex items-center justify-center w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-blue-600/40"
                     >
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 2.04c-5.5 0-10 4.49-10 10.02c0 5 3.66 9.15 8.44 9.9v-7H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.89 3.78-3.89c1.09 0 2.23.19 2.23.19v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.9h-2.33v7a10 10 0 0 0 8.44-9.9c0-5.53-4.5-10.02-10-10.02"></path>
@@ -1670,10 +1700,7 @@ function App() {
                       className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full transition-all duration-300 hover:scale-110 hover:shadow-lg hover:shadow-pink-500/40"
                     >
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path
-                          d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25
- 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1-1.25-1.25M12 8a4 4 0 0 1 4 4a4 4 0 0 1-4 4a4 4 0 0 1-4-4a4 4 0 0 1 4-4"
-                        ></path>
+                        <path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1-1.25-1.25M12 8a4 4 0 0 1 4 4a4 4 0 0 1-4 4a4 4 0 0 1-4-4a4 4 0 0 1 4-4"></path>
                       </svg>
                     </a>
                   </div>
@@ -1685,7 +1712,7 @@ function App() {
             <div className="border-t border-gray-700 pt-8">
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 <p className="text-white-400 text-sm order-2 md:order-1 dangrek">
-                  &copy; {new Date().getFullYear()} PANDA. All rights reserved.
+                  © {new Date().getFullYear()} JACKSTORE. All rights reserved.
                 </p>
                 <div className="order-1 md:order-2 flex items-center gap-4">
                   <a
