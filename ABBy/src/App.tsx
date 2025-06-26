@@ -800,7 +800,7 @@ function App() {
         className="p-4 shadow-md flex items-center justify-between w-full top-0 z-50"
         style={{
           height: "100px",
-          backgroundImage: 'url("https://raw.githubusercontent.com/Mengly08/xnxx/refs/heads/main/photo_2025-06-13_09-34-17%20(1).png")',
+          backgroundImage: 'url("https://assets.grok.com/users/b6007d42-6973-4290-9a20-0daabcf98baf/5ca15fee-78c9-4358-9150-b02730133357/content")',
           backgroundSize: "contain",
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
